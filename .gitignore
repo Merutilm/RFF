@@ -1,0 +1,8 @@
+# Project exclude paths
+exe archive
+target
+*.iml
+*.log
+*.jfr
+.idea
+src/main/resources

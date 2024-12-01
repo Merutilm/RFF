@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>kr.merutilm</groupId>
+        <artifactId>mmpp</artifactId>
+        <version>1.15</version>
+    </parent>
+
+    <artifactId>rff</artifactId>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>basestructures</id>
+            <url>https://github.com/tkdydwk7071/TMP2</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jcodec</groupId>
+            <artifactId>jcodec-javase</artifactId>
+            <version>0.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jcodec</groupId>
+            <artifactId>jcodec-streaming</artifactId>
+            <version>0.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>kr.merutilm</groupId>
+            <artifactId>basestructures</artifactId>
+            <version>1.15</version>
+        </dependency>
+        <dependency>
+            <groupId>kr.merutilm</groupId>
+            <artifactId>customswing</artifactId>
+            <version>1.15</version>
+        </dependency>
+    </dependencies>
+</project>
