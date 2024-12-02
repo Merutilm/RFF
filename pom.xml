@@ -3,14 +3,12 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>kr.merutilm</groupId>
-        <artifactId>mmpp</artifactId>
-        <version>1.15</version>
-    </parent>
-
+    
+    <groupId>kr.merutilm</groupId>
     <artifactId>rff</artifactId>
+    <version>1.15</version>
 
+    
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
@@ -19,12 +17,22 @@
 
     <repositories>
         <repository>
-            <id>basestructures</id>
-            <url>https://github.com/tkdydwk7071/TMP2</url>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 
     <dependencies>
+        <dependency>
+	        <groupId>com.github.Merutilm</groupId>
+	        <artifactId>Base-Structures</artifactId>
+	        <version>v1.0.01</version>
+	    </dependency>
+        <dependency>
+	        <groupId>com.github.Merutilm</groupId>
+	        <artifactId>Custom-Swing</artifactId>
+	        <version>v1.0.02</version>
+	    </dependency>
         <dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>javacv-platform</artifactId>
@@ -34,16 +42,6 @@
             <groupId>org.bytedeco</groupId>
             <artifactId>javacv</artifactId>
             <version>1.5.11</version>
-        </dependency>
-        <dependency>
-            <groupId>kr.merutilm</groupId>
-            <artifactId>basestructures</artifactId>
-            <version>1.15</version>
-        </dependency>
-        <dependency>
-            <groupId>kr.merutilm</groupId>
-            <artifactId>customswing</artifactId>
-            <version>1.15</version>
         </dependency>
     </dependencies>
 </project>
