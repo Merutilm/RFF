@@ -20,7 +20,6 @@ final class RFF {
 
     private static final int INIT_WIDTH = 1280;
     private static final int INIT_HEIGHT = 720;
-    public static final String EXTENSION_MAP = "rffm";
 
     public static final BasicThemes DEFAULT_THEME = BasicThemes.ADVANCED_RAINBOW;
 

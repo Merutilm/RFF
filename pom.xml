@@ -26,14 +26,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.jcodec</groupId>
-            <artifactId>jcodec-javase</artifactId>
-            <version>0.2.3</version>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>javacv-platform</artifactId>
+            <version>1.5.11</version>
         </dependency>
         <dependency>
-            <groupId>org.jcodec</groupId>
-            <artifactId>jcodec-streaming</artifactId>
-            <version>0.2.3</version>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>javacv</artifactId>
+            <version>1.5.11</version>
         </dependency>
         <dependency>
             <groupId>kr.merutilm</groupId>

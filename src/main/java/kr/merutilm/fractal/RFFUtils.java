@@ -9,6 +9,7 @@ public final class RFFUtils {
 
     }
 
+    public static final String EXTENSION_MAP = "rffm";
 
 
     public static Image getApplicationIcon() {
@@ -31,12 +32,25 @@ public final class RFFUtils {
         return String.format("%04d", number);
     }
 
-    public static File generateNewFile(File file, String extension) {
+    public static File generateFileName(File dir, int id, String extension){
+        return new File(dir, numberToDefaultFileName(id) + "." + extension);
+    }
+
+    public static int generateFileNameNumber(File dir, String extension){
         int count = 0;
-        File originalFile = file;
+        File original = dir;
         do {
-            file = new File(originalFile, numberToDefaultFileName(++count) + "." + extension);
-        } while (file.exists());
-        return file;
+            dir = generateFileName(original, ++count, extension);
+        } while (dir.exists());
+        return count;
+    }
+
+    public static File generateNewFile(File dir, String extension) {
+        int count = 0;
+        File originalFile = dir;
+        do {
+            dir = generateFileName(originalFile, ++count, extension);
+        } while (dir.exists());
+        return dir;
     }
 }
