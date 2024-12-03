@@ -6,7 +6,7 @@
     
     <groupId>kr.merutilm</groupId>
     <artifactId>rff</artifactId>
-    <version>1.15</version>
+    <version>1.0</version>
 
     
     <properties>
@@ -36,11 +36,6 @@
         <dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>javacv-platform</artifactId>
-            <version>1.5.11</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>javacv</artifactId>
             <version>1.5.11</version>
         </dependency>
     </dependencies>

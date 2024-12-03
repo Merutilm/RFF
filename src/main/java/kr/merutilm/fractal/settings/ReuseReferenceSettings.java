@@ -13,7 +13,7 @@ public enum ReuseReferenceSettings {
      * Do not reuse refernce, and recalculate reference every perturbator.
      */
     DISABLED("Disabled");
-
+    
     private final String name;
 
     @Override

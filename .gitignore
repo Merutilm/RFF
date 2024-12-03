@@ -6,3 +6,5 @@ target
 *.jfr
 .idea
 src/main/resources
+VideoSample
+*.mp4

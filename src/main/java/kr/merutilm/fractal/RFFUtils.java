@@ -2,6 +2,8 @@ package kr.merutilm.fractal;
 
 import java.awt.*;
 import java.io.File;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
 
 public final class RFFUtils {
 
@@ -11,6 +13,40 @@ public final class RFFUtils {
 
     public static final String EXTENSION_MAP = "rffm";
 
+    public static File selectFile(String title, String extension, String desc){
+        JFileChooser ch = new JFileChooser();
+        ch.setDialogTitle(title);
+        ch.setMultiSelectionEnabled(false);
+        ch.setFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                return f.isDirectory() || f.getPath().endsWith("." + extension);
+            }
+
+            @Override
+            public String getDescription() {
+                return desc + "(." + extension + ")";
+            }
+        });
+        ch.setAcceptAllFileFilterUsed(false);
+        int r = ch.showOpenDialog(null);
+        if (r == JFileChooser.APPROVE_OPTION) {
+		    return ch.getSelectedFile();
+        }
+        return null;
+    }
+
+    public static File selectFolder(String title){
+        JFileChooser ch = new JFileChooser();
+        ch.setDialogTitle(title);
+        ch.setMultiSelectionEnabled(false);
+        ch.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int r = ch.showOpenDialog(null);
+        if (r == JFileChooser.APPROVE_OPTION) {
+		    return ch.getSelectedFile();
+        }
+        return null;
+    }
 
     public static Image getApplicationIcon() {
         return Toolkit.getDefaultToolkit().getImage(RFFUtils.class.getResource("/icon.png"));

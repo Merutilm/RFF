@@ -43,7 +43,6 @@ final class CalcSettingsPanel extends CSPanel {
             @Override
             public void enterFunction(Long value) {
                 master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 -> e2.edit().setMaxIteration(value).build()).build());
-                master.getFractalRender().getPainter().recompute();
             }
         };
         maxIterationPanel.setBounds(new Rectangle(r.width / 2, 0, r.width / 2, BAR_HEIGHT));
@@ -57,15 +56,15 @@ final class CalcSettingsPanel extends CSPanel {
         periodPanel = new CSValueLabelPanel(window, "Period", "");
         periodPanel.setBounds(new Rectangle(2 * r.width / 3, BAR_HEIGHT, r.width / 3, BAR_HEIGHT));
 
-        CSValueSelectionInputPanel<BooleanValue> autoIterPanel = new CSValueSelectionInputPanel<>(window, this, new Rectangle(0, BAR_HEIGHT * 2, r.width / 2, BAR_HEIGHT), "Auto Iteration", BooleanValue.typeOf(master.getSettings().calculationSettings().autoIteration()), value -> {
-            master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 -> e2.edit().setAutoIteration(value.bool()).build()).build());
-            master.getFractalRender().getPainter().recompute();
-        }, false, BooleanValue.values());
+        CSValueSelectionInputPanel<BooleanValue> autoIterPanel = new CSValueSelectionInputPanel<>(window, this, new Rectangle(0, BAR_HEIGHT * 2, r.width / 2, BAR_HEIGHT), "Auto Iteration", BooleanValue.typeOf(master.getSettings().calculationSettings().autoIteration()), 
+        value -> 
+            master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 -> e2.edit().setAutoIteration(value.bool()).build()).build())
+        , false, BooleanValue.values());
 
-        CSValueSelectionInputPanel<ReuseReferenceSettings> reusePanel = new CSValueSelectionInputPanel<>(window, this, new Rectangle(r.width / 2, BAR_HEIGHT * 2, r.width / 2, BAR_HEIGHT), "Reuse Reference", master.getSettings().calculationSettings().reuseReference(), value -> {
-            master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 -> e2.edit().setReuseReference(value).build()).build());
-            master.getFractalRender().getPainter().recompute();
-        }, false, ReuseReferenceSettings.values());
+        CSValueSelectionInputPanel<ReuseReferenceSettings> reusePanel = new CSValueSelectionInputPanel<>(window, this, new Rectangle(r.width / 2, BAR_HEIGHT * 2, r.width / 2, BAR_HEIGHT), "Reuse Reference", master.getSettings().calculationSettings().reuseReference(), 
+        value -> 
+            master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 -> e2.edit().setReuseReference(value).build()).build())
+        , false, ReuseReferenceSettings.values());
 
         progressPanel = new CSValueLabelPanel(window, "Progress", "");
         progressPanel.setBounds(new Rectangle(0, BAR_HEIGHT * 3, r.width / 2, BAR_HEIGHT));

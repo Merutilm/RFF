@@ -11,6 +11,7 @@ import kr.merutilm.base.parallel.RenderState;
 import kr.merutilm.base.struct.DoubleMatrix;
 import kr.merutilm.base.util.ConsoleUtils;
 import kr.merutilm.base.util.TaskManager;
+import kr.merutilm.customswing.CSMultiDialog;
 import kr.merutilm.customswing.CSPanel;
 import kr.merutilm.fractal.RFFUtils;
 import kr.merutilm.fractal.formula.DeepMandelbrotPerturbator;
@@ -23,6 +24,7 @@ import kr.merutilm.fractal.locater.MandelbrotLocator;
 import kr.merutilm.fractal.settings.CalculationSettings;
 import kr.merutilm.fractal.settings.ImageSettings;
 import kr.merutilm.fractal.settings.Settings;
+import kr.merutilm.fractal.settings.VideoSettings;
 import kr.merutilm.fractal.struct.DoubleExponent;
 import kr.merutilm.fractal.struct.LWBigComplex;
 import kr.merutilm.fractal.theme.BasicTheme;
@@ -30,6 +32,7 @@ import kr.merutilm.fractal.util.DoubleExponentMath;
 import kr.merutilm.fractal.util.LabelTextUtils;
 import kr.merutilm.fractal.util.MathUtilities;
 
+import static kr.merutilm.fractal.RFFUtils.selectFolder;
 import static kr.merutilm.fractal.theme.BasicTheme.INIT_ITERATION;
 
 import java.awt.*;
@@ -99,10 +102,10 @@ final class RenderPanel extends CSPanel {
 
     private void createVideoData(){
 
-        File file = new File(RFFUtils.getOriginalResource(), VideoRenderer.EXPORT_DIR);
+        File dir = selectFolder("Folder to Export Samples");
         try{
-            if(file.exists()){
-                for (File f : file.listFiles()) {
+            if(dir.exists()){
+                for (File f : dir.listFiles()) {
                     Files.delete(f.toPath());
                 }
             }
@@ -115,7 +118,7 @@ final class RenderPanel extends CSPanel {
                         id++;
                         recompute();
                         currentThread.join();
-                        VideoRenderer.exportMap(iterations);
+                        VideoRenderer.exportMap(dir, master.getSettings().calculationSettings().maxIteration(), iterations);
                         master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit().zoomOut(MathUtilities.LOG2).build()).build());
                     }
 
@@ -212,8 +215,19 @@ final class RenderPanel extends CSPanel {
         window.addKeyListener(this::findCenter, KeyEvent.VK_C);
         window.addKeyListener(this::cancel, KeyEvent.VK_ESCAPE);
         window.addKeyListener(this::createVideoData, KeyEvent.VK_E, true, true);
-        window.addKeyListener(() -> VideoRenderer.exportZoomingVideo(master.getSettings()), KeyEvent.VK_V, true, true);
         window.addKeyListener(() -> saveCurrentMapToImage(IMAGE_EXPORT_DIR), KeyEvent.VK_ENTER, true);
+        window.addKeyListener(() -> {
+            VideoSettings.Builder vsb = new VideoSettings.Builder();
+            VideoSettings first = vsb.build();
+            CSMultiDialog dialog = new CSMultiDialog(window, "Video Settings", 200, 150, () -> 
+                VideoRenderer.exportZoomingVideo(master.getSettings(), vsb.build(), RFFUtils.selectFolder("Select Sample Folder"), RFFUtils.selectFile("Export", "mp4", "video"))
+            );
+            dialog.getInput().createTextInput("FPS", null, first.fps(), Double::parseDouble, vsb::setFps);
+            dialog.getInput().createTextInput("Zoom Speed", null, first.logZoomPerSecond(), Double::parseDouble, vsb::setLogZoomPerSecond);
+            dialog.getInput().createTextInput("Multi Sampling", null, first.logZoomPerSecond(), Double::parseDouble, vsb::setMultiSampling);
+            dialog.setup();
+
+        }, KeyEvent.VK_V, true, true);
         addMouseWheelListener(new MouseAdapter() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
@@ -433,7 +447,7 @@ final class RenderPanel extends CSPanel {
 
             
 
-            generator.createRenderer((x, y, xRes, yRes, rx, ry, i, col, t) -> {
+            generator.createRenderer((x, y, xRes, yRes, rx, ry, i, v, t) -> {
                 DoubleExponent[] dc = offsetConversion(x, y);
                 return currentPerturbator.iterate(dc[0], dc[1]);
             });

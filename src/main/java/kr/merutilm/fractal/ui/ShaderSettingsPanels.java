@@ -10,8 +10,8 @@ import kr.merutilm.customswing.CSValueInputGroupPanel;
 import kr.merutilm.customswing.CSValueInputGroupPanel.InputType;
 import kr.merutilm.fractal.settings.*;
 
-enum ShaderSettingsPanels implements Selectable{
 
+enum ShaderSettingsPanels implements Selectable{
     COLOR("Color", master -> {
         CSPanel target = targetPanel(master);
         
@@ -33,7 +33,6 @@ enum ShaderSettingsPanels implements Selectable{
         panel.createSelectInput("Color Smoothing", null, color.colorSmoothing(), ColorSmoothingSettings.values(), e ->
             applier.accept(f -> f.setColorSmoothing(e))
         );
-
         target.add(panel);
     }),
 
