@@ -18,7 +18,8 @@ import kr.merutilm.fractal.formula.DeepMandelbrotPerturbator;
 import kr.merutilm.fractal.formula.LightMandelbrotPerturbator;
 import kr.merutilm.fractal.formula.MandelbrotPerturbator;
 import kr.merutilm.fractal.formula.Perturbator;
-import kr.merutilm.fractal.io.VideoRenderer;
+import kr.merutilm.fractal.io.IOManager;
+import kr.merutilm.fractal.io.RFFMap;
 import kr.merutilm.fractal.locater.Locator;
 import kr.merutilm.fractal.locater.MandelbrotLocator;
 import kr.merutilm.fractal.settings.CalculationSettings;
@@ -55,6 +56,7 @@ final class RenderPanel extends CSPanel {
     private transient BufferedImage currentImage;
     private final transient RFF master;
     private transient DoubleMatrix iterations;
+    private transient RFFMap currentMap = null;
     private transient Thread currentThread;
     private transient Perturbator currentPerturbator;
     private static final double EXP_DEADLINE = 290;
@@ -71,123 +73,6 @@ final class RenderPanel extends CSPanel {
         addListeners(window);
     }
 
-    private void cancel() {
-        state.createBreakpoint();
-    }
-
-    private void resetToInit() {
-        master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit()
-                .setCenter(BasicTheme.INIT_C)
-                .setLogZoom(BasicTheme.INIT_LOG_ZOOM)
-                .build()).build());
-        recompute();
-    }
-
-    private void findCenter() {
-        
-        if (currentPerturbator == null) {
-            return;
-        }
-        LWBigComplex c = MandelbrotLocator.findCenter((MandelbrotPerturbator) currentPerturbator);
-
-        if (c != null) {
-            master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit()
-                    .setCenter(c)
-                    .build()).build());
-            recompute();
-        }else{
-            checkNullLocator(null);
-        }
-    }
-
-    private void createVideoData(){
-
-        File dir = selectFolder("Folder to Export Samples");
-        try{
-            if(dir.exists()){
-                for (File f : dir.listFiles()) {
-                    Files.delete(f.toPath());
-                }
-            }
-
-            TaskManager.runTask(() -> {
-
-                try{
-                    int id = state.getId();
-                    while(master.getSettings().calculationSettings().logZoom() > 1 && id == state.getId()){
-                        id++;
-                        recompute();
-                        currentThread.join();
-                        VideoRenderer.exportMap(dir, master.getSettings().calculationSettings().maxIteration(), iterations);
-                        master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit().zoomOut(MathUtilities.LOG2).build()).build());
-                    }
-
-                }catch(InterruptedException e){
-                    Thread.currentThread().interrupt();
-                }
-            });
-
-           
-
-        }catch(IOException e){
-            ConsoleUtils.logError(e);
-        }
-       
-    }
-
-
-    private BiConsumer<Integer, Integer> getActionWhileFindingMinibrotCenter(int period){
-        CalcSettingsPanel panel = master.getFractalStatus().getFractalCalc();
-        int interval = periodPanelRefreshInterval();
-        return (p, i) -> {
-                            
-            if (p % interval == 0) {
-                panel.setProcess("Locating Center... "
-                        + LabelTextUtils
-                                .processText((double) p / period)
-                        + " [" + i + "]");
-            }
-        };
-    }
-
-    private DoubleConsumer getActionWhileFindingMinibrotZoom(){
-        CalcSettingsPanel panel = master.getFractalStatus().getFractalCalc();
-        return d -> TaskManager.runTask(() -> panel.setProcess("Finding Zoom... 10^-" + String.format("%.2f", d)));
-    }
-
-
-    private synchronized void locateMinibrot() {
-        if (currentPerturbator == null) {
-            return;
-        }
-        TaskManager.runTask(() -> {
-            
-            AtomicInteger id = new AtomicInteger();
-            int period = currentPerturbator.getReference().period();
-            MandelbrotLocator locator = MandelbrotLocator.locateMinibrot(state, state.getId(), (MandelbrotPerturbator) currentPerturbator,
-                    getActionWhileFindingMinibrotCenter(period),
-                    getActionWhileFindingMinibrotZoom()
-                    );
-
-            id.getAndIncrement();
-            if (checkNullLocator(locator)) {
-                master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit()
-                        .setCenter(locator.center())
-                        .setLogZoom(locator.logZoom())
-                        .build()).build());
-                recompute();
-            }
-        });
-
-    }
-
-    private boolean checkNullLocator(@Nullable Locator locator) {
-        if (locator == null) {
-            JOptionPane.showMessageDialog(null, "Cannot find center. Zoom in a little and try again.", "Locate Minibrot", JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-        return true;
-    }
 
     private int getImgWidth() {
         ImageSettings img = master.getSettings().imageSettings();
@@ -209,22 +94,33 @@ final class RenderPanel extends CSPanel {
         return (int) (e.getY() * img.resolutionMultiplier());
     }
 
+
+
     private void addListeners(RenderWindow window) {
         window.addKeyListener(this::resetToInit, KeyEvent.VK_R);
         window.addKeyListener(this::locateMinibrot, KeyEvent.VK_M);
         window.addKeyListener(this::findCenter, KeyEvent.VK_C);
         window.addKeyListener(this::cancel, KeyEvent.VK_ESCAPE);
+        window.addKeyListener(this::openMap, KeyEvent.VK_M, true, true);
         window.addKeyListener(this::createVideoData, KeyEvent.VK_E, true, true);
         window.addKeyListener(() -> saveCurrentMapToImage(IMAGE_EXPORT_DIR), KeyEvent.VK_ENTER, true);
         window.addKeyListener(() -> {
             VideoSettings.Builder vsb = new VideoSettings.Builder();
             VideoSettings first = vsb.build();
-            CSMultiDialog dialog = new CSMultiDialog(window, "Video Settings", 200, 150, () -> 
-                VideoRenderer.exportZoomingVideo(master.getSettings(), vsb.build(), RFFUtils.selectFolder("Select Sample Folder"), RFFUtils.selectFile("Export", "mp4", "video"))
-            );
+            CSMultiDialog dialog = new CSMultiDialog(window, "Video Settings", 200, 150, () -> {
+                File selected = RFFUtils.selectFolder("Select Sample Folder");
+                if(selected == null){
+                    return;
+                }
+                File toSave = RFFUtils.saveFile("Export", "mp4", "video");
+                if(toSave == null){
+                    return;
+                }
+                IOManager.exportZoomingVideo(master.getSettings(), vsb.build(), selected, toSave);
+            });
             dialog.getInput().createTextInput("FPS", null, first.fps(), Double::parseDouble, vsb::setFps);
             dialog.getInput().createTextInput("Zoom Speed", null, first.logZoomPerSecond(), Double::parseDouble, vsb::setLogZoomPerSecond);
-            dialog.getInput().createTextInput("Multi Sampling", null, first.logZoomPerSecond(), Double::parseDouble, vsb::setMultiSampling);
+            dialog.getInput().createTextInput("Multi Sampling", null, first.multiSampling(), Double::parseDouble, vsb::setMultiSampling);
             dialog.setup();
 
         }, KeyEvent.VK_V, true, true);
@@ -318,8 +214,143 @@ final class RenderPanel extends CSPanel {
         });
 
     }
+    
+    private void cancel() {
+        state.createBreakpoint();
+    }
+
+    private void resetToInit() {
+        master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit()
+                .setCenter(BasicTheme.INIT_C)
+                .setLogZoom(BasicTheme.INIT_LOG_ZOOM)
+                .build()).build());
+        recompute();
+    }
+
+    private void findCenter() {
+        
+        if (currentPerturbator == null) {
+            return;
+        }
+        LWBigComplex c = MandelbrotLocator.findCenter((MandelbrotPerturbator) currentPerturbator);
+
+        if (c != null) {
+            master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit()
+                    .setCenter(c)
+                    .build()).build());
+            recompute();
+        }else{
+            checkNullLocator(null);
+        }
+    }
+
+    private void createVideoData(){
+
+        File dir = selectFolder("Folder to Export Samples");
+        if(dir == null){
+            return;
+        }   
+        try{
+            if(dir.exists()){
+                for (File f : dir.listFiles()) {
+                    Files.delete(f.toPath());
+                }
+            }
+
+            TaskManager.runTask(() -> {
+
+                try{
+                    int id = state.getId();
+                    while(master.getSettings().calculationSettings().logZoom() > 1 && id == state.getId()){
+                        id++;
+                        recompute();
+                        currentThread.join();
+                        IOManager.exportMap(dir, master.getSettings().calculationSettings().maxIteration(), iterations);
+                        master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit().zoomOut(MathUtilities.LOG2).build()).build());
+                    }
+
+                }catch(InterruptedException e){
+                    Thread.currentThread().interrupt();
+                }
+            });
+
+           
+
+        }catch(IOException e){
+            ConsoleUtils.logError(e);
+        }
+       
+    }
 
 
+    private BiConsumer<Integer, Integer> getActionWhileFindingMinibrotCenter(int period){
+        CalcSettingsPanel panel = master.getFractalStatus().getFractalCalc();
+        int interval = periodPanelRefreshInterval();
+        return (p, i) -> {
+                            
+            if (p % interval == 0) {
+                panel.setProcess("Locating Center... "
+                        + LabelTextUtils
+                                .processText((double) p / period)
+                        + " [" + i + "]");
+            }
+        };
+    }
+
+    private DoubleConsumer getActionWhileFindingMinibrotZoom(){
+        CalcSettingsPanel panel = master.getFractalStatus().getFractalCalc();
+        return d -> TaskManager.runTask(() -> panel.setProcess("Finding Zoom... 10^-" + String.format("%.2f", d)));
+    }
+
+
+    private synchronized void locateMinibrot() {
+        if (currentPerturbator == null) {
+            return;
+        }
+        TaskManager.runTask(() -> {
+            
+            AtomicInteger id = new AtomicInteger();
+            int period = currentPerturbator.getReference().period();
+            MandelbrotLocator locator = MandelbrotLocator.locateMinibrot(state, state.getId(), (MandelbrotPerturbator) currentPerturbator,
+                    getActionWhileFindingMinibrotCenter(period),
+                    getActionWhileFindingMinibrotZoom()
+                    );
+
+            id.getAndIncrement();
+            if (checkNullLocator(locator)) {
+                master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit()
+                        .setCenter(locator.center())
+                        .setLogZoom(locator.logZoom())
+                        .build()).build());
+                recompute();
+            }
+        });
+
+    }
+
+    private boolean checkNullLocator(@Nullable Locator locator) {
+        if (locator == null) {
+            JOptionPane.showMessageDialog(null, "Cannot find center. Zoom in a little and try again.", "Locate Minibrot", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        return true;
+    }
+
+    private void openMap(){
+        File file = RFFUtils.selectFile("Open Map", RFFUtils.EXTENSION_MAP, "RFF Map");
+        if(file == null){
+            return;
+        }
+        RFFMap map = IOManager.readMap(file);
+        currentMap = map;
+        try{
+            reloadAndPaint(state.getId(), false);
+        }catch(IllegalRenderStateException e){
+            //noop
+        }catch(InterruptedException e){
+            Thread.currentThread().interrupt();
+        }
+    }
 
     private void saveCurrentMapToImage(String dir) {
         File file = RFFUtils.mkdir(dir);
@@ -367,18 +398,19 @@ final class RenderPanel extends CSPanel {
 
     //this method can be thread-safe only when called via recompute()
     private void compute(int currentID) {
-
+        
         int w = getImgWidth();
         int h = getImgHeight();
         iterations = new DoubleMatrix(w, h);
+        currentMap = null;
+        Settings settings = master.getSettings();
         ShaderProcessor.fillInit(iterations);
 
         if (master.getSettings().calculationSettings().autoIteration()) {
             master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit().setMaxIteration(Math.max(INIT_ITERATION, lastPeriod * 50L)).build()).build());
         }
 
-        Settings settings = master.getSettings();
-
+        
         CalculationSettings calc = settings.calculationSettings();
         int precision = Perturbator.precision(calc.logZoom());
         double logZoom = calc.logZoom();
@@ -462,13 +494,13 @@ final class RenderPanel extends CSPanel {
                 boolean processing = p < 1;
 
                 if (ShaderProcessor.getCompressDivisor(settings.imageSettings()) > 1 || processing) {
-                    reloadAndPaint(iterations, currentID, true);
+                    reloadAndPaint(currentID, true);
                 }
 
                 if (processing) {
                     panel.setProcess("Calculating... " + LabelTextUtils.processText(p));
                 } else {
-                    reloadAndPaint(iterations, currentID, false);
+                    reloadAndPaint(currentID, false);
                     panel.setProcess("Done");
                 }
                 panel.refreshTime();
@@ -492,11 +524,11 @@ final class RenderPanel extends CSPanel {
         return (int) (1000000 / master.getSettings().calculationSettings().logZoom());
     }
 
-    public void reloadAndPaintCurrentMap() {
+    public void reloadAndPaintCurrentIterations() {
         TaskManager.runTask(() -> {
             try {
                 CalcSettingsPanel panel = master.getFractalStatus().getFractalCalc();
-                reloadAndPaint(iterations, state.getId(), false);
+                reloadAndPaint(state.getId(), false);
                 panel.setProcess("Done");
             } catch (IllegalRenderStateException | InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -511,15 +543,19 @@ final class RenderPanel extends CSPanel {
         + LabelTextUtils.frac(fracA, fracB, LabelTextUtils.Parentheses.SQUARE));
     }
 
-
-    public synchronized void reloadAndPaint(DoubleMatrix iterations, int currentID, boolean compressed) throws IllegalRenderStateException, InterruptedException {
-        
-        currentImage = ShaderProcessor.createImageWithVisualizer(state, currentID, iterations, master.getSettings(), compressed, 
-            new ProcessVisualizer[]{
-                gvf(1, 3), 
-                gvf(2, 3),
-                gvf(3, 3)
-            });
+    
+    public synchronized void reloadAndPaint(int currentID, boolean compressed) throws IllegalRenderStateException, InterruptedException {
+        ProcessVisualizer[] pv = new ProcessVisualizer[]{
+            gvf(1, 3), 
+            gvf(2, 3),
+            gvf(3, 3)
+        };
+        if(currentMap == null){
+            currentImage = ShaderProcessor.createImageWithVisualizer(state, currentID, iterations, master.getSettings(), compressed, pv);
+        }else{
+            currentImage = ShaderProcessor.createImageWithVisualizer(state, currentID, currentMap.iterations(), IOManager.modifyToMapSettings(currentMap, master.getSettings()), false, pv);
+        }
+            
         repaint();
 
     }

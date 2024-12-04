@@ -33,7 +33,7 @@ final class ImgSettingsPanel extends CSPanel {
         new Rectangle(0, 0, r.width, BAR_HEIGHT), 
         "Fractal Theme", Objects.requireNonNull(BasicThemes.tryMatch(master.getTheme())), e -> {
             master.setTheme(e.getTheme());
-            getPainter().reloadAndPaintCurrentMap();
+            getPainter().reloadAndPaintCurrentIterations();
             SwingUtilities.invokeLater(this::newUI);
 
         }, false, BasicThemes.values());

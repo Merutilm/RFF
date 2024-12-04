@@ -12,8 +12,7 @@ public final class RFFUtils {
     }
 
     public static final String EXTENSION_MAP = "rffm";
-
-    public static File selectFile(String title, String extension, String desc){
+    private static JFileChooser setupChooser(String title, String extension, String desc){
         JFileChooser ch = new JFileChooser();
         ch.setDialogTitle(title);
         ch.setMultiSelectionEnabled(false);
@@ -29,6 +28,20 @@ public final class RFFUtils {
             }
         });
         ch.setAcceptAllFileFilterUsed(false);
+        return ch;
+    }
+
+    public static File saveFile(String title, String extension, String desc){
+        JFileChooser ch = setupChooser(title, extension, desc);
+        int r = ch.showSaveDialog(null);
+        if (r == JFileChooser.APPROVE_OPTION) {
+		    return ch.getSelectedFile();
+        }
+        return null;
+    }
+
+    public static File selectFile(String title, String extension, String desc){
+        JFileChooser ch = setupChooser(title, extension, desc);
         int r = ch.showOpenDialog(null);
         if (r == JFileChooser.APPROVE_OPTION) {
 		    return ch.getSelectedFile();

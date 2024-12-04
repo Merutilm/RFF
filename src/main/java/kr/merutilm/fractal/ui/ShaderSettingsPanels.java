@@ -178,6 +178,6 @@ enum ShaderSettingsPanels implements Selectable{
     }
 
     private static void reloadColor(RFF master){
-        master.getFractalRender().getPainter().reloadAndPaintCurrentMap();
+        master.getFractalRender().getPainter().reloadAndPaintCurrentIterations();
     }
 }

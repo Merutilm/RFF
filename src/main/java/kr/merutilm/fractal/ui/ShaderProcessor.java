@@ -57,15 +57,14 @@ public class ShaderProcessor {
             return null;
         }
         ColorSettings col = settings.imageSettings().colorSettings();
-        double r = iteration % 1;
-
+       
         double value = switch (col.colorSmoothing()) {
             case NONE -> (long) iteration;
-            case REVERSED -> (long) iteration + 1 - r;
-            default -> (long) iteration + r;
+            case REVERSED -> (long) iteration + 1 - (iteration % 1);
+            default -> iteration;
         };
 
-
+        
         return col.getColor(value);
     }
     
@@ -79,7 +78,12 @@ public class ShaderProcessor {
         ShaderDispatcher pp1 = new ShaderDispatcher(state, currentID, bitMap);
         int fitResolutionMultiplier = iterations.getWidth() / bitMap.getWidth();
 
-        pp1.createRenderer((x, y, xRes, yRes, rx, ry, i, c, t) -> getColorByIteration(settings, iterations.pipette(x * fitResolutionMultiplier, y * fitResolutionMultiplier)));
+        pp1.createRenderer((x, y, xRes, yRes, rx, ry, i, c, t) -> {
+            int ix = x * fitResolutionMultiplier;
+            int iy = y * fitResolutionMultiplier;
+
+            return getColorByIteration(settings, iterations.pipette(ix, iy));
+        });
         pp1.createRenderer(new Slope(iterations, img.slopeSettings(), img.resolutionMultiplier(), fitResolutionMultiplier));
         pp1.createRenderer(new ColorFilter(img.colorFilterSettings()));
 
@@ -115,13 +119,14 @@ public class ShaderProcessor {
 
         pp3.createRenderer(new Bloom(bitMap, compressedBitMap, img.bloomSettings()));
         pp3.createRenderer((x, y, xRes, yRes, rx, ry, i, c, t) -> {
-
-            HexColor a1 = pp3.texture2D(x, y - 1);
-            HexColor a2 = pp3.texture2D(x, y + 1);
+            HexColor a1 = pp3.texture2D(x, y + 1);
+            HexColor a2 = pp3.texture2D(x, y - 1);
             HexColor a3 = pp3.texture2D(x + 1, y);
             HexColor a4 = pp3.texture2D(x - 1, y);
-            return HexColor.average(a1, a2, a3, a4);
+            return HexColor.average(a1, a2, a3, a4, c);
         });
+
+
 
         if (compressed) {
             pp3.dispatch();
