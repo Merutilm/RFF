@@ -12,6 +12,9 @@ public final class RFFUtils {
     }
 
     public static final String EXTENSION_MAP = "rffm";
+
+
+    
     private static JFileChooser setupChooser(String title, String extension, String desc){
         JFileChooser ch = new JFileChooser();
         ch.setDialogTitle(title);

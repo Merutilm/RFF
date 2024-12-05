@@ -1,8 +1,8 @@
 package kr.merutilm.fractal.util;
 
-public class MathUtilities {
+public class MathConstants {
 
-    private MathUtilities(){
+    private MathConstants(){
 
     }
 

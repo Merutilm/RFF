@@ -18,7 +18,6 @@ import kr.merutilm.fractal.formula.DeepMandelbrotPerturbator;
 import kr.merutilm.fractal.formula.LightMandelbrotPerturbator;
 import kr.merutilm.fractal.formula.MandelbrotPerturbator;
 import kr.merutilm.fractal.formula.Perturbator;
-import kr.merutilm.fractal.io.IOManager;
 import kr.merutilm.fractal.io.RFFMap;
 import kr.merutilm.fractal.locater.Locator;
 import kr.merutilm.fractal.locater.MandelbrotLocator;
@@ -31,7 +30,7 @@ import kr.merutilm.fractal.struct.LWBigComplex;
 import kr.merutilm.fractal.theme.BasicTheme;
 import kr.merutilm.fractal.util.DoubleExponentMath;
 import kr.merutilm.fractal.util.LabelTextUtils;
-import kr.merutilm.fractal.util.MathUtilities;
+import kr.merutilm.fractal.util.MathConstants;
 
 import static kr.merutilm.fractal.RFFUtils.selectFolder;
 import static kr.merutilm.fractal.theme.BasicTheme.INIT_ITERATION;
@@ -116,7 +115,7 @@ final class RenderPanel extends CSPanel {
                 if(toSave == null){
                     return;
                 }
-                IOManager.exportZoomingVideo(master.getSettings(), vsb.build(), selected, toSave);
+                VideoRenderWindow.createVideo(master.getSettings(), vsb.build(), selected, toSave);
             });
             dialog.getInput().createTextInput("FPS", null, first.fps(), Double::parseDouble, vsb::setFps);
             dialog.getInput().createTextInput("Zoom Speed", null, first.logZoomPerSecond(), Double::parseDouble, vsb::setLogZoomPerSecond);
@@ -261,12 +260,15 @@ final class RenderPanel extends CSPanel {
 
                 try{
                     int id = state.getId();
+
                     while(master.getSettings().calculationSettings().logZoom() > 1 && id == state.getId()){
                         id++;
                         recompute();
                         currentThread.join();
-                        IOManager.exportMap(dir, master.getSettings().calculationSettings().maxIteration(), iterations);
-                        master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit().zoomOut(MathUtilities.LOG2).build()).build());
+                        CalculationSettings calc = master.getSettings().calculationSettings();
+                        RFFMap map = new RFFMap(RFFMap.LATEST, calc.logZoom(), calc.maxIteration(), iterations);
+                        map.export(dir);
+                        master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit().zoomOut(MathConstants.LOG2).build()).build());
                     }
 
                 }catch(InterruptedException e){
@@ -341,7 +343,7 @@ final class RenderPanel extends CSPanel {
         if(file == null){
             return;
         }
-        RFFMap map = IOManager.readMap(file);
+        RFFMap map = RFFMap.readMap(file);
         currentMap = map;
         try{
             reloadAndPaint(state.getId(), false);
@@ -553,7 +555,7 @@ final class RenderPanel extends CSPanel {
         if(currentMap == null){
             currentImage = ShaderProcessor.createImageWithVisualizer(state, currentID, iterations, master.getSettings(), compressed, pv);
         }else{
-            currentImage = ShaderProcessor.createImageWithVisualizer(state, currentID, currentMap.iterations(), IOManager.modifyToMapSettings(currentMap, master.getSettings()), false, pv);
+            currentImage = ShaderProcessor.createImageWithVisualizer(state, currentID, currentMap.iterations(), currentMap.modifyToMapSettings(master.getSettings()), false, pv);
         }
             
         repaint();
