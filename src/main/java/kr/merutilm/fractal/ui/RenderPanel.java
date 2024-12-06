@@ -24,13 +24,13 @@ import kr.merutilm.fractal.locater.MandelbrotLocator;
 import kr.merutilm.fractal.settings.CalculationSettings;
 import kr.merutilm.fractal.settings.ImageSettings;
 import kr.merutilm.fractal.settings.Settings;
-import kr.merutilm.fractal.settings.VideoSettings;
+import kr.merutilm.fractal.settings.VideoDataSettings;
+import kr.merutilm.fractal.settings.VideoExportSettings;
 import kr.merutilm.fractal.struct.DoubleExponent;
 import kr.merutilm.fractal.struct.LWBigComplex;
 import kr.merutilm.fractal.theme.BasicTheme;
 import kr.merutilm.fractal.util.DoubleExponentMath;
 import kr.merutilm.fractal.util.LabelTextUtils;
-import kr.merutilm.fractal.util.MathConstants;
 
 import static kr.merutilm.fractal.RFFUtils.selectFolder;
 import static kr.merutilm.fractal.theme.BasicTheme.INIT_ITERATION;
@@ -101,25 +101,41 @@ final class RenderPanel extends CSPanel {
         window.addKeyListener(this::findCenter, KeyEvent.VK_C);
         window.addKeyListener(this::cancel, KeyEvent.VK_ESCAPE);
         window.addKeyListener(this::openMap, KeyEvent.VK_M, true, true);
-        window.addKeyListener(this::createVideoData, KeyEvent.VK_E, true, true);
         window.addKeyListener(() -> saveCurrentMapToImage(IMAGE_EXPORT_DIR), KeyEvent.VK_ENTER, true);
         window.addKeyListener(() -> {
-            VideoSettings.Builder vsb = new VideoSettings.Builder();
-            VideoSettings first = vsb.build();
-            CSMultiDialog dialog = new CSMultiDialog(window, "Video Settings", 200, 150, () -> {
-                File selected = RFFUtils.selectFolder("Select Sample Folder");
+            VideoDataSettings.Builder vsb = new VideoDataSettings.Builder();
+            VideoDataSettings first = vsb.build();
+            CSMultiDialog dialog = new CSMultiDialog(window, "Video Settings", 300, 150, () -> {
+                File defOpen = new File(RFFUtils.getOriginalResource(), RFFUtils.DefaultDirectory.MAP_AS_VIDEO_DATA.toString());
+                File dir = defOpen.isDirectory() ? defOpen : selectFolder("Folder to Export Samples");
+
+                createVideoData(dir, vsb.build());
+            });
+            
+            dialog.getInput().createTextInput("ZoomIncrement", null, first.defaultZoomIncrement(), Double::parseDouble, vsb::setDefaultZoomIncrement);
+            dialog.setup();
+
+        }, KeyEvent.VK_E, true, true);
+        window.addKeyListener(() -> {
+            VideoExportSettings.Builder vsb = new VideoExportSettings.Builder();
+            VideoExportSettings first = vsb.build();
+            CSMultiDialog dialog = new CSMultiDialog(window, "Video Settings", 300, 200, () -> {
+                File defOpen = new File(RFFUtils.getOriginalResource(), RFFUtils.DefaultDirectory.MAP_AS_VIDEO_DATA.toString());
+                File selected = defOpen.isDirectory() ? defOpen : RFFUtils.selectFolder("Select Sample Folder");
                 if(selected == null){
                     return;
                 }
-                File toSave = RFFUtils.saveFile("Export", "mp4", "video");
+                File toSave = defOpen.isDirectory() ? new File(defOpen, RFFUtils.DefaultFileName.VIDEO + ".mp4") : RFFUtils.saveFile("Export", "mp4", "video");
                 if(toSave == null){
                     return;
                 }
                 VideoRenderWindow.createVideo(master.getSettings(), vsb.build(), selected, toSave);
             });
             dialog.getInput().createTextInput("FPS", null, first.fps(), Double::parseDouble, vsb::setFps);
-            dialog.getInput().createTextInput("Zoom Speed", null, first.logZoomPerSecond(), Double::parseDouble, vsb::setLogZoomPerSecond);
-            dialog.getInput().createTextInput("Multi Sampling", null, first.multiSampling(), Double::parseDouble, vsb::setMultiSampling);
+            dialog.getInput().createTextInput("MPS", null, first.mps(), Double::parseDouble, vsb::setMps);
+            dialog.getInput().createTextInput("OverZoom", null, first.overZoom(), Double::parseDouble, vsb::setOverZoom);
+            dialog.getInput().createTextInput("MultiSampling", null, first.multiSampling(), Double::parseDouble, vsb::setMultiSampling);
+            dialog.getInput().createTextInput("Bitrate", null, first.bitrate(), Integer::parseInt, vsb::setBitrate);
             dialog.setup();
 
         }, KeyEvent.VK_V, true, true);
@@ -243,9 +259,8 @@ final class RenderPanel extends CSPanel {
         }
     }
 
-    private void createVideoData(){
+    private void createVideoData(File dir, VideoDataSettings settings){
 
-        File dir = selectFolder("Folder to Export Samples");
         if(dir == null){
             return;
         }   
@@ -267,9 +282,11 @@ final class RenderPanel extends CSPanel {
                         currentThread.join();
                         CalculationSettings calc = master.getSettings().calculationSettings();
                         RFFMap map = new RFFMap(RFFMap.LATEST, calc.logZoom(), calc.maxIteration(), iterations);
-                        map.export(dir);
-                        master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit().zoomOut(MathConstants.LOG2).build()).build());
+                        map.exportAsVideoData(dir);
+                        master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit().zoomOut(Math.log10(settings.defaultZoomIncrement())).build()).build());
                     }
+
+                    settings.export(dir);
 
                 }catch(InterruptedException e){
                     Thread.currentThread().interrupt();
@@ -339,11 +356,11 @@ final class RenderPanel extends CSPanel {
     }
 
     private void openMap(){
-        File file = RFFUtils.selectFile("Open Map", RFFUtils.EXTENSION_MAP, "RFF Map");
+        File file = RFFUtils.selectFile("Open Map", RFFUtils.Extension.MAP.toString(), "RFF Map");
         if(file == null){
             return;
         }
-        RFFMap map = RFFMap.readMap(file);
+        RFFMap map = RFFMap.read(file);
         currentMap = map;
         try{
             reloadAndPaint(state.getId(), false);

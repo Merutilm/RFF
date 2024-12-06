@@ -14,10 +14,13 @@ public record RFFMap(int version, double zoom, long maxIteration, DoubleMatrix i
 
     public static final int LATEST = 1;
 
-    public static RFFMap readMap(File file){
+    public static RFFMap read(File file){
         if(file == null || !file.exists()){
             return null;
         }
+
+        RFFUtils.checkInvalidExtension(file,  RFFUtils.Extension.MAP.toString());
+
         byte[] data;
 
         try(FileInputStream stream = new FileInputStream(file)) {
@@ -46,15 +49,28 @@ public record RFFMap(int version, double zoom, long maxIteration, DoubleMatrix i
             throw new IllegalStateException();
         }
     }
-
-    public static RFFMap readMapByID(File dir, int id){
-        return readMap(new File(dir, RFFUtils.numberToDefaultFileName(id) + "." + RFFUtils.EXTENSION_MAP));
+    /**
+     * read map with name to XXXX.extension. (ID is XXXX)
+     * @param dir Directory to read
+     */
+    public static RFFMap readByID(File dir, int id){
+        return read(new File(dir, RFFUtils.numberToDefaultFileName(id) + "." + RFFUtils.Extension.MAP));
     }
 
-    public void export(File dir){
-        File dest = RFFUtils.generateNewFile(dir, RFFUtils.EXTENSION_MAP);
+    /**
+     * export map with name to XXXX.extension.
+     * This format must always be followed when creating a video.
+     * 
+     * @param dir Directory to export
+     */
+    public void exportAsVideoData(File dir){
+        File dest = RFFUtils.generateNewFile(dir, RFFUtils.Extension.MAP.toString());
+        export(dest);
+    }
 
-        try(FileOutputStream stream = new FileOutputStream(dest)) {
+    public void export(File file){
+        RFFUtils.checkInvalidExtension(file,  RFFUtils.Extension.MAP.toString());
+        try(FileOutputStream stream = new FileOutputStream(file)) {
             double[] canvas = iterations.getCanvas();
             int width = iterations.getWidth();
             
@@ -73,10 +89,12 @@ public record RFFMap(int version, double zoom, long maxIteration, DoubleMatrix i
             throw new IllegalStateException();
         }
     }
-
     public Settings modifyToMapSettings(Settings target){
         return target.edit().setCalculationSettings(e -> 
-            e.edit().setMaxIteration(maxIteration).build()
+            e.edit()
+            .setMaxIteration(maxIteration)
+            .setLogZoom(zoom)
+            .build()
         ).build();
     }
     

@@ -11,10 +11,67 @@ public final class RFFUtils {
 
     }
 
-    public static final String EXTENSION_MAP = "rffm";
+    public enum Extension{
 
+        MAP("rfm"),
+        VIDEO_DATA_SETTINGS("rfv"),
+        ALL_SETTINGS("rfs"),
+        CALCULATION_SETTINGS("rfc"),
+        IMAGE_SETTINGS("rfi"),
+        COLOR_PALETTE("rfp"),
+        
+        ;
 
+        private final String name;
+        
+        @Override
+        public String toString() {
+            return name;
+        }
+        
+        private Extension(String name){
+            this.name = name;
+        }
+    }
+
+    public enum DefaultDirectory{
+        MAP_AS_VIDEO_DATA("Videos"),
+        ;
+
+        private final String name;
+        
+        @Override
+        public String toString() {
+            return name;
+        }
+        
+        private DefaultDirectory(String name){
+            this.name = name;
+        }
+    }
     
+    public enum DefaultFileName{
+        VIDEO("video"),
+        VIDEO_DATA_SETTINGS("data"),
+        ;
+
+        private final String name;
+        
+        @Override
+        public String toString() {
+            return name;
+        }
+        
+        private DefaultFileName(String name){
+            this.name = name;
+        }
+    }
+    
+    public static void checkInvalidExtension(File file, String ext){
+        if(!file.getName().endsWith("." + ext)){
+            throw new IllegalArgumentException("Invalid Extension");
+        }
+    }
     private static JFileChooser setupChooser(String title, String extension, String desc){
         JFileChooser ch = new JFileChooser();
         ch.setDialogTitle(title);
@@ -69,7 +126,7 @@ public final class RFFUtils {
     }
 
     public static File getOriginalResource() {
-        return new File("RFF/src/main/resources");
+        return new File("src/main/resources");
     }
 
     public static File mkdir(String dir) {

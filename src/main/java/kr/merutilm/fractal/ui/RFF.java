@@ -9,6 +9,8 @@ import kr.merutilm.fractal.theme.Theme;
 
 import java.util.function.UnaryOperator;
 
+import javax.swing.JFrame;
+
 /**
  * <h2>Ridiculously Fast Fractal</h2>
  * Check how RFF works : https://docs.google.com/document/d/1IZMfTcF_-2f3HcX7AS9v8I57P8M1yTJgpzfBPYq9JIg/edit?pli=1&tab=t.jphmxxug3mna#heading=h.j5b0q4ufohul
@@ -20,13 +22,14 @@ final class RFF {
 
     private static final int INIT_WIDTH = 1280;
     private static final int INIT_HEIGHT = 720;
-
+    
     public static final BasicThemes DEFAULT_THEME = BasicThemes.ADVANCED_RAINBOW;
 
     private Theme theme = DEFAULT_THEME.getTheme();
     private Settings settings = theme.generate();
 
     public RFF() {
+        System.out.println(new JFrame().getInsets().top);
         this.fractalStatusWindow = new StatusWindow(this);
         this.fractalRenderWindow = new RenderWindow(this, INIT_WIDTH, INIT_HEIGHT);
         fractalStatusWindow.setLocation((int)fractalRenderWindow.getLocation().getX() + (int)fractalRenderWindow.getSize().getWidth(), 0);
