@@ -9,7 +9,6 @@ import kr.merutilm.fractal.theme.Theme;
 
 import java.util.function.UnaryOperator;
 
-import javax.swing.JFrame;
 
 /**
  * <h2>Ridiculously Fast Fractal</h2>
@@ -29,7 +28,6 @@ final class RFF {
     private Settings settings = theme.generate();
 
     public RFF() {
-        System.out.println(new JFrame().getInsets().top);
         this.fractalStatusWindow = new StatusWindow(this);
         this.fractalRenderWindow = new RenderWindow(this, INIT_WIDTH, INIT_HEIGHT);
         fractalStatusWindow.setLocation((int)fractalRenderWindow.getLocation().getX() + (int)fractalRenderWindow.getSize().getWidth(), 0);

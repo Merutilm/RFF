@@ -15,7 +15,7 @@ final class StatusWindow extends CSFrame {
     public static final int H = 400;
 
     public StatusWindow(RFF master) {
-        super("Status", RFFUtils.getApplicationIcon(), W , H);
+        super("Settings", RFFUtils.getApplicationIcon(), W , H);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         getContentPane().setBackground(new HexColor(10,10,10,255).toAWT());
         setResizable(false);
@@ -23,7 +23,7 @@ final class StatusWindow extends CSFrame {
         fractalImg = new ImgSettingsPanel(master, this, new Rectangle(0, fractalCalc.getHeight(), W, H - fractalCalc.getHeight()));
         add(fractalCalc);
         add(fractalImg);
-        pack();
+        setVisible(true);
     }
 
     public CalcSettingsPanel getFractalCalc() {

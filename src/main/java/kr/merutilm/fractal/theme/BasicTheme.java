@@ -31,13 +31,15 @@ public interface BasicTheme extends Theme {
 
     @Override
     default Settings generate() {
-        return new Settings(DEFAULT_CALC, new ImageSettings(INIT_MULTIPLIER, colorSettings(), slopeSettings(), colorFilterSettings(), fogSettings(), bloomSettings()));
+        return new Settings(DEFAULT_CALC, new ImageSettings(INIT_MULTIPLIER, colorSettings(), stripeSettings(), slopeSettings(), colorFilterSettings(), fogSettings(), bloomSettings()));
     }
 
 
     String getName();
 
     ColorSettings colorSettings();
+
+    StripeSettings stripeSettings();
 
     SlopeSettings slopeSettings();
 

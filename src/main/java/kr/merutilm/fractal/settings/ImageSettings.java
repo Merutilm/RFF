@@ -11,6 +11,7 @@ import kr.merutilm.base.struct.StructBuilder;
 public record ImageSettings(
     double resolutionMultiplier,
     ColorSettings colorSettings,
+    StripeSettings stripeSettings,
     SlopeSettings slopeSettings,
     ColorFilterSettings colorFilterSettings,
     FogSettings fogSettings,
@@ -24,6 +25,7 @@ public record ImageSettings(
         return new Builder()
         .setResolutionMultiplier(resolutionMultiplier)
         .setColorSettings(colorSettings)
+        .setStripeSettings(stripeSettings)
         .setSlopeSettings(slopeSettings)
         .setColorFilterSettings(colorFilterSettings)
         .setFogSettings(fogSettings)
@@ -34,6 +36,7 @@ public record ImageSettings(
         
         private double resolutionMultiplier;
         private ColorSettings colorSettings;
+        private StripeSettings stripeSettings;
         private SlopeSettings slopeSettings;
         private ColorFilterSettings colorFilterSettings;
         private BloomSettings bloomSettings;
@@ -48,6 +51,11 @@ public record ImageSettings(
 
         public Builder setColorSettings(ColorSettings colorSettings) {
             this.colorSettings = colorSettings;
+            return this;
+        }
+
+        public Builder setStripeSettings(StripeSettings stripeSettings) {
+            this.stripeSettings = stripeSettings;
             return this;
         }
 
@@ -81,6 +89,11 @@ public record ImageSettings(
             return this;
         }
 
+        public Builder setStripeSettings(UnaryOperator<StripeSettings> changes) {
+            this.stripeSettings = changes.apply(stripeSettings);
+            return this;
+        }
+
         public Builder setSlopeSettings(UnaryOperator<SlopeSettings> changes) {
             this.slopeSettings = changes.apply(slopeSettings);
             return this;
@@ -104,7 +117,7 @@ public record ImageSettings(
 
         @Override
         public ImageSettings build() {
-            return new ImageSettings(resolutionMultiplier, colorSettings, slopeSettings, colorFilterSettings, fogSettings, bloomSettings);
+            return new ImageSettings(resolutionMultiplier, colorSettings, stripeSettings, slopeSettings, colorFilterSettings, fogSettings, bloomSettings);
         }
     }
 

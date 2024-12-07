@@ -6,6 +6,7 @@ import kr.merutilm.fractal.settings.ColorFilterSettings;
 import kr.merutilm.fractal.settings.ColorSettings;
 import kr.merutilm.fractal.settings.FogSettings;
 import kr.merutilm.fractal.settings.SlopeSettings;
+import kr.merutilm.fractal.settings.StripeSettings;
 
 public class ThemeClassic1 implements BasicTheme{
 
@@ -31,7 +32,12 @@ public class ThemeClassic1 implements BasicTheme{
 
     @Override
     public SlopeSettings slopeSettings() {
-        return new SlopeSettings(0, 0, 1, 60, 135);      
+        return new SlopeSettings(0, 0.5, 1, 60, 135);      
+    }
+
+    @Override
+    public StripeSettings stripeSettings() {
+        return new StripeSettings(false, 10, 50, 1, 0);
     }
 
     @Override

@@ -5,15 +5,18 @@ import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
 import kr.merutilm.base.exception.IllegalRenderStateException;
+import kr.merutilm.base.functions.FunctionEase;
 import kr.merutilm.base.io.BitMap;
 import kr.merutilm.base.parallel.ProcessVisualizer;
 import kr.merutilm.base.parallel.RenderState;
 import kr.merutilm.base.parallel.ShaderDispatcher;
+import kr.merutilm.base.selectable.Ease;
 import kr.merutilm.base.struct.DoubleMatrix;
 import kr.merutilm.base.struct.HexColor;
 import kr.merutilm.fractal.settings.ColorSettings;
 import kr.merutilm.fractal.settings.ImageSettings;
 import kr.merutilm.fractal.settings.Settings;
+import kr.merutilm.fractal.settings.StripeSettings;
 import kr.merutilm.fractal.shader.Bloom;
 import kr.merutilm.fractal.shader.ColorFilter;
 import kr.merutilm.fractal.shader.Fog;
@@ -57,6 +60,7 @@ public class ShaderProcessor {
             return null;
         }
         ColorSettings col = settings.imageSettings().colorSettings();
+        StripeSettings stp = settings.imageSettings().stripeSettings();
        
         double value = switch (col.colorSmoothing()) {
             case NONE -> (long) iteration;
@@ -64,8 +68,22 @@ public class ShaderProcessor {
             default -> iteration;
         };
 
+        HexColor c1 = col.getColor(value);
+
+        if(!stp.use()){
+            return c1;
+        }
+
+        double si1 = stp.firstInterval();
+        double si2 = stp.secondInterval();
+        double sof = stp.offset();
+        FunctionEase ease =  Ease.INOUT_SINE.fun();
+
+        sof = (int) sof + ease.apply((sof % 1 + 1) % 1);
         
-        return col.getColor(value);
+        double m = ((value - sof) % si1) * ((value - sof) % si2) / (si1 * si2);
+        
+        return HexColor.ratioDivide(c1, HexColor.BLACK, m * stp.opacity());
     }
     
 
@@ -81,7 +99,6 @@ public class ShaderProcessor {
         pp1.createRenderer((x, y, xRes, yRes, rx, ry, i, c, t) -> {
             int ix = x * fitResolutionMultiplier;
             int iy = y * fitResolutionMultiplier;
-
             return getColorByIteration(settings, iterations.pipette(ix, iy));
         });
         pp1.createRenderer(new Slope(iterations, img.slopeSettings(), img.resolutionMultiplier(), fitResolutionMultiplier));

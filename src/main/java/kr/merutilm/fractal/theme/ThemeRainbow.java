@@ -24,6 +24,11 @@ public class ThemeRainbow implements BasicTheme{
     }
 
     @Override
+    public StripeSettings stripeSettings() {
+        return new StripeSettings(true, 10, 50, 1, 0);
+    }
+
+    @Override
     public ColorFilterSettings colorFilterSettings() {
         return new ColorFilterSettings(1,0.3,-0.3,0,0);
     }

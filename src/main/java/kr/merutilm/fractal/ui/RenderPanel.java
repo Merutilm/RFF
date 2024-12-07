@@ -45,6 +45,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
@@ -117,7 +118,9 @@ final class RenderPanel extends CSPanel {
 
         }, KeyEvent.VK_E, true, true);
         window.addKeyListener(() -> {
+            ImageSettings img = master.getSettings().imageSettings();
             VideoExportSettings.Builder vsb = new VideoExportSettings.Builder();
+            AtomicReference<Double> stripeAnimationSpeed = new AtomicReference<>(0.0);
             VideoExportSettings first = vsb.build();
             CSMultiDialog dialog = new CSMultiDialog(window, "Video Settings", 300, 200, () -> {
                 File defOpen = new File(RFFUtils.getOriginalResource(), RFFUtils.DefaultDirectory.MAP_AS_VIDEO_DATA.toString());
@@ -129,13 +132,16 @@ final class RenderPanel extends CSPanel {
                 if(toSave == null){
                     return;
                 }
-                VideoRenderWindow.createVideo(master.getSettings(), vsb.build(), selected, toSave);
+                VideoRenderWindow.createVideo(master.getSettings(), vsb.build(), stripeAnimationSpeed.get(), selected, toSave);
             });
             dialog.getInput().createTextInput("FPS", null, first.fps(), Double::parseDouble, vsb::setFps);
             dialog.getInput().createTextInput("MPS", null, first.mps(), Double::parseDouble, vsb::setMps);
             dialog.getInput().createTextInput("OverZoom", null, first.overZoom(), Double::parseDouble, vsb::setOverZoom);
             dialog.getInput().createTextInput("MultiSampling", null, first.multiSampling(), Double::parseDouble, vsb::setMultiSampling);
             dialog.getInput().createTextInput("Bitrate", null, first.bitrate(), Integer::parseInt, vsb::setBitrate);
+            if(img.stripeSettings().use()){
+                dialog.getInput().createTextInput("Stripe Animation Speed", null, 1.0, Double::parseDouble, stripeAnimationSpeed::set);
+            }   
             dialog.setup();
 
         }, KeyEvent.VK_V, true, true);

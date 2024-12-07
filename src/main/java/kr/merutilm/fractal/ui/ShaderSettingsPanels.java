@@ -8,6 +8,7 @@ import kr.merutilm.base.selectable.Selectable;
 import kr.merutilm.customswing.CSPanel;
 import kr.merutilm.customswing.CSValueInputGroupPanel;
 import kr.merutilm.customswing.CSValueInputGroupPanel.InputType;
+import kr.merutilm.fractal.RFFUtils;
 import kr.merutilm.fractal.settings.*;
 
 
@@ -27,7 +28,7 @@ enum ShaderSettingsPanels implements Selectable{
         panel.createTextInput("Color Pulse Interval", null, color.iterationInterval(), Double::parseDouble, e -> 
             applier.accept(f -> f.setIterationInterval(e))
         );
-        panel.createTextInput("Offset Ratio", null, color.offsetRatio(), Double::parseDouble, e ->
+        panel.createTextInput(RFFUtils.Constants.OFFSET_RATIO.toString(), null, color.offsetRatio(), Double::parseDouble, e ->
             applier.accept(f -> f.setOffsetRatio(e))
         );
         panel.createSelectInput("Color Smoothing", null, color.colorSmoothing(), ColorSmoothingSettings.values(), e ->
@@ -36,6 +37,36 @@ enum ShaderSettingsPanels implements Selectable{
         target.add(panel);
     }),
 
+    STRIPE("Stripe", master -> {
+        CSPanel target = targetPanel(master);
+        
+        CSValueInputGroupPanel panel = new CSValueInputGroupPanel(window(master), target, "", InputType.VERTICAL, false);
+        
+        StripeSettings color = getImageSettings(master).stripeSettings();
+        
+        Consumer<UnaryOperator<StripeSettings.Builder>> applier = e -> {
+            master.setSettings(e1 -> e1.edit().setImageSettings(e2 -> e2.edit().setStripeSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
+            reloadColor(master);
+        };
+
+        panel.createBoolInput("Use", null, color.use(), e -> 
+            applier.accept(f -> f.setUse(e))
+        );
+        panel.createTextInput("First Interval", null, color.firstInterval(), Double::parseDouble, e -> 
+            applier.accept(f -> f.setFirstInterval(e))
+        );
+        panel.createTextInput("Secondary Interval", null, color.secondInterval(), Double::parseDouble, e ->
+            applier.accept(f -> f.setSecondInterval(e))
+        );
+        panel.createTextInput(RFFUtils.Constants.OPACITY.toString(), null, color.opacity(), Double::parseDouble, e ->
+            applier.accept(f -> f.setOpacity(e))
+        );
+        panel.createTextInput(RFFUtils.Constants.OFFSET_RATIO.toString(), null, color.offset(), Double::parseDouble, e ->
+            applier.accept(f -> f.setOffset(e))
+        );
+        
+        target.add(panel);
+    }),
     SLOPE("Slope", master -> {
         CSPanel target = targetPanel(master);
         
@@ -54,7 +85,7 @@ enum ShaderSettingsPanels implements Selectable{
         panel.createTextInput("Reflection Ratio", null, slope.reflectionRatio(), Double::parseDouble, e -> 
             applier.accept(f -> f.setReflectionRatio(e))
         );
-        panel.createTextInput("Opacity", null, slope.opacity(), Double::parseDouble, e -> 
+        panel.createTextInput(RFFUtils.Constants.OPACITY.toString(), null, slope.opacity(), Double::parseDouble, e -> 
         	applier.accept(f -> f.setOpacity(e))
         );
         panel.createTextInput("Zenith", null, slope.zenith(), Double::parseDouble, e -> 
@@ -112,7 +143,7 @@ enum ShaderSettingsPanels implements Selectable{
         panel.createTextInput("Radius", null, fog.radius(), Double::parseDouble, e -> 
         	applier.accept(f -> f.setRadius(e))
         );
-        panel.createTextInput("Opacity", null, fog.opacity(), Double::parseDouble, e -> 
+        panel.createTextInput(RFFUtils.Constants.OPACITY.toString(), null, fog.opacity(), Double::parseDouble, e -> 
         	applier.accept(f -> f.setOpacity(e))
         );
 

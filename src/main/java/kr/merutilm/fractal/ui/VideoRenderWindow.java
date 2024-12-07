@@ -82,7 +82,6 @@ public final class VideoRenderWindow extends CSFrame{
         bar.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
         add(bar);
         setResizable(false);
-        pack();
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         getContentPane().setBackground(Color.BLACK);
         addWindowListener(new WindowAdapter(){
@@ -92,14 +91,13 @@ public final class VideoRenderWindow extends CSFrame{
             }
         });
         
+        setVisible(true);
     }
 
-
-    public static void createVideo(Settings settings, VideoExportSettings videoSettings, File dir, File out){
-        double rfmPerSecond = videoSettings.mps();
+    public static void createVideo(Settings settings, VideoExportSettings videoSettings, double stripeAnimationSpeed,
+            File dir, File out) {
         double fps = videoSettings.fps();
-        double frameZoomingPerSecond = rfmPerSecond;
-        double frameInterval = frameZoomingPerSecond / fps;
+        double frameInterval = videoSettings.mps() / fps;
         VideoDataSettings vds = VideoDataSettings.read(dir);
         
         RenderState state = new RenderState();
@@ -135,6 +133,7 @@ public final class VideoRenderWindow extends CSFrame{
                 recorder.setVideoBitrate(videoSettings.bitrate());
                 recorder.start(); 
                 double m = Math.min((double) VIDEO_PREVIEW_WINDOW_MAX_LEN / imgWidth, (double) VIDEO_PREVIEW_WINDOW_MAX_LEN / imgHeight);
+                double currentSec = 0;
                 int w = (int)(imgWidth * m);
                 int h = (int)(imgHeight * m);  
                 VideoRenderWindow window = new VideoRenderWindow(w, h);
@@ -144,9 +143,12 @@ public final class VideoRenderWindow extends CSFrame{
 
                 while(currentFrameNumber > minNumber) {    
                     currentFrameNumber -= frameInterval;
+                    currentSec += 1 / fps;
+
                     frame = getFrame(state, currentID, dir, currentFrameNumber, vds.defaultZoomIncrement(), multiplier);
 
-                    Settings settingsModified = frame.modifyToMapSettings(settings);
+                    Settings settingsModified = modifyToImageSettings(frame, settings,
+                            stripeAnimationSpeed * currentSec);
                     
                     window.setImage(ShaderProcessor.createImage(state, currentID, frame.iterations(), settingsModified, false));
                     
@@ -175,6 +177,15 @@ public final class VideoRenderWindow extends CSFrame{
         
     }
 
+    private static Settings modifyToImageSettings(RFFMap frame, Settings settings, double stripeOffset) {
+        return frame.modifyToMapSettings(settings).edit()
+                .setImageSettings(e -> e.edit()
+                        .setStripeSettings(e1 -> e1.edit()
+                                .setOffset(stripeOffset)
+                                .build())
+                        .build())
+                .build();
+    }
 
     private void setImage(BufferedImage img){
         this.img = img;
@@ -183,7 +194,6 @@ public final class VideoRenderWindow extends CSFrame{
 
     private static RFFMap getFrame(RenderState state, int currentID, File dir, double frame, double defaultZoomIncrement, double multiplier) throws IllegalRenderStateException, InterruptedException{
         
-
         if (frame < 1) {
 
             double r = 1 - frame;

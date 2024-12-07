@@ -12,7 +12,7 @@ final class RenderWindow extends CSFrame {
     private final RenderPanel drawPanel;
 
     public RenderWindow(RFF master, int w, int h) {
-        super("Fractal", RFFUtils.getApplicationIcon(), w, h);
+        super("RFF", RFFUtils.getApplicationIcon(), w, h);
         drawPanel = new RenderPanel(master, this);
         drawPanel.setBounds(0, 0, w, h);
         add(drawPanel);
@@ -25,8 +25,8 @@ final class RenderWindow extends CSFrame {
                 super.componentResized(e);
                 if (e.getComponent().isShowing()) {
                     Dimension size = e.getComponent().getSize();
-                    int x = size.width + X_CORRECTION_FRAME;
-                    int y = size.height + Y_CORRECTION_FRAME;
+                    int x = size.width - X_CORRECTION_FRAME;
+                    int y = size.height - Y_CORRECTION_FRAME;
 
                     drawPanel.setSize(x, y);
                     drawPanel.recompute();
@@ -34,11 +34,8 @@ final class RenderWindow extends CSFrame {
                 }
             }
         });
-
-        pack();
-
+        setVisible(true);
     }
-
 
 
     public RenderPanel getPainter() {

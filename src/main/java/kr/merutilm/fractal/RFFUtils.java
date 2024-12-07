@@ -66,6 +66,23 @@ public final class RFFUtils {
             this.name = name;
         }
     }
+
+    public enum Constants{
+        OFFSET_RATIO("Offset Ratio"),
+        OPACITY("Opacity"),
+        ;
+
+        private final String name;
+        
+        @Override
+        public String toString() {
+            return name;
+        }
+        
+        private Constants(String name){
+            this.name = name;
+        }
+    }
     
     public static void checkInvalidExtension(File file, String ext){
         if(!file.getName().endsWith("." + ext)){
