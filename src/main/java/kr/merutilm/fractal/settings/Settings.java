@@ -7,7 +7,9 @@ import kr.merutilm.base.struct.StructBuilder;
 
 public record Settings(
     CalculationSettings calculationSettings,
-    ImageSettings imageSettings
+    ImageSettings imageSettings,
+    ShaderSettings shaderSettings,
+    VideoSettings videoSettings
 ) implements Struct<Settings>{
 
     
@@ -16,13 +18,17 @@ public record Settings(
     public Builder edit() {
         return new Builder()
         .setCalculationSettings(calculationSettings)
-        .setImageSettings(imageSettings);
+        .setImageSettings(imageSettings)
+        .setShaderSettings(shaderSettings)
+        .setVideoSettings(videoSettings);
     }
 
     public static final class Builder implements StructBuilder<Settings>{
 
         private CalculationSettings calculationSettings;
         private ImageSettings imageSettings;
+        private ShaderSettings shaderSettings;
+        private VideoSettings videoSettings;
 
         public Builder setCalculationSettings(CalculationSettings calculationSettings) {
             this.calculationSettings = calculationSettings;
@@ -34,6 +40,16 @@ public record Settings(
             return this;
         }
 
+        public Builder setShaderSettings(ShaderSettings shaderSettings) {
+            this.shaderSettings = shaderSettings;
+            return this;
+        }
+        
+        public Builder setVideoSettings(VideoSettings videoSettings) {
+            this.videoSettings = videoSettings;
+            return this;
+        }
+        
         public Builder setCalculationSettings(UnaryOperator<CalculationSettings> changes) {
             this.calculationSettings = changes.apply(calculationSettings);
             return this;
@@ -44,9 +60,20 @@ public record Settings(
             return this;
         }
 
+        public Builder setShaderSettings(UnaryOperator<ShaderSettings> changes) {
+            this.shaderSettings = changes.apply(shaderSettings);
+            return this;
+        }
+
+        public Builder setVideoSettings(UnaryOperator<VideoSettings> changes) {
+            this.videoSettings = changes.apply(videoSettings);
+            return this;
+        }
+
+
         @Override
         public Settings build() {
-            return new Settings(calculationSettings, imageSettings);
+            return new Settings(calculationSettings, imageSettings, shaderSettings, videoSettings);
         }
     }
 

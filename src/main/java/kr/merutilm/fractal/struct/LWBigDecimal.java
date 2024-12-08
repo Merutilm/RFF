@@ -166,8 +166,6 @@ public class LWBigDecimal extends Number{
         return value.compareTo(BigInteger.ZERO) < 0;
     }
 
-    
-
     @Override
     public double doubleValue(){
         return value.doubleValue() * Math.pow(2, exp2);
@@ -208,6 +206,11 @@ public class LWBigDecimal extends Number{
     public int getExp2() {
         return exp2;
     }
+    
+    public int getPrecision(){
+        return exp2ToPrecision(exp2);
+    }
+
 
     @Override
     public String toString() {

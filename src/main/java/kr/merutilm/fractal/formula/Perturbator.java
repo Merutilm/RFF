@@ -64,9 +64,20 @@ public abstract class Perturbator {
             return iteration;
         }
         double ratio = (bailout - prevIterDistance) / (currIterDistance - prevIterDistance);
-        if (bailout > 2.5) {
-            ratio = Math.log(Math.log(ratio + 1) / LN2 + 1) / LN2;
+        
+        switch (calc.decimalIterationSettings()) {
+            case LINEAR -> {
+                //noop
+            }
+            case LOG -> {
+                ratio = Math.log(ratio + 1) / LN2;
+            }
+            case LOG_LOG -> {
+                ratio = Math.log(Math.log(ratio + 1) / LN2 + 1) / LN2;
+            }
+            default -> throw new IllegalArgumentException();
         }
+        
         return iteration + ratio;
     }
 

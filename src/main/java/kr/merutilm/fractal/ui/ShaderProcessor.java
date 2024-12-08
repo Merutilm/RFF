@@ -5,17 +5,17 @@ import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
 import kr.merutilm.base.exception.IllegalRenderStateException;
-import kr.merutilm.base.functions.FunctionEase;
 import kr.merutilm.base.io.BitMap;
 import kr.merutilm.base.parallel.ProcessVisualizer;
 import kr.merutilm.base.parallel.RenderState;
 import kr.merutilm.base.parallel.ShaderDispatcher;
-import kr.merutilm.base.selectable.Ease;
 import kr.merutilm.base.struct.DoubleMatrix;
 import kr.merutilm.base.struct.HexColor;
+import kr.merutilm.fractal.io.RFFMap;
 import kr.merutilm.fractal.settings.ColorSettings;
 import kr.merutilm.fractal.settings.ImageSettings;
 import kr.merutilm.fractal.settings.Settings;
+import kr.merutilm.fractal.settings.ShaderSettings;
 import kr.merutilm.fractal.settings.StripeSettings;
 import kr.merutilm.fractal.shader.Bloom;
 import kr.merutilm.fractal.shader.ColorFilter;
@@ -34,12 +34,14 @@ public class ShaderProcessor {
         Arrays.fill(iterations.getCanvas(), NOT_RENDERED);
     }
 
-    public static BufferedImage createImage(RenderState state, int currentID, DoubleMatrix iterations, Settings settings, boolean compressed) throws IllegalRenderStateException, InterruptedException{
+    public static BufferedImage createImage(RenderState state, int currentID, RFFMap map, Settings settings, boolean compressed) throws IllegalRenderStateException, InterruptedException{
         ProcessVisualizer na = ProcessVisualizer.na();
-        return createImageWithVisualizer(state, currentID, iterations, settings, compressed, new ProcessVisualizer[]{na, na, na});
+        return createImageWithVisualizer(state, currentID, map, settings, compressed, new ProcessVisualizer[]{na, na, na});
     }
-    public static BufferedImage createImageWithVisualizer(RenderState state, int currentID, DoubleMatrix iterations, Settings settings, boolean compressed, ProcessVisualizer[] visualizers) throws IllegalRenderStateException, InterruptedException{
-        
+    public static BufferedImage createImageWithVisualizer(RenderState state, int currentID, RFFMap map, Settings settings, boolean compressed, ProcessVisualizer[] visualizers) throws IllegalRenderStateException, InterruptedException{
+    
+        DoubleMatrix iterations = map.iterations();
+        settings = map.modifyToMapSettings(settings);
         int compressDivisor = getCompressDivisor(settings.imageSettings());
         int currentDivisor = compressed ? compressDivisor : 1;
 
@@ -59,8 +61,8 @@ public class ShaderProcessor {
         if (iteration == NOT_RENDERED) {
             return null;
         }
-        ColorSettings col = settings.imageSettings().colorSettings();
-        StripeSettings stp = settings.imageSettings().stripeSettings();
+        ColorSettings col = settings.shaderSettings().colorSettings();
+        StripeSettings stp = settings.shaderSettings().stripeSettings();
        
         double value = switch (col.colorSmoothing()) {
             case NONE -> (long) iteration;
@@ -77,9 +79,6 @@ public class ShaderProcessor {
         double si1 = stp.firstInterval();
         double si2 = stp.secondInterval();
         double sof = stp.offset();
-        FunctionEase ease =  Ease.INOUT_SINE.fun();
-
-        sof = (int) sof + ease.apply((sof % 1 + 1) % 1);
         
         double m = ((value - sof) % si1) * ((value - sof) % si2) / (si1 * si2);
         
@@ -93,6 +92,7 @@ public class ShaderProcessor {
 
     private static void basicShaders(RenderState state, int currentID, BitMap bitMap, DoubleMatrix iterations, Settings settings, boolean compressed, ProcessVisualizer... visualizers) throws IllegalRenderStateException, InterruptedException {
         ImageSettings img = settings.imageSettings();
+        ShaderSettings shd = settings.shaderSettings();
         ShaderDispatcher pp1 = new ShaderDispatcher(state, currentID, bitMap);
         int fitResolutionMultiplier = iterations.getWidth() / bitMap.getWidth();
 
@@ -101,8 +101,8 @@ public class ShaderProcessor {
             int iy = y * fitResolutionMultiplier;
             return getColorByIteration(settings, iterations.pipette(ix, iy));
         });
-        pp1.createRenderer(new Slope(iterations, img.slopeSettings(), img.resolutionMultiplier(), fitResolutionMultiplier));
-        pp1.createRenderer(new ColorFilter(img.colorFilterSettings()));
+        pp1.createRenderer(new Slope(iterations, shd.slopeSettings(), img.resolutionMultiplier(), fitResolutionMultiplier));
+        pp1.createRenderer(new ColorFilter(shd.colorFilterSettings()));
 
 
         if (compressed) {
@@ -115,6 +115,7 @@ public class ShaderProcessor {
     private static void postProcessing(RenderState state, int currentID, BitMap bitMap, DoubleMatrix iterations, Settings settings, boolean compressed, ProcessVisualizer... visualizers) throws IllegalRenderStateException, InterruptedException {
 
         ImageSettings img = settings.imageSettings();
+        ShaderSettings shd = settings.shaderSettings();
         int compressDivisor = getCompressDivisor(img);
 
         BitMap compressedBitMap = compressDivisor > 1 ? new BitMap(iterations.getWidth() / compressDivisor, iterations.getHeight() / compressDivisor) : bitMap;
@@ -123,7 +124,7 @@ public class ShaderProcessor {
         }
 
         ShaderDispatcher pp2 = new ShaderDispatcher(state, currentID, bitMap);
-        pp2.createRenderer(new Fog(bitMap, compressedBitMap, img.fogSettings()));
+        pp2.createRenderer(new Fog(bitMap, compressedBitMap, shd.fogSettings()));
 
 
         if (compressed) {
@@ -134,7 +135,7 @@ public class ShaderProcessor {
 
         ShaderDispatcher pp3 = new ShaderDispatcher(state, currentID, bitMap);
 
-        pp3.createRenderer(new Bloom(bitMap, compressedBitMap, img.bloomSettings()));
+        pp3.createRenderer(new Bloom(bitMap, compressedBitMap, shd.bloomSettings()));
         pp3.createRenderer((x, y, xRes, yRes, rx, ry, i, c, t) -> {
             HexColor a1 = pp3.texture2D(x, y + 1);
             HexColor a2 = pp3.texture2D(x, y - 1);

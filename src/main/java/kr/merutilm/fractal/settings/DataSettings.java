@@ -10,16 +10,16 @@ import kr.merutilm.base.struct.StructBuilder;
 import kr.merutilm.fractal.RFFUtils;
 import kr.merutilm.fractal.io.IOManager;
 
-public record VideoDataSettings(double defaultZoomIncrement) implements Struct<VideoDataSettings>{
+public record DataSettings(double defaultZoomIncrement) implements Struct<DataSettings>{
     @Override
     public Builder edit() {
         return new Builder()
         .setDefaultZoomIncrement(defaultZoomIncrement);
     }
 
-    public static final class Builder implements StructBuilder<VideoDataSettings>{
+    public static final class Builder implements StructBuilder<DataSettings>{
 
-        private double defaultZoomIncrement = 2;
+        private double defaultZoomIncrement;
 
         public Builder setDefaultZoomIncrement(double defaultZoomIncrement) {
             this.defaultZoomIncrement = defaultZoomIncrement;
@@ -28,8 +28,8 @@ public record VideoDataSettings(double defaultZoomIncrement) implements Struct<V
         
 
         @Override
-        public VideoDataSettings build() {
-            return new VideoDataSettings(defaultZoomIncrement);
+        public DataSettings build() {
+            return new DataSettings(defaultZoomIncrement);
         }
     }
 
@@ -37,7 +37,7 @@ public record VideoDataSettings(double defaultZoomIncrement) implements Struct<V
         return new File(dir, RFFUtils.DefaultFileName.VIDEO_DATA_SETTINGS + "." + RFFUtils.Extension.VIDEO_DATA_SETTINGS);
     }
 
-    public static VideoDataSettings read(File dir){
+    public static DataSettings read(File dir){
 
         File file = generateFile(dir);
         if(file == null || !file.exists()){
@@ -53,7 +53,7 @@ public record VideoDataSettings(double defaultZoomIncrement) implements Struct<V
             data = stream.readNBytes(Double.BYTES);
             double defaultZoomIncrement = IOManager.byteArrayToDouble(data);
             
-            return new VideoDataSettings(defaultZoomIncrement);
+            return new DataSettings(defaultZoomIncrement);
         }catch (IOException e) {
             throw new IllegalStateException();
         }

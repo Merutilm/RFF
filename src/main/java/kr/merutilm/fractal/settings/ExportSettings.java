@@ -3,7 +3,7 @@ package kr.merutilm.fractal.settings;
 import kr.merutilm.base.struct.Struct;
 import kr.merutilm.base.struct.StructBuilder;
 
-public record VideoExportSettings(double fps, double mps, double overZoom, double multiSampling, int bitrate) implements Struct<VideoExportSettings> {
+public record ExportSettings(double fps, double mps, double overZoom, double multiSampling, int bitrate) implements Struct<ExportSettings> {
     @Override
     public Builder edit() {
         return new Builder()
@@ -14,13 +14,13 @@ public record VideoExportSettings(double fps, double mps, double overZoom, doubl
         .setBitrate(bitrate);
     }
 
-    public static final class Builder implements StructBuilder<VideoExportSettings>{
+    public static final class Builder implements StructBuilder<ExportSettings>{
 
-        private double fps = 30;
-        private double mps = 1;
-        private double overZoom = 2;
-        private double multiSampling = 1;
-        private int bitrate = 5000;
+        private double fps;
+        private double mps;
+        private double overZoom;
+        private double multiSampling;
+        private int bitrate;
 
         public Builder setFps(double fps) {
             this.fps = fps;
@@ -48,8 +48,8 @@ public record VideoExportSettings(double fps, double mps, double overZoom, doubl
         }
 
         @Override
-        public VideoExportSettings build() {
-            return new VideoExportSettings(fps, mps, overZoom, multiSampling, bitrate);
+        public ExportSettings build() {
+            return new ExportSettings(fps, mps, overZoom, multiSampling, bitrate);
         }
     }
 }

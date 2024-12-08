@@ -13,6 +13,7 @@ public record CalculationSettings(
         double logZoom,
         long maxIteration,
         double bailout,
+        DecimalIterationSettings decimalIterationSettings,
         LWBigComplex center,
         boolean autoIteration,
         ReuseReferenceSettings reuseReference,
@@ -27,6 +28,7 @@ public record CalculationSettings(
                 .setLogZoom(logZoom)
                 .setMaxIteration(maxIteration)
                 .setBailout(bailout)
+                .setDecimalIterationSettings(decimalIterationSettings)
                 .setCenter(center)
                 .setAutoIteration(autoIteration)
                 .setReuseReference(reuseReference)
@@ -38,6 +40,7 @@ public record CalculationSettings(
         private double logZoom;
         private long maxIteration;
         private double bailout;
+        private DecimalIterationSettings decimalIterationSettings;
         private LWBigComplex center;
         private boolean autoIteration;
         private ReuseReferenceSettings reuseReference;
@@ -68,6 +71,11 @@ public record CalculationSettings(
             return this;
         }
 
+        public Builder setDecimalIterationSettings(DecimalIterationSettings decimalIterationSettings) {
+            this.decimalIterationSettings = decimalIterationSettings;
+            return this;
+        }
+
         public Builder setReuseReference(ReuseReferenceSettings reuseReference) {
             this.reuseReference = reuseReference;
             return this;
@@ -88,22 +96,11 @@ public record CalculationSettings(
             return this;
         }
 
-        public Builder setCenter(UnaryOperator<LWBigComplex> changes) {
-            this.center = changes.apply(center);
-            return this;
-        }
-        public Builder setAutoIteration(UnaryOperator<Boolean> changes) {
-            this.autoIteration = changes.apply(autoIteration);
-            return this;
-        }
         public Builder setBLASettings(UnaryOperator<BLASettings> changes) {
             this.blaSettings = changes.apply(blaSettings);
             return this;
         }
-        public Builder setReuseReference(UnaryOperator<ReuseReferenceSettings> changes) {
-            this.reuseReference = changes.apply(reuseReference);
-            return this;
-        }
+
         public Builder zoomIn(double v) {
             logZoom += v;
             return this;
@@ -135,7 +132,7 @@ public record CalculationSettings(
 
         @Override
         public CalculationSettings build() {
-            return new CalculationSettings(logZoom, maxIteration, bailout, center, autoIteration, reuseReference, blaSettings);
+            return new CalculationSettings(logZoom, maxIteration, bailout, decimalIterationSettings, center, autoIteration, reuseReference, blaSettings);
         }
     }
 

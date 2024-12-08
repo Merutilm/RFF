@@ -1,5 +1,6 @@
 package kr.merutilm.fractal.ui;
 
+import kr.merutilm.customswing.CSButton;
 import kr.merutilm.fractal.settings.CalculationSettings;
 import kr.merutilm.fractal.settings.ImageSettings;
 import kr.merutilm.fractal.settings.Settings;
@@ -16,8 +17,7 @@ import java.util.function.UnaryOperator;
  */
 final class RFF {
 
-    private final RenderWindow fractalRenderWindow;
-    private final StatusWindow fractalStatusWindow;
+    private final RFFWindow window;
 
     private static final int INIT_WIDTH = 1280;
     private static final int INIT_HEIGHT = 720;
@@ -28,17 +28,11 @@ final class RFF {
     private Settings settings = theme.generate();
 
     public RFF() {
-        this.fractalStatusWindow = new StatusWindow(this);
-        this.fractalRenderWindow = new RenderWindow(this, INIT_WIDTH, INIT_HEIGHT);
-        fractalStatusWindow.setLocation((int)fractalRenderWindow.getLocation().getX() + (int)fractalRenderWindow.getSize().getWidth(), 0);
+        this.window = new RFFWindow(this, INIT_WIDTH, INIT_HEIGHT + CSButton.BUTTON_HEIGHT * 2);
     }
 
-    public RenderWindow getFractalRender() {
-        return fractalRenderWindow;
-    }
-
-    public StatusWindow getFractalStatus() {
-        return fractalStatusWindow;
+    public RFFWindow getWindow() {
+        return window;
     }
 
     public Settings getSettings() {

@@ -24,6 +24,7 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.Java2DFrameConverter;
 
 import kr.merutilm.base.exception.IllegalRenderStateException;
+import kr.merutilm.base.functions.FunctionEase;
 import kr.merutilm.base.parallel.DoubleArrayDispatcher;
 import kr.merutilm.base.parallel.RenderState;
 import kr.merutilm.base.struct.DoubleMatrix;
@@ -36,8 +37,9 @@ import kr.merutilm.customswing.CSPanel;
 import kr.merutilm.fractal.RFFUtils;
 import kr.merutilm.fractal.io.RFFMap;
 import kr.merutilm.fractal.settings.Settings;
-import kr.merutilm.fractal.settings.VideoDataSettings;
-import kr.merutilm.fractal.settings.VideoExportSettings;
+import kr.merutilm.fractal.settings.AnimationSettings;
+import kr.merutilm.fractal.settings.DataSettings;
+import kr.merutilm.fractal.settings.ExportSettings;
 
 public final class VideoRenderWindow extends CSFrame{
 
@@ -94,11 +96,12 @@ public final class VideoRenderWindow extends CSFrame{
         setVisible(true);
     }
 
-    public static void createVideo(Settings settings, VideoExportSettings videoSettings, double stripeAnimationSpeed,
-            File dir, File out) {
-        double fps = videoSettings.fps();
-        double frameInterval = videoSettings.mps() / fps;
-        VideoDataSettings vds = VideoDataSettings.read(dir);
+    public static void createVideo(Settings settings, File dir, File out) {
+                
+        ExportSettings exportSettings = settings.videoSettings().exportSettings();
+        double fps = exportSettings.fps();
+        double frameInterval = exportSettings.mps() / fps;
+        DataSettings vds = DataSettings.read(dir);
         
         RenderState state = new RenderState();
         int currentID = state.getId();
@@ -111,7 +114,7 @@ public final class VideoRenderWindow extends CSFrame{
         DoubleMatrix targetMatrix = targetMap.iterations();
         int imgWidth; 
         int imgHeight;
-        double multiplier = videoSettings.multiSampling();
+        double multiplier = exportSettings.multiSampling();
 
         imgWidth = (int)(targetMatrix.getWidth() * multiplier);            
         imgHeight = (int)(targetMatrix.getHeight() * multiplier);
@@ -125,12 +128,12 @@ public final class VideoRenderWindow extends CSFrame{
                 RFFMap frame;
                 avutil.av_log_set_level(avutil.AV_LOG_QUIET);
                 int maxNumber = RFFUtils.generateFileNameNumber(dir, RFFUtils.Extension.MAP.toString()) - 1;
-                double minNumber = -videoSettings.overZoom();
+                double minNumber = -exportSettings.overZoom();
                 double currentFrameNumber = maxNumber;
                 recorder.setFrameRate(fps);
                 recorder.setVideoQuality(0); // maximum quality  
                 recorder.setFormat("mp4");
-                recorder.setVideoBitrate(videoSettings.bitrate());
+                recorder.setVideoBitrate(exportSettings.bitrate());
                 recorder.start(); 
                 double m = Math.min((double) VIDEO_PREVIEW_WINDOW_MAX_LEN / imgWidth, (double) VIDEO_PREVIEW_WINDOW_MAX_LEN / imgHeight);
                 double currentSec = 0;
@@ -147,14 +150,13 @@ public final class VideoRenderWindow extends CSFrame{
 
                     frame = getFrame(state, currentID, dir, currentFrameNumber, vds.defaultZoomIncrement(), multiplier);
 
-                    Settings settingsModified = modifyToImageSettings(frame, settings,
-                            stripeAnimationSpeed * currentSec);
+                    Settings settingsModified = modifyToVideoSettings(frame, settings, currentSec);
                     
-                    window.setImage(ShaderProcessor.createImage(state, currentID, frame.iterations(), settingsModified, false));
+                    window.setImage(ShaderProcessor.createImage(state, currentID, frame, settingsModified, false));
                     
                     Java2DFrameConverter.copy(window.img, f);
                     recorder.record(f, avutil.AV_PIX_FMT_ABGR);
-                    double progressRatio = (maxNumber - currentFrameNumber) / (maxNumber + videoSettings.overZoom());
+                    double progressRatio = (maxNumber - currentFrameNumber) / (maxNumber + exportSettings.overZoom());
                     long spent = System.currentTimeMillis() - startMillis;
                     long remained = (long)((1 - progressRatio) / progressRatio * spent);
 
@@ -177,11 +179,15 @@ public final class VideoRenderWindow extends CSFrame{
         
     }
 
-    private static Settings modifyToImageSettings(RFFMap frame, Settings settings, double stripeOffset) {
+    private static Settings modifyToVideoSettings(RFFMap frame, Settings settings, double currentSec) {
+        AnimationSettings animation = settings.videoSettings().animationSettings();
+        double sof = currentSec * animation.stripeAnimationSpeed();
+        FunctionEase ease = animation.stripeAnimationEase().fun();
+
         return frame.modifyToMapSettings(settings).edit()
-                .setImageSettings(e -> e.edit()
+                .setShaderSettings(e -> e.edit()
                         .setStripeSettings(e1 -> e1.edit()
-                                .setOffset(stripeOffset)
+                                .setOffset((int) Math.floor(sof) + ease.apply((sof % 1 + 1) % 1))
                                 .build())
                         .build())
                 .build();
