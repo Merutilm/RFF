@@ -9,8 +9,6 @@ import kr.merutilm.base.parallel.ProcessVisualizer;
 import kr.merutilm.base.parallel.RenderState;
 import kr.merutilm.base.struct.DoubleMatrix;
 import kr.merutilm.base.util.TaskManager;
-import kr.merutilm.customswing.CSPanel;
-import kr.merutilm.fractal.RFFUtils;
 import kr.merutilm.fractal.formula.DeepMandelbrotPerturbator;
 import kr.merutilm.fractal.formula.LightMandelbrotPerturbator;
 import kr.merutilm.fractal.formula.MandelbrotPerturbator;
@@ -27,16 +25,14 @@ import kr.merutilm.fractal.util.LabelTextUtils;
 import static kr.merutilm.fractal.theme.BasicTheme.INIT_ITERATION;
 
 import java.awt.*;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntConsumer;
 
-final class RFFRenderer extends CSPanel {
+final class RFFRenderer extends JPanel {
     private final transient RenderState state = new RenderState();
 
     private transient BufferedImage currentImage;
@@ -47,54 +43,16 @@ final class RFFRenderer extends CSPanel {
     private static final double EXP_DEADLINE = 290;
     private static final String FINISHING_TEXT = "Finishing... ";
 
-    private int lastPeriod = 1;
+    private int period = 1;
 
-    public RFFRenderer(RFF master, RFFWindow window) {
-        super(window);
+    public RFFRenderer(RFF master) {
         this.master = master;
         setBackground(Color.BLACK);
-        addListeners(window);
+        addListeners();
     }
 
+    private void addListeners() {
 
-    private int getImgWidth() {
-        ImageSettings img = master.getSettings().imageSettings();
-        return (int) (getWidth() * img.resolutionMultiplier());
-    }
-
-    private int getImgHeight() {
-        ImageSettings img = master.getSettings().imageSettings();
-        return (int) (getHeight() * img.resolutionMultiplier());
-    }
-
-    private int getMouseX(MouseEvent e) {
-        ImageSettings img = master.getSettings().imageSettings();
-        return (int) (e.getX() * img.resolutionMultiplier());
-    }
-
-    private int getMouseY(MouseEvent e) {
-        ImageSettings img = master.getSettings().imageSettings();
-        return (int) (e.getY() * img.resolutionMultiplier());
-    }
-
-
-
-    private void addListeners(RFFWindow window) {
-
-        window.addKeyListener(() -> {
-
-            File defOpen = new File(RFFUtils.getOriginalResource(), RFFUtils.DefaultDirectory.MAP_AS_VIDEO_DATA.toString());
-            File selected = defOpen.isDirectory() ? defOpen : RFFUtils.selectFolder("Select Sample Folder");
-            if(selected == null){
-                return;
-            }
-            File toSave = defOpen.isDirectory() ? new File(defOpen, RFFUtils.DefaultFileName.VIDEO + ".mp4") : RFFUtils.saveFile("Export", "mp4", "video");
-            if(toSave == null){
-                return;
-            }
-            VideoRenderWindow.createVideo(master.getSettings(), selected, toSave);
-           
-        }, KeyEvent.VK_V, true, true);
         addMouseWheelListener(new MouseAdapter() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
@@ -188,6 +146,27 @@ final class RFFRenderer extends CSPanel {
 
 
 
+    private int getImgWidth() {
+        ImageSettings img = master.getSettings().imageSettings();
+        return (int) (getWidth() * img.resolutionMultiplier());
+    }
+
+    private int getImgHeight() {
+        ImageSettings img = master.getSettings().imageSettings();
+        return (int) (getHeight() * img.resolutionMultiplier());
+    }
+
+    private int getMouseX(MouseEvent e) {
+        ImageSettings img = master.getSettings().imageSettings();
+        return (int) (e.getX() * img.resolutionMultiplier());
+    }
+
+    private int getMouseY(MouseEvent e) {
+        ImageSettings img = master.getSettings().imageSettings();
+        return (int) (e.getY() * img.resolutionMultiplier());
+    }
+
+
 
 
     private DoubleExponent getDivisor() {
@@ -231,7 +210,7 @@ final class RFFRenderer extends CSPanel {
         int h = getImgHeight();
         
         if (master.getSettings().calculationSettings().autoIteration()) {
-            master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit().setMaxIteration(Math.max(INIT_ITERATION, lastPeriod * 50L)).build()).build());
+            master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit().setMaxIteration(Math.max(INIT_ITERATION, period * 50L)).build()).build());
         }
         
         Settings settings = master.getSettings();
@@ -315,10 +294,8 @@ final class RFFRenderer extends CSPanel {
                 return currentPerturbator.iterate(dc[0], dc[1]);
             });
 
-            int period = currentPerturbator.getReference().period();
+            period = currentPerturbator.getReference().period();
             panel.setPeriodText(period);
-            setPeriodDirectly(period);
-
             panel.setProcess("Preparing...");
             generator.process(p -> {
 
@@ -364,10 +341,6 @@ final class RFFRenderer extends CSPanel {
 
     public void waitUntilRenderEnds() throws InterruptedException {
         currentThread.join();
-    }
-
-    public void setPeriodDirectly(int period) {
-        this.lastPeriod = period;
     }
 
 

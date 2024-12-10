@@ -1,6 +1,8 @@
 package kr.merutilm.fractal.ui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.WindowAdapter;
@@ -12,7 +14,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.WindowConstants;
 import javax.swing.border.LineBorder;
@@ -31,9 +35,6 @@ import kr.merutilm.base.struct.DoubleMatrix;
 import kr.merutilm.base.util.AdvancedMath;
 import kr.merutilm.base.util.ConsoleUtils;
 import kr.merutilm.base.util.TaskManager;
-import kr.merutilm.customswing.CSButton;
-import kr.merutilm.customswing.CSFrame;
-import kr.merutilm.customswing.CSPanel;
 import kr.merutilm.fractal.RFFUtils;
 import kr.merutilm.fractal.io.RFFMap;
 import kr.merutilm.fractal.settings.Settings;
@@ -41,27 +42,30 @@ import kr.merutilm.fractal.settings.AnimationSettings;
 import kr.merutilm.fractal.settings.DataSettings;
 import kr.merutilm.fractal.settings.ExportSettings;
 
-public final class VideoRenderWindow extends CSFrame{
+public final class VideoRenderWindow extends JFrame{
 
     private static final int VIDEO_PREVIEW_WINDOW_MAX_LEN = 640;
     
-    private final CSPanel panel;
+    private final JPanel panel;
     private final JProgressBar bar;
     private transient BufferedImage img;
 
     private VideoRenderWindow(int imageWidth, int imageHeight){
-        super("Preview Video", RFFUtils.getApplicationIcon(), imageWidth, imageHeight + CSButton.BUTTON_HEIGHT);
+        super("Preview Video");
+        setIconImage(RFFUtils.getApplicationIcon());
+        setPreferredSize(new Dimension(imageWidth, imageHeight + MUI.UI_HEIGHT));
+        setLayout(new BorderLayout());
+
         RenderState state = new RenderState();
-        
-        this.panel = new CSPanel(this){
+
+        this.panel = new JPanel(){
             @Override
             public void paint(Graphics g) {
                 super.paint(g);
                 g.drawImage(img, 0, 0, imageWidth, imageHeight, null);
             }
         };
-        panel.setBounds(0, 0, imageWidth, imageHeight);
-        add(panel);
+        
         this.bar = new JProgressBar();
         bar.setLayout(null);
         bar.setBackground(new Color(40,40,40));
@@ -78,14 +82,17 @@ public final class VideoRenderWindow extends CSFrame{
             }
         });
         bar.setBorder(new LineBorder(Color.BLACK));
-        bar.setBounds(0, imageHeight, imageWidth, CSButton.BUTTON_HEIGHT);
         bar.setMaximum(10000);
         bar.setStringPainted(true);
         bar.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
-        add(bar);
+
+
+        add(panel, BorderLayout.CENTER);
+        add(bar, BorderLayout.SOUTH);
         setResizable(false);
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         getContentPane().setBackground(Color.BLACK);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
         addWindowListener(new WindowAdapter(){
             @Override
             public void windowClosing(WindowEvent e){
@@ -93,6 +100,7 @@ public final class VideoRenderWindow extends CSFrame{
             }
         });
         
+        pack();
         setVisible(true);
     }
 

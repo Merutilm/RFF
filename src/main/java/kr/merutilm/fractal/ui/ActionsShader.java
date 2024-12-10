@@ -19,14 +19,14 @@ enum ActionsShader implements Actions {
             ActionsExplore.REFRESH_COLOR.accept(master);
         };
 
-        panel.createTextInput("Color Pulse Interval", null, color.iterationInterval(), Double::parseDouble, e -> 
+        panel.createTextInput("Color Pulse Interval", color.iterationInterval(), Double::parseDouble, e -> 
             applier.accept(f -> f.setIterationInterval(e))
         );
-        panel.createTextInput(RFFUtils.Constants.OFFSET_RATIO.toString(), null, color.offsetRatio(), Double::parseDouble, e ->
+        panel.createTextInput(RFFUtils.Constants.OFFSET_RATIO.toString(), color.offsetRatio(), Double::parseDouble, e ->
             applier.accept(f -> f.setOffsetRatio(e))
         );
-        panel.createSelectInput("Color Smoothing", null, color.colorSmoothing(), ColorSmoothingSettings.values(), e ->
-            applier.accept(f -> f.setColorSmoothing(e))
+        panel.createSelectInput("Color Smoothing", color.colorSmoothing(), ColorSmoothingSettings.values(), e ->
+            applier.accept(f -> f.setColorSmoothing(e)), false
         );
     })),
 
@@ -38,19 +38,20 @@ enum ActionsShader implements Actions {
             ActionsExplore.REFRESH_COLOR.accept(master);
         };
 
-        panel.createBoolInput("Use", null, color.use(), e -> 
+
+        panel.createBoolInput("Use", color.use(), e -> 
             applier.accept(f -> f.setUse(e))
         );
-        panel.createTextInput("First Interval", null, color.firstInterval(), Double::parseDouble, e -> 
+        panel.createTextInput("First Interval", color.firstInterval(), Double::parseDouble, e -> 
             applier.accept(f -> f.setFirstInterval(e))
         );
-        panel.createTextInput("Secondary Interval", null, color.secondInterval(), Double::parseDouble, e ->
+        panel.createTextInput("Secondary Interval", color.secondInterval(), Double::parseDouble, e ->
             applier.accept(f -> f.setSecondInterval(e))
         );
-        panel.createTextInput(RFFUtils.Constants.OPACITY.toString(), null, color.opacity(), Double::parseDouble, e ->
+        panel.createTextInput(RFFUtils.Constants.OPACITY.toString(), color.opacity(), Double::parseDouble, e ->
             applier.accept(f -> f.setOpacity(e))
         );
-        panel.createTextInput(RFFUtils.Constants.OFFSET_RATIO.toString(), null, color.offset(), Double::parseDouble, e ->
+        panel.createTextInput(RFFUtils.Constants.OFFSET_RATIO.toString(), color.offset(), Double::parseDouble, e ->
             applier.accept(f -> f.setOffset(e))
         );
     })),
@@ -62,19 +63,19 @@ enum ActionsShader implements Actions {
             ActionsExplore.REFRESH_COLOR.accept(master);
         };
 
-        panel.createTextInput("Depth", null, slope.depth(), Double::parseDouble, e -> 
+        panel.createTextInput("Depth", slope.depth(), Double::parseDouble, e -> 
             applier.accept(f -> f.setDepth(e))
         );
-        panel.createTextInput("Reflection Ratio", null, slope.reflectionRatio(), Double::parseDouble, e -> 
+        panel.createTextInput("Reflection Ratio", slope.reflectionRatio(), Double::parseDouble, e -> 
             applier.accept(f -> f.setReflectionRatio(e))
         );
-        panel.createTextInput(RFFUtils.Constants.OPACITY.toString(), null, slope.opacity(), Double::parseDouble, e -> 
+        panel.createTextInput(RFFUtils.Constants.OPACITY.toString(), slope.opacity(), Double::parseDouble, e -> 
         	applier.accept(f -> f.setOpacity(e))
         );
-        panel.createTextInput("Zenith", null, slope.zenith(), Double::parseDouble, e -> 
+        panel.createTextInput("Zenith", slope.zenith(), Double::parseDouble, e -> 
             applier.accept(f -> f.setZenith(e))
         );
-        panel.createTextInput("Azimuth", null, slope.azimuth(), Double::parseDouble, e -> 
+        panel.createTextInput("Azimuth", slope.azimuth(), Double::parseDouble, e -> 
             applier.accept(f -> f.setAzimuth(e))
         );
 
@@ -89,19 +90,19 @@ enum ActionsShader implements Actions {
                 ActionsExplore.REFRESH_COLOR.accept(master);
             };
     
-            panel.createTextInput("Gamma", null, colorFilter.gamma(), Double::parseDouble, e -> 
+            panel.createTextInput("Gamma", colorFilter.gamma(), Double::parseDouble, e -> 
                 applier.accept(f -> f.setGamma(e))
             );
-            panel.createTextInput("Exposure", null, colorFilter.exposure(), Double::parseDouble, e -> 
+            panel.createTextInput("Exposure", colorFilter.exposure(), Double::parseDouble, e -> 
                 applier.accept(f -> f.setExposure(e))        
             );
-            panel.createTextInput("Saturation", null, colorFilter.saturation(), Double::parseDouble, e -> 
+            panel.createTextInput("Saturation", colorFilter.saturation(), Double::parseDouble, e -> 
                    applier.accept(f -> f.setSaturation(e))
             );
-            panel.createTextInput("Brightness", null, colorFilter.brightness(), Double::parseDouble, e -> 
+            panel.createTextInput("Brightness", colorFilter.brightness(), Double::parseDouble, e -> 
                 applier.accept(f -> f.setBrightness(e))
             );
-            panel.createTextInput("Contrast", null, colorFilter.contrast(), Double::parseDouble, e -> 
+            panel.createTextInput("Contrast", colorFilter.contrast(), Double::parseDouble, e -> 
                 applier.accept(f -> f.setContrast(e))
             );
         })
@@ -114,10 +115,10 @@ enum ActionsShader implements Actions {
             ActionsExplore.REFRESH_COLOR.accept(master);
         };
 
-        panel.createTextInput("Radius", null, fog.radius(), Double::parseDouble, e -> 
+        panel.createTextInput("Radius", fog.radius(), Double::parseDouble, e -> 
         	applier.accept(f -> f.setRadius(e))
         );
-        panel.createTextInput(RFFUtils.Constants.OPACITY.toString(), null, fog.opacity(), Double::parseDouble, e -> 
+        panel.createTextInput(RFFUtils.Constants.OPACITY.toString(), fog.opacity(), Double::parseDouble, e -> 
         	applier.accept(f -> f.setOpacity(e))
         );
     })),
@@ -129,17 +130,16 @@ enum ActionsShader implements Actions {
             ActionsExplore.REFRESH_COLOR.accept(master);
         };
 
-        panel.createTextInput("Threshold", null, bloom.threshold(), Double::parseDouble, e -> 
+        panel.createTextInput("Threshold", bloom.threshold(), Double::parseDouble, e -> 
         	applier.accept(f -> f.setThreshold(e))
         );
-        panel.createTextInput("Radius", 
-        null, bloom.radius(), Double::parseDouble, e -> 
+        panel.createTextInput("Radius", bloom.radius(), Double::parseDouble, e -> 
         	applier.accept(f -> f.setRadius(e))
         );
-        panel.createTextInput("Softness", null, bloom.softness(), Double::parseDouble, e -> 
+        panel.createTextInput("Softness", bloom.softness(), Double::parseDouble, e -> 
         	applier.accept(f -> f.setSoftness(e))
         );
-        panel.createTextInput("Intensity", null, bloom.intensity(), Double::parseDouble, e -> 
+        panel.createTextInput("Intensity", bloom.intensity(), Double::parseDouble, e -> 
         	applier.accept(f -> f.setIntensity(e))
         );
     }));

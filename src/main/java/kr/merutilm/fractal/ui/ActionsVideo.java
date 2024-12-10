@@ -23,7 +23,7 @@ enum ActionsVideo implements Actions {
         Consumer<UnaryOperator<DataSettings.Builder>> applier = e -> 
             master.setSettings(e1 -> e1.edit().setVideoSettings(e2 -> e2.edit().setDataSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
 
-        panel.createTextInput("Default Zoom Increment", null, data.defaultZoomIncrement(), Double::parseDouble, e -> 
+        panel.createTextInput("Default Zoom Increment", data.defaultZoomIncrement(), Double::parseDouble, e -> 
             applier.accept(f -> f.setDefaultZoomIncrement(e))
         );
     })),
@@ -34,9 +34,9 @@ enum ActionsVideo implements Actions {
         Consumer<UnaryOperator<AnimationSettings.Builder>> applier = e -> 
             master.setSettings(e1 -> e1.edit().setVideoSettings(e2 -> e2.edit().setAnimationSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
 
-        panel.createSelectInput("Animation Ease", null, animation.stripeAnimationEase(), Ease.values(), e -> 
-            applier.accept(f -> f.setStripeAnimationEase(e)));
-        panel.createTextInput("Animation Speed", null, animation.stripeAnimationSpeed(), Double::parseDouble, e -> 
+        panel.createSelectInput("Animation Ease", animation.stripeAnimationEase(), Ease.values(), e -> 
+            applier.accept(f -> f.setStripeAnimationEase(e)), true);
+        panel.createTextInput("Animation Speed", animation.stripeAnimationSpeed(), Double::parseDouble, e -> 
             applier.accept(f -> f.setStripeAnimationSpeed(e))
         );
     })),
@@ -47,19 +47,19 @@ enum ActionsVideo implements Actions {
         Consumer<UnaryOperator<ExportSettings.Builder>> applier = e -> 
             master.setSettings(e1 -> e1.edit().setVideoSettings(e2 -> e2.edit().setExportSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
 
-        panel.createTextInput("FPS", null, export.fps(), Double::parseDouble, e -> 
+        panel.createTextInput("FPS",export.fps(), Double::parseDouble, e -> 
             applier.accept(f -> f.setFps(e))
         );
-        panel.createTextInput("MPS", null, export.mps(), Double::parseDouble, e -> 
+        panel.createTextInput("MPS", export.mps(), Double::parseDouble, e -> 
             applier.accept(f -> f.setMps(e))
         );
-        panel.createTextInput("Over Zoom", null, export.overZoom(), Double::parseDouble, e -> 
+        panel.createTextInput("Over Zoom", export.overZoom(), Double::parseDouble, e -> 
         	applier.accept(f -> f.setOverZoom(e))
         );
-        panel.createTextInput("Multi Sampling", null, export.multiSampling(), Double::parseDouble, e -> 
+        panel.createTextInput("Multi Sampling", export.multiSampling(), Double::parseDouble, e -> 
             applier.accept(f -> f.setMultiSampling(e))
         );
-        panel.createTextInput("Bitrate", null, export.bitrate(), Integer::parseInt, e -> 
+        panel.createTextInput("Bitrate", export.bitrate(), Integer::parseInt, e -> 
             applier.accept(f -> f.setBitrate(e))
         );
     })),
@@ -103,7 +103,19 @@ enum ActionsVideo implements Actions {
         }catch(IOException e){
             ConsoleUtils.logError(e);
         }
-    })
+    }),
+    EXPORT_ZOOMING_VIDEO("Export Zooming Video", (master, name) -> {
+        File defOpen = new File(RFFUtils.getOriginalResource(), RFFUtils.DefaultDirectory.MAP_AS_VIDEO_DATA.toString());
+            File selected = defOpen.isDirectory() ? defOpen : RFFUtils.selectFolder("Select Sample Folder");
+            if(selected == null){
+                return;
+            }
+            File toSave = defOpen.isDirectory() ? new File(defOpen, RFFUtils.DefaultFileName.VIDEO + ".mp4") : RFFUtils.saveFile(name, "mp4", "video");
+            if(toSave == null){
+                return;
+            }
+            VideoRenderWindow.createVideo(master.getSettings(), selected, toSave);
+    }),
     ;
    
 

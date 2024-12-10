@@ -1,9 +1,12 @@
 package kr.merutilm.fractal.theme;
 
 import javax.annotation.Nullable;
+
+import kr.merutilm.base.selectable.Selectable;
+
 import java.util.Arrays;
 
-public enum BasicThemes {
+public enum BasicThemes implements Selectable{
     CLASSIC_1(new ThemeClassic1()),
     CLASSIC_2(new ThemeClassic2()),
     RAINBOW(new ThemeRainbow()),

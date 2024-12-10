@@ -7,7 +7,7 @@ import kr.merutilm.fractal.struct.LWBigComplex;
 public interface BasicTheme extends Theme {
 
     double INIT_MULTIPLIER = 1;
-    long INIT_ITERATION = 3000;
+    long INIT_ITERATION = 300;
     double INIT_LOG_ZOOM = 2;
     double INIT_BAILOUT = 2;
     DecimalIterationSettings INIT_DECIMAL_ITERATION = DecimalIterationSettings.LINEAR;

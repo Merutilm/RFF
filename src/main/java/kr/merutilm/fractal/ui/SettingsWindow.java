@@ -1,29 +1,29 @@
 package kr.merutilm.fractal.ui;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.util.function.Consumer;
 
-import kr.merutilm.customswing.CSFrame;
-import kr.merutilm.customswing.CSPanel;
-import kr.merutilm.customswing.CSValueInputGroupPanel;
-import kr.merutilm.customswing.CSValueInputGroupPanel.InputType;
+import javax.swing.JFrame;
 import kr.merutilm.fractal.RFFUtils;
 
-final class SettingsWindow extends CSFrame{
+final class SettingsWindow extends JFrame{
     public static final int WIDTH = 400;
-    public static final int MAX_HEIGHT = 600;
 
-    public SettingsWindow(String name, Consumer<CSValueInputGroupPanel> ui){
-        super(name, RFFUtils.getApplicationIcon(), WIDTH, MAX_HEIGHT);
-        CSPanel target = new CSPanel(this);
-        target.setBounds(0, 0, WIDTH, MAX_HEIGHT);
-        CSValueInputGroupPanel panel = new CSValueInputGroupPanel(this, target, "", InputType.VERTICAL, false);
+    public SettingsWindow(String name, Consumer<MSettingElementsPanel> ui){
+        super(name);
+        setIconImage(RFFUtils.getApplicationIcon());
+        setLayout(new BorderLayout());
+        
+        MSettingElementsPanel panel = new MSettingElementsPanel();
         ui.accept(panel);
-        target.add(panel);
-        setStrictBounds(0, 0, panel.getWidth(), panel.getHeight());
+        panel.refresh();
+        add(panel);
         setAlwaysOnTop(true);
         setLocationRelativeTo(null);
+        setPreferredSize(new Dimension(WIDTH, MUI.UI_HEIGHT * panel.getComponentCount()));
         setResizable(false);
-        add(target);
+        pack();
         setVisible(true);
     }
     

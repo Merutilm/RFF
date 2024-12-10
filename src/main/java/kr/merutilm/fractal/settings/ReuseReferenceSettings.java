@@ -1,6 +1,8 @@
 package kr.merutilm.fractal.settings;
 
-public enum ReuseReferenceSettings {
+import kr.merutilm.base.selectable.Selectable;
+
+public enum ReuseReferenceSettings implements Selectable{
     /**
      * Reuse current reference
      */

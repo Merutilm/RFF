@@ -1,6 +1,5 @@
 package kr.merutilm.fractal.ui;
 
-import kr.merutilm.customswing.CSButton;
 import kr.merutilm.fractal.settings.CalculationSettings;
 import kr.merutilm.fractal.settings.ImageSettings;
 import kr.merutilm.fractal.settings.Settings;
@@ -9,6 +8,9 @@ import kr.merutilm.fractal.theme.BasicThemes;
 import kr.merutilm.fractal.theme.Theme;
 
 import java.util.function.UnaryOperator;
+
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 
 /**
@@ -27,8 +29,9 @@ final class RFF {
     private Theme theme = DEFAULT_THEME.getTheme();
     private Settings settings = theme.generate();
 
-    public RFF() {
-        this.window = new RFFWindow(this, INIT_WIDTH, INIT_HEIGHT + CSButton.BUTTON_HEIGHT * 2);
+    public RFF() throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException{
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        this.window = new RFFWindow(this, INIT_WIDTH, INIT_HEIGHT);
     }
 
     public RFFWindow getWindow() {
@@ -68,7 +71,7 @@ final class RFF {
     }
     
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         new RFF();
     }
 

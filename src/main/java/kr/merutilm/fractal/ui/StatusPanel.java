@@ -1,50 +1,59 @@
 package kr.merutilm.fractal.ui;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
+import java.awt.GridLayout;
 
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-
+import javax.swing.border.BevelBorder;
 import kr.merutilm.base.util.AdvancedMath;
-import kr.merutilm.customswing.CSPanel;
 
-class StatusPanel extends CSPanel{
+class StatusPanel extends JPanel {
     
-    private final CSPanel iteration;
-    private final CSPanel zoom;
-    private final CSPanel period;
-    private final CSPanel progress;
-    private final CSPanel time;
+    private final MLabelPanel iteration;
+    private final MLabelPanel zoom;
+    private final MLabelPanel period;
+    private final MLabelPanel time;
+    private final MLabelPanel progress;
+    private static final String SPACE = "  ";
     private long t = 0;
 
-    public StatusPanel(RFFWindow window){
-        super(window);
+    public StatusPanel() {
 
-        iteration = new CSPanel(window);
-        zoom = new CSPanel(window);
-        period = new CSPanel(window);
-        progress = new CSPanel(window);
-        time = new CSPanel(window);    
+        setLayout(new GridLayout(1, 5));
+        iteration = new MLabelPanel();
+        zoom = new MLabelPanel();
+        period = new MLabelPanel();
+        time = new MLabelPanel();
+        progress = new MLabelPanel();
 
-        add(iteration);
-        add(zoom);
-        add(period);
-        add(progress);
-        add(time);
+        initPanel(iteration);
+        initPanel(zoom);
+        initPanel(period);
+        initPanel(time);
+        initPanel(progress);
     }
 
+    private void initPanel(MLabelPanel panel) {
+        panel.getNameLabel().setHorizontalAlignment(SwingConstants.LEFT);
+        panel.getNameLabel().setFont(MUI.DEFAULT_FONT);
+        panel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+        add(panel);
+    }
     public void setIterationText(long it) {
         String text = (it == -1 ? "?" : String.valueOf(it));
-        iteration.getNameLabel().setText(text);
+        iteration.getNameLabel().setText(SPACE + "Iterations : " + text);
     }
 
     public void setZoomText(double logZoom) {
         String text = AdvancedMath.fixDouble(Math.pow(10, logZoom % 1)) + "E-" + (int) logZoom;
-        zoom.getNameLabel().setText(text);
+        zoom.getNameLabel().setText(SPACE + "Zoom : " + text);
     }
 
     public void setPeriodText(int period) {
         String text = String.valueOf(period);
-        this.period.getNameLabel().setText(text);
+        this.period.getNameLabel().setText(SPACE + "Period : " + text);
     }
 
     public void initTime() {
@@ -55,21 +64,11 @@ class StatusPanel extends CSPanel{
         long ms = System.currentTimeMillis() - t;
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-        time.getNameLabel().setText(sdf.format(ms));
+        time.getNameLabel().setText(SPACE + "Time : " + sdf.format(ms));
     }
 
     public void setProcess(String v) {
-        SwingUtilities.invokeLater(() -> progress.getNameLabel().setText(v));
+        SwingUtilities.invokeLater(() -> progress.getNameLabel().setText(SPACE + v));
     }
 
-
-    @Override
-    public void setBounds(int x, int y, int w, int h) {
-        super.setBounds(x, y, w, h);
-        iteration.setBounds(0, 0, w / 5, h);
-        zoom.setBounds(w / 5, 0, w / 5, h);
-        period.setBounds(2 * w / 5, 0, w / 5, h);
-        progress.setBounds(3 * w / 5, 0, w / 5, h);
-        time.setBounds(4 * w / 5, 0, w - w / 5, h);
-    }
 }

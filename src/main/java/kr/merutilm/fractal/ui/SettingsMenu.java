@@ -46,6 +46,8 @@ public enum SettingsMenu {
             JMenuItem item = new JMenuItem(e.toString());
             item.addActionListener(k -> e.accept(master));
             menu.add(item);
+            menu.setFont(MUI.DEFAULT_FONT);
+            item.setFont(MUI.DEFAULT_FONT);
         });
     }
 
