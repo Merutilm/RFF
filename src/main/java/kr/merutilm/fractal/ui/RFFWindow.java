@@ -8,7 +8,7 @@ import java.util.Arrays;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 
-import kr.merutilm.fractal.RFFUtils;
+import kr.merutilm.fractal.io.IOUtilities;
 
 final class RFFWindow extends JFrame {
 
@@ -17,7 +17,7 @@ final class RFFWindow extends JFrame {
 
     public RFFWindow(RFF master, int w, int h) {
         setTitle("RFF");
-        setIconImage(RFFUtils.getApplicationIcon());
+        setIconImage(IOUtilities.getApplicationIcon());
         setPreferredSize(new Dimension(w, h));
         setLayout(new BorderLayout(0, 0));
 

@@ -4,6 +4,8 @@ import java.util.function.Consumer;
 import java.util.function.BiConsumer;
 import java.util.function.UnaryOperator;
 
+import javax.swing.KeyStroke;
+
 import kr.merutilm.fractal.struct.LWBigComplex;
 import kr.merutilm.fractal.struct.LWBigDecimal;
 import kr.merutilm.fractal.settings.CalculationSettings;
@@ -25,7 +27,7 @@ enum ActionsFractal implements Actions {
         panel.createTextInput("Minimum Level", bla.minLevel(), Integer::parseInt, e -> 
             applier.accept(f -> f.setMinLevel(e))
         );
-    })),
+    }), null),
 
     ITERATIONS("Iterations", (master, name) -> new SettingsWindow(name, panel -> {
         CalculationSettings calc = getCalculationSettings(master);
@@ -45,7 +47,7 @@ enum ActionsFractal implements Actions {
         panel.createBoolInput("Automatic Iterations", calc.autoIteration(), e -> 
             applier.accept(f -> f.setAutoIteration(e))
         );
-    })),
+    }), null),
 
 
     REFERENCE("Reference", (master, name) -> new SettingsWindow(name, panel -> {
@@ -70,15 +72,22 @@ enum ActionsFractal implements Actions {
         );
         
         
-    }));
+    }), null);
    
 
     private final String name;
-    private final BiConsumer<RFF, String> generator;
+    private final BiConsumer<RFF, String> action;
+    private final KeyStroke keyStroke;
 
-    private ActionsFractal(String name, BiConsumer<RFF, String> generator){
+    @Override
+    public KeyStroke keyStroke() {
+        return keyStroke;
+    }
+
+    private ActionsFractal(String name, BiConsumer<RFF, String> generator, KeyStroke keyStroke) {
         this.name = name;
-        this.generator = generator;
+        this.action = generator;
+        this.keyStroke = keyStroke;
     }
 
 
@@ -89,7 +98,7 @@ enum ActionsFractal implements Actions {
 
     @Override
     public void accept(RFF master) {
-        generator.accept(master, name);
+        action.accept(master, name);
     }
 
     private static CalculationSettings getCalculationSettings(RFF master){

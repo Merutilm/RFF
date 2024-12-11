@@ -6,7 +6,7 @@ import java.util.function.Function;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
-public enum SettingsMenu {
+enum SettingsMenu {
     FILE(master -> {
         JMenu menu = new JMenu("File");
         addAll(master, menu, ActionsFile.values());
@@ -45,9 +45,10 @@ public enum SettingsMenu {
         Arrays.stream(items).forEach(e -> {
             JMenuItem item = new JMenuItem(e.toString());
             item.addActionListener(k -> e.accept(master));
+            item.setAccelerator(e.keyStroke());
             menu.add(item);
-            menu.setFont(MUI.DEFAULT_FONT);
-            item.setFont(MUI.DEFAULT_FONT);
+            menu.setFont(MUIConstants.DEFAULT_FONT);
+            item.setFont(MUIConstants.DEFAULT_FONT);
         });
     }
 

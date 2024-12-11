@@ -1,13 +1,17 @@
 package kr.merutilm.fractal.ui;
 
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
+import javax.swing.KeyStroke;
+
 import kr.merutilm.base.io.BitMapImage;
-import kr.merutilm.fractal.RFFUtils;
+import kr.merutilm.fractal.io.IOUtilities;
 import kr.merutilm.fractal.settings.ImageSettings;
 import kr.merutilm.fractal.theme.BasicThemes;
 
@@ -18,7 +22,7 @@ enum ActionsImage implements Actions {
                 ActionsExplore.REFRESH_COLOR.accept(master);
             }, true);
             panel.setSize(panel.getWidth(), 150);
-        })),
+        }), KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_DOWN_MASK)),
     RESOLUTION("Set Resolution", (master, name) -> new SettingsWindow(name, panel -> {
 
         ImageSettings image = getImageSettings(master);
@@ -31,23 +35,33 @@ enum ActionsImage implements Actions {
             Actions.getRenderer(master).recompute();
         });
 
-    })),
+    }), null),
     SAVE_IMAGE("Save Image", (master, name) -> {
-        File file = RFFUtils.saveFile(name, "png", "Image");
+        File file = IOUtilities.saveFile(name, "png", "Image");
+        if(file == null){
+            return;
+        }
         try {
             new BitMapImage(Actions.getRenderer(master).getCurrentImage()).export(file);
         } catch (IOException e) {
             throw new IllegalStateException();
         }
-    }),
+    }, KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK)),
     ;
 
     private final String name;
-    private final BiConsumer<RFF, String> generator;
+    private final BiConsumer<RFF, String> action;
+    private final KeyStroke keyStroke;
 
-    private ActionsImage(String name, BiConsumer<RFF, String> generator) {
+    @Override
+    public KeyStroke keyStroke() {
+        return keyStroke;
+    }
+
+    private ActionsImage(String name, BiConsumer<RFF, String> generator, KeyStroke keyStroke) {
         this.name = name;
-        this.generator = generator;
+        this.action = generator;
+        this.keyStroke = keyStroke;
     }
 
     @Override
@@ -57,7 +71,7 @@ enum ActionsImage implements Actions {
 
     @Override
     public void accept(RFF master) {
-        generator.accept(master, name);
+        action.accept(master, name);
     }
 
     private static ImageSettings getImageSettings(RFF master) {

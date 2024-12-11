@@ -5,8 +5,6 @@ target
 *.log
 *.jfr
 .idea
-src/main/resources/Fractals
-src/main/resources/Videos
-src/main/resources/META-INF
+src/test
 VideoSample
 *.mp4

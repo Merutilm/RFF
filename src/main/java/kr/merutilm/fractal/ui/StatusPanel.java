@@ -9,24 +9,24 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import kr.merutilm.base.util.AdvancedMath;
 
-class StatusPanel extends JPanel {
+final class StatusPanel extends JPanel {
     
-    private final MLabelPanel iteration;
-    private final MLabelPanel zoom;
-    private final MLabelPanel period;
-    private final MLabelPanel time;
-    private final MLabelPanel progress;
+    private final MUILabelPanel iteration;
+    private final MUILabelPanel zoom;
+    private final MUILabelPanel period;
+    private final MUILabelPanel time;
+    private final MUILabelPanel progress;
     private static final String SPACE = "  ";
     private long t = 0;
 
     public StatusPanel() {
 
         setLayout(new GridLayout(1, 5));
-        iteration = new MLabelPanel();
-        zoom = new MLabelPanel();
-        period = new MLabelPanel();
-        time = new MLabelPanel();
-        progress = new MLabelPanel();
+        iteration = new MUILabelPanel();
+        zoom = new MUILabelPanel();
+        period = new MUILabelPanel();
+        time = new MUILabelPanel();
+        progress = new MUILabelPanel();
 
         initPanel(iteration);
         initPanel(zoom);
@@ -35,9 +35,9 @@ class StatusPanel extends JPanel {
         initPanel(progress);
     }
 
-    private void initPanel(MLabelPanel panel) {
+    private void initPanel(MUILabelPanel panel) {
         panel.getNameLabel().setHorizontalAlignment(SwingConstants.LEFT);
-        panel.getNameLabel().setFont(MUI.DEFAULT_FONT);
+        panel.getNameLabel().setFont(MUIConstants.DEFAULT_FONT);
         panel.setBorder(new BevelBorder(BevelBorder.LOWERED));
         add(panel);
     }

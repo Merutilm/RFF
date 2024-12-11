@@ -22,7 +22,7 @@ import kr.merutilm.fractal.shader.ColorFilter;
 import kr.merutilm.fractal.shader.Fog;
 import kr.merutilm.fractal.shader.Slope;
 
-public class ShaderProcessor {
+final class ShaderProcessor {
     private ShaderProcessor(){
         
     }

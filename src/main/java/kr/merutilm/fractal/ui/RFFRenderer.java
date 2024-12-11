@@ -20,7 +20,7 @@ import kr.merutilm.fractal.settings.ImageSettings;
 import kr.merutilm.fractal.settings.Settings;
 import kr.merutilm.fractal.struct.DoubleExponent;
 import kr.merutilm.fractal.util.DoubleExponentMath;
-import kr.merutilm.fractal.util.LabelTextUtils;
+import kr.merutilm.fractal.util.TextFormatter;
 
 import static kr.merutilm.fractal.theme.BasicTheme.INIT_ITERATION;
 
@@ -59,16 +59,12 @@ final class RFFRenderer extends JPanel {
                 super.mouseWheelMoved(e);
                 int r = e.getWheelRotation();
 
-                final double mzi = 1.0 / Math.pow(10, CalculationSettings.ZOOM_VALUE);
-                final double mzo = 1.0 / Math.pow(10, -CalculationSettings.ZOOM_VALUE);
-
-
                 if (r == 1) {
                     DoubleExponent[] offset = offsetConversion(
                             getMouseX(e),
                             getMouseY(e)
                     );
-                        
+                    double mzo = 1.0 / Math.pow(10, -CalculationSettings.ZOOM_VALUE);
                     master.setSettings(e1 -> e1.edit().setCalculationSettings(      
                                     e2 -> e2.edit().addCenter(
                                             offset[0].multiply(1 - mzo), offset[1].multiply(1 - mzo), Perturbator.precision(e2.logZoom())
@@ -81,6 +77,7 @@ final class RFFRenderer extends JPanel {
                             getMouseX(e),
                             getMouseY(e)
                     );
+                    double mzi = 1.0 / Math.pow(10, CalculationSettings.ZOOM_VALUE);
                     master.setSettings(e1 -> e1.edit().setCalculationSettings(
                                     e2 -> e2.edit().addCenter(
                                             offset[0].multiply(1 - mzi), offset[1].multiply(1 - mzi), Perturbator.precision(e2.logZoom())
@@ -306,7 +303,7 @@ final class RFFRenderer extends JPanel {
                 }
 
                 if (processing) {
-                    panel.setProcess("Calculating... " + LabelTextUtils.processText(p));
+                    panel.setProcess("Calculating... " + TextFormatter.processText(p));
                 } else {
                     reloadAndPaint(currentID, false);
                     panel.setProcess("Done");
@@ -346,8 +343,8 @@ final class RFFRenderer extends JPanel {
 
     private ProcessVisualizer gvf(int fracA, int fracB){
         StatusPanel panel = master.getWindow().getStatusPanel();
-        return a -> panel.setProcess(FINISHING_TEXT + LabelTextUtils.processText(a)
-        + LabelTextUtils.frac(fracA, fracB, LabelTextUtils.Parentheses.SQUARE));
+        return a -> panel.setProcess(FINISHING_TEXT + TextFormatter.processText(a)
+        + TextFormatter.frac(fracA, fracB, TextFormatter.Parentheses.SQUARE));
     }
 
     public synchronized void reloadAndPaint(int currentID, boolean compressed) throws IllegalRenderStateException, InterruptedException {

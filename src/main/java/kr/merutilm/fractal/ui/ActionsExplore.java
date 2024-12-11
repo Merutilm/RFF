@@ -1,10 +1,13 @@
 package kr.merutilm.fractal.ui;
 
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.util.function.BiConsumer;
 import java.util.function.DoubleConsumer;
 
 import javax.annotation.Nullable;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 
 import kr.merutilm.base.exception.IllegalRenderStateException;
 import kr.merutilm.base.util.TaskManager;
@@ -13,12 +16,12 @@ import kr.merutilm.fractal.locater.Locator;
 import kr.merutilm.fractal.locater.MandelbrotLocator;
 import kr.merutilm.fractal.struct.LWBigComplex;
 import kr.merutilm.fractal.theme.BasicTheme;
-import kr.merutilm.fractal.util.LabelTextUtils;
+import kr.merutilm.fractal.util.TextFormatter;
 
 enum ActionsExplore implements Actions {
     RECOMPUTE("Recompute", (master, name) -> 
-        Actions.getRenderer(master).recompute()
-    ),
+        Actions.getRenderer(master).recompute(), 
+        KeyStroke.getKeyStroke(KeyEvent.VK_C, 0)),
     REFRESH_COLOR("Refresh Color", (master, name) -> {
         RFFRenderer render = Actions.getRenderer(master);
         TaskManager.runTask(() -> {
@@ -30,17 +33,17 @@ enum ActionsExplore implements Actions {
                 Thread.currentThread().interrupt();
             }
         });
-    }),
+    }, KeyStroke.getKeyStroke(KeyEvent.VK_R, 0)),
     RESET("Reset", (master, name) -> {
         master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit()
         .setCenter(BasicTheme.INIT_C)
         .setLogZoom(BasicTheme.INIT_LOG_ZOOM)
         .build()).build());
         Actions.getRenderer(master).recompute();
-    }),
+    }, KeyStroke.getKeyStroke(KeyEvent.VK_N, 0)),
     CANCEL("Cencel Render", (master, name) -> 
-        Actions.getRenderer(master).getState().createBreakpoint()
-    ),
+        Actions.getRenderer(master).getState().createBreakpoint(),
+        KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0)),
     FIND_CENTER("Find Center", (master, name) -> {
         RFFRenderer render = Actions.getRenderer(master);
         if (render.getCurrentPerturbator() == null) {
@@ -56,7 +59,7 @@ enum ActionsExplore implements Actions {
                     .build()).build());
             RECOMPUTE.accept(master);
         }
-    }),
+    }, KeyStroke.getKeyStroke(KeyEvent.VK_9, InputEvent.CTRL_DOWN_MASK)),
     LOCATE_MINIBROT("Locate Minibrot", (master, name) -> {
         RFFRenderer render = Actions.getRenderer(master);
         if (render.getCurrentPerturbator() == null) {
@@ -78,15 +81,22 @@ enum ActionsExplore implements Actions {
                 RECOMPUTE.accept(master);
             }
         });
-    })
+    }, KeyStroke.getKeyStroke(KeyEvent.VK_0, InputEvent.CTRL_DOWN_MASK))
     ;
 
     private final String name;
     private final BiConsumer<RFF, String> action;
+    private final KeyStroke keyStroke;
 
-    private ActionsExplore(String name, BiConsumer<RFF, String> generator) {
+    @Override
+    public KeyStroke keyStroke() {
+        return keyStroke;
+    }
+
+    private ActionsExplore(String name, BiConsumer<RFF, String> generator, KeyStroke keyStroke) {
         this.name = name;
         this.action = generator;
+        this.keyStroke = keyStroke;
     }
 
     @Override
@@ -113,7 +123,7 @@ enum ActionsExplore implements Actions {
                             
             if (p % interval == 0) {
                 panel.setProcess("Locating Center... "
-                        + LabelTextUtils
+                        + TextFormatter
                                 .processText((double) p / period)
                         + " [" + i + "]");
             }

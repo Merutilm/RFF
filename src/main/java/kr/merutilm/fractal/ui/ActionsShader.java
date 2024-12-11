@@ -5,7 +5,9 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
-import kr.merutilm.fractal.RFFUtils;
+import javax.swing.KeyStroke;
+
+import kr.merutilm.fractal.io.IOUtilities;
 import kr.merutilm.fractal.settings.*;
 
 
@@ -22,13 +24,13 @@ enum ActionsShader implements Actions {
         panel.createTextInput("Color Pulse Interval", color.iterationInterval(), Double::parseDouble, e -> 
             applier.accept(f -> f.setIterationInterval(e))
         );
-        panel.createTextInput(RFFUtils.Constants.OFFSET_RATIO.toString(), color.offsetRatio(), Double::parseDouble, e ->
+        panel.createTextInput(IOUtilities.Constants.OFFSET_RATIO.toString(), color.offsetRatio(), Double::parseDouble, e ->
             applier.accept(f -> f.setOffsetRatio(e))
         );
         panel.createSelectInput("Color Smoothing", color.colorSmoothing(), ColorSmoothingSettings.values(), e ->
             applier.accept(f -> f.setColorSmoothing(e)), false
         );
-    })),
+    }), null),
 
     STRIPE("Stripe", (master, name) -> new SettingsWindow(name, panel -> {
         StripeSettings color = getShaderSettings(master).stripeSettings();
@@ -48,13 +50,13 @@ enum ActionsShader implements Actions {
         panel.createTextInput("Secondary Interval", color.secondInterval(), Double::parseDouble, e ->
             applier.accept(f -> f.setSecondInterval(e))
         );
-        panel.createTextInput(RFFUtils.Constants.OPACITY.toString(), color.opacity(), Double::parseDouble, e ->
+        panel.createTextInput(IOUtilities.Constants.OPACITY.toString(), color.opacity(), Double::parseDouble, e ->
             applier.accept(f -> f.setOpacity(e))
         );
-        panel.createTextInput(RFFUtils.Constants.OFFSET_RATIO.toString(), color.offset(), Double::parseDouble, e ->
+        panel.createTextInput(IOUtilities.Constants.OFFSET_RATIO.toString(), color.offset(), Double::parseDouble, e ->
             applier.accept(f -> f.setOffset(e))
         );
-    })),
+    }), null),
     SLOPE("Slope", (master, name) -> new SettingsWindow(name, panel -> {
         SlopeSettings slope = getShaderSettings(master).slopeSettings();
         
@@ -69,7 +71,7 @@ enum ActionsShader implements Actions {
         panel.createTextInput("Reflection Ratio", slope.reflectionRatio(), Double::parseDouble, e -> 
             applier.accept(f -> f.setReflectionRatio(e))
         );
-        panel.createTextInput(RFFUtils.Constants.OPACITY.toString(), slope.opacity(), Double::parseDouble, e -> 
+        panel.createTextInput(IOUtilities.Constants.OPACITY.toString(), slope.opacity(), Double::parseDouble, e -> 
         	applier.accept(f -> f.setOpacity(e))
         );
         panel.createTextInput("Zenith", slope.zenith(), Double::parseDouble, e -> 
@@ -80,7 +82,7 @@ enum ActionsShader implements Actions {
         );
 
         
-    })),
+    }), null),
     COLOR_FILTER("Color Filter", (master, name) -> 
         new SettingsWindow(name, panel -> {
             ColorFilterSettings colorFilter = getShaderSettings(master).colorFilterSettings();
@@ -105,8 +107,7 @@ enum ActionsShader implements Actions {
             panel.createTextInput("Contrast", colorFilter.contrast(), Double::parseDouble, e -> 
                 applier.accept(f -> f.setContrast(e))
             );
-        })
-    ),
+        }), null),
     FOG("Fog", (master, name) -> new SettingsWindow(name, panel -> {
         FogSettings fog = getShaderSettings(master).fogSettings();
         
@@ -118,10 +119,10 @@ enum ActionsShader implements Actions {
         panel.createTextInput("Radius", fog.radius(), Double::parseDouble, e -> 
         	applier.accept(f -> f.setRadius(e))
         );
-        panel.createTextInput(RFFUtils.Constants.OPACITY.toString(), fog.opacity(), Double::parseDouble, e -> 
+        panel.createTextInput(IOUtilities.Constants.OPACITY.toString(), fog.opacity(), Double::parseDouble, e -> 
         	applier.accept(f -> f.setOpacity(e))
         );
-    })),
+    }), null),
     BLOOM("Bloom", (master, name) -> new SettingsWindow(name, panel -> {
         BloomSettings bloom = getShaderSettings(master).bloomSettings();
     
@@ -142,13 +143,21 @@ enum ActionsShader implements Actions {
         panel.createTextInput("Intensity", bloom.intensity(), Double::parseDouble, e -> 
         	applier.accept(f -> f.setIntensity(e))
         );
-    }));
+    }), null);
 
     private final String name;
-    private final BiConsumer<RFF, String> generator;
-    private ActionsShader(String name, BiConsumer<RFF, String> generator){
+    private final BiConsumer<RFF, String> action;
+    private final KeyStroke keyStroke;
+
+    @Override
+    public KeyStroke keyStroke() {
+        return keyStroke;
+    }
+
+    private ActionsShader(String name, BiConsumer<RFF, String> generator, KeyStroke keyStroke) {
         this.name = name;
-        this.generator = generator;
+        this.action = generator;
+        this.keyStroke = keyStroke;
     }
 
     @Override
@@ -158,7 +167,7 @@ enum ActionsShader implements Actions {
 
     @Override
     public void accept(RFF master) {
-        generator.accept(master, name);
+        action.accept(master, name);
     }
 
     private static ShaderSettings getShaderSettings(RFF master){

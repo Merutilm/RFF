@@ -5,25 +5,28 @@ import java.awt.Dimension;
 import java.util.function.Consumer;
 
 import javax.swing.JFrame;
-import kr.merutilm.fractal.RFFUtils;
+
+import kr.merutilm.fractal.io.IOUtilities;
 
 final class SettingsWindow extends JFrame{
     public static final int WIDTH = 400;
 
-    public SettingsWindow(String name, Consumer<MSettingElementsPanel> ui){
+    public SettingsWindow(String name, Consumer<MUISettingElementsPanel> ui){
         super(name);
-        setIconImage(RFFUtils.getApplicationIcon());
+        setIconImage(IOUtilities.getApplicationIcon());
         setLayout(new BorderLayout());
         
-        MSettingElementsPanel panel = new MSettingElementsPanel();
+        MUISettingElementsPanel panel = new MUISettingElementsPanel();
         ui.accept(panel);
         panel.refresh();
         add(panel);
         setAlwaysOnTop(true);
-        setLocationRelativeTo(null);
-        setPreferredSize(new Dimension(WIDTH, MUI.UI_HEIGHT * panel.getComponentCount()));
+        setSize(0,0);
+        getContentPane().setPreferredSize(new Dimension(WIDTH, MUIConstants.UI_HEIGHT * panel.getComponentCount()));
         setResizable(false);
         pack();
+
+        setLocationRelativeTo(null);
         setVisible(true);
     }
     

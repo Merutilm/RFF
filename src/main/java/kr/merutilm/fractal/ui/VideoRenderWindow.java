@@ -35,14 +35,14 @@ import kr.merutilm.base.struct.DoubleMatrix;
 import kr.merutilm.base.util.AdvancedMath;
 import kr.merutilm.base.util.ConsoleUtils;
 import kr.merutilm.base.util.TaskManager;
-import kr.merutilm.fractal.RFFUtils;
+import kr.merutilm.fractal.io.IOUtilities;
 import kr.merutilm.fractal.io.RFFMap;
 import kr.merutilm.fractal.settings.Settings;
 import kr.merutilm.fractal.settings.AnimationSettings;
 import kr.merutilm.fractal.settings.DataSettings;
 import kr.merutilm.fractal.settings.ExportSettings;
 
-public final class VideoRenderWindow extends JFrame{
+final class VideoRenderWindow extends JFrame{
 
     private static final int VIDEO_PREVIEW_WINDOW_MAX_LEN = 640;
     
@@ -52,8 +52,8 @@ public final class VideoRenderWindow extends JFrame{
 
     private VideoRenderWindow(int imageWidth, int imageHeight){
         super("Preview Video");
-        setIconImage(RFFUtils.getApplicationIcon());
-        setPreferredSize(new Dimension(imageWidth, imageHeight + MUI.UI_HEIGHT));
+        setIconImage(IOUtilities.getApplicationIcon());
+        setPreferredSize(new Dimension(imageWidth, imageHeight + MUIConstants.UI_HEIGHT));
         setLayout(new BorderLayout());
 
         RenderState state = new RenderState();
@@ -135,7 +135,7 @@ public final class VideoRenderWindow extends JFrame{
                 ){  
                 RFFMap frame;
                 avutil.av_log_set_level(avutil.AV_LOG_QUIET);
-                int maxNumber = RFFUtils.generateFileNameNumber(dir, RFFUtils.Extension.MAP.toString()) - 1;
+                int maxNumber = IOUtilities.generateFileNameNumber(dir, IOUtilities.Extension.MAP.toString()) - 1;
                 double minNumber = -exportSettings.overZoom();
                 double currentFrameNumber = maxNumber;
                 recorder.setFrameRate(fps);

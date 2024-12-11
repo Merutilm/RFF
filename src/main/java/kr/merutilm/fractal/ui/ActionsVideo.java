@@ -1,5 +1,7 @@
 package kr.merutilm.fractal.ui;
 
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -7,10 +9,12 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
+import javax.swing.KeyStroke;
+
 import kr.merutilm.base.selectable.Ease;
 import kr.merutilm.base.util.ConsoleUtils;
 import kr.merutilm.base.util.TaskManager;
-import kr.merutilm.fractal.RFFUtils;
+import kr.merutilm.fractal.io.IOUtilities;
 import kr.merutilm.fractal.settings.AnimationSettings;
 import kr.merutilm.fractal.settings.DataSettings;
 import kr.merutilm.fractal.settings.ExportSettings;
@@ -26,7 +30,7 @@ enum ActionsVideo implements Actions {
         panel.createTextInput("Default Zoom Increment", data.defaultZoomIncrement(), Double::parseDouble, e -> 
             applier.accept(f -> f.setDefaultZoomIncrement(e))
         );
-    })),
+    }), null),
 
     ANIMATE("Animation", (master, name) -> new SettingsWindow(name, panel -> {
         AnimationSettings animation = getVideoSettings(master).animationSettings();
@@ -39,7 +43,7 @@ enum ActionsVideo implements Actions {
         panel.createTextInput("Animation Speed", animation.stripeAnimationSpeed(), Double::parseDouble, e -> 
             applier.accept(f -> f.setStripeAnimationSpeed(e))
         );
-    })),
+    }), null),
 
     EXPORT_SETTINGS("Export Settings", (master, name) -> new SettingsWindow(name, panel -> {
         ExportSettings export = getVideoSettings(master).exportSettings();
@@ -62,10 +66,10 @@ enum ActionsVideo implements Actions {
         panel.createTextInput("Bitrate", export.bitrate(), Integer::parseInt, e -> 
             applier.accept(f -> f.setBitrate(e))
         );
-    })),
+    }), null),
     CREATE_VIDEO_DATA("Create Video Data", (master, name) -> {
-        File defOpen = new File(RFFUtils.getOriginalResource(), RFFUtils.DefaultDirectory.MAP_AS_VIDEO_DATA.toString());
-        File dir = defOpen.isDirectory() ? defOpen : RFFUtils.selectFolder("Folder to Export Samples");
+        File defOpen = new File(IOUtilities.getOriginalResource(), IOUtilities.DefaultDirectory.MAP_AS_VIDEO_DATA.toString());
+        File dir = defOpen.isDirectory() ? defOpen : IOUtilities.selectFolder("Folder to Export Samples");
         DataSettings dataSettings = master.getSettings().videoSettings().dataSettings();
         RFFRenderer render = Actions.getRenderer(master);
         if(dir == null){
@@ -103,28 +107,35 @@ enum ActionsVideo implements Actions {
         }catch(IOException e){
             ConsoleUtils.logError(e);
         }
-    }),
+    }, KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK)),
     EXPORT_ZOOMING_VIDEO("Export Zooming Video", (master, name) -> {
-        File defOpen = new File(RFFUtils.getOriginalResource(), RFFUtils.DefaultDirectory.MAP_AS_VIDEO_DATA.toString());
-            File selected = defOpen.isDirectory() ? defOpen : RFFUtils.selectFolder("Select Sample Folder");
+        File defOpen = new File(IOUtilities.getOriginalResource(), IOUtilities.DefaultDirectory.MAP_AS_VIDEO_DATA.toString());
+            File selected = defOpen.isDirectory() ? defOpen : IOUtilities.selectFolder("Select Sample Folder");
             if(selected == null){
                 return;
             }
-            File toSave = defOpen.isDirectory() ? new File(defOpen, RFFUtils.DefaultFileName.VIDEO + ".mp4") : RFFUtils.saveFile(name, "mp4", "video");
+            File toSave = defOpen.isDirectory() ? new File(defOpen, IOUtilities.DefaultFileName.VIDEO + ".mp4") : IOUtilities.saveFile(name, "mp4", "video");
             if(toSave == null){
                 return;
             }
             VideoRenderWindow.createVideo(master.getSettings(), selected, toSave);
-    }),
+    }, KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK)),
     ;
    
 
     private final String name;
-    private final BiConsumer<RFF, String> generator;
+    private final BiConsumer<RFF, String> action;
+    private final KeyStroke keyStroke;
 
-    private ActionsVideo(String name, BiConsumer<RFF, String> generator){
+    @Override
+    public KeyStroke keyStroke() {
+        return keyStroke;
+    }
+
+    private ActionsVideo(String name, BiConsumer<RFF, String> generator, KeyStroke keyStroke) {
         this.name = name;
-        this.generator = generator;
+        this.action = generator;
+        this.keyStroke = keyStroke;
     }
 
 
@@ -135,7 +146,7 @@ enum ActionsVideo implements Actions {
 
     @Override
     public void accept(RFF master) {
-        generator.accept(master, name);
+        action.accept(master, name);
     }
 
     private static VideoSettings getVideoSettings(RFF master){

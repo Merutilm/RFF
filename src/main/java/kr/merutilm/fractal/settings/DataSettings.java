@@ -7,8 +7,8 @@ import java.io.IOException;
 
 import kr.merutilm.base.struct.Struct;
 import kr.merutilm.base.struct.StructBuilder;
-import kr.merutilm.fractal.RFFUtils;
-import kr.merutilm.fractal.io.IOManager;
+import kr.merutilm.fractal.io.IOBinaryParser;
+import kr.merutilm.fractal.io.IOUtilities;
 
 public record DataSettings(double defaultZoomIncrement) implements Struct<DataSettings>{
     @Override
@@ -34,7 +34,7 @@ public record DataSettings(double defaultZoomIncrement) implements Struct<DataSe
     }
 
     private static File generateFile(File dir){
-        return new File(dir, RFFUtils.DefaultFileName.VIDEO_DATA_SETTINGS + "." + RFFUtils.Extension.VIDEO_DATA_SETTINGS);
+        return new File(dir, IOUtilities.DefaultFileName.VIDEO_DATA_SETTINGS + "." + IOUtilities.Extension.VIDEO_DATA_SETTINGS);
     }
 
     public static DataSettings read(File dir){
@@ -44,14 +44,14 @@ public record DataSettings(double defaultZoomIncrement) implements Struct<DataSe
             return null;
         }
 
-        RFFUtils.checkInvalidExtension(file, RFFUtils.Extension.VIDEO_DATA_SETTINGS.toString());
+        IOUtilities.checkInvalidExtension(file, IOUtilities.Extension.VIDEO_DATA_SETTINGS.toString());
 
         byte[] data;
 
         try(FileInputStream stream = new FileInputStream(file)) {
 
             data = stream.readNBytes(Double.BYTES);
-            double defaultZoomIncrement = IOManager.byteArrayToDouble(data);
+            double defaultZoomIncrement = IOBinaryParser.byteArrayToDouble(data);
             
             return new DataSettings(defaultZoomIncrement);
         }catch (IOException e) {
@@ -62,7 +62,7 @@ public record DataSettings(double defaultZoomIncrement) implements Struct<DataSe
         File file = generateFile(dir);
         try(FileOutputStream stream = new FileOutputStream(file)) {
             
-            stream.write(IOManager.doubleToByteArray(defaultZoomIncrement));
+            stream.write(IOBinaryParser.doubleToByteArray(defaultZoomIncrement));
         } catch (IOException e) {
             throw new IllegalStateException();
         }
