@@ -6,11 +6,11 @@ import kr.merutilm.base.struct.HexColor;
 import kr.merutilm.base.util.AdvancedMath;
 import kr.merutilm.fractal.settings.*;
 
-public class ThemeAdvancedRainbow implements BasicTheme{
+public class ThemeRandomizedRainbow implements BasicTheme{
 
     @Override
     public String getName() {
-        return "Advanced Rainbow";
+        return "Randomized Rainbow";
     }
 
     @Override

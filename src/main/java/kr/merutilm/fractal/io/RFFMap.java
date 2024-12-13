@@ -9,9 +9,7 @@ import java.util.Arrays;
 import kr.merutilm.base.struct.DoubleMatrix;
 import kr.merutilm.fractal.settings.Settings;
 
-public record RFFMap(int version, double zoom, long maxIteration, DoubleMatrix iterations) {
-
-    public static final int LATEST = 1;
+public record RFFMap(double zoom, int period, long maxIteration, DoubleMatrix iterations) {
 
     public static RFFMap read(File file){
         if(file == null || !file.exists()){
@@ -27,12 +25,12 @@ public record RFFMap(int version, double zoom, long maxIteration, DoubleMatrix i
             data = stream.readNBytes(Integer.BYTES);
             int width = IOBinaryParser.byteArrayToInt(data);
 
-            data = stream.readNBytes(Integer.BYTES);
-            int version = IOBinaryParser.byteArrayToInt(data);
-            
             data = stream.readNBytes(Double.BYTES);
             double zoom = IOBinaryParser.byteArrayToDouble(data);
             
+            data = stream.readNBytes(Integer.BYTES);
+            int period = IOBinaryParser.byteArrayToInt(data);
+
             data = stream.readNBytes(Long.BYTES);
             long maxIteration = IOBinaryParser.byteArrayToLong(data);
 
@@ -43,7 +41,7 @@ public record RFFMap(int version, double zoom, long maxIteration, DoubleMatrix i
             for (int i = 0; i < data.length; i += 8) {
                 iterations[i / 8] = IOBinaryParser.byteArrayToDouble(Arrays.copyOfRange(data, i, i+8));
             }
-            return new RFFMap(version, zoom, maxIteration, new DoubleMatrix(width, height, iterations));
+            return new RFFMap(zoom, period, maxIteration, new DoubleMatrix(width, height, iterations));
         }catch (IOException e) {
             throw new IllegalStateException();
         }
@@ -74,8 +72,8 @@ public record RFFMap(int version, double zoom, long maxIteration, DoubleMatrix i
             int width = iterations.getWidth();
             
             stream.write(IOBinaryParser.intToByteArray(width));
-            stream.write(IOBinaryParser.intToByteArray(version));
             stream.write(IOBinaryParser.doubleToByteArray(zoom));
+            stream.write(IOBinaryParser.intToByteArray(period));
             stream.write(IOBinaryParser.longToByteArray(maxIteration));
             byte[] arr = new byte[canvas.length * 8];
             for (int i = 0; i < canvas.length; i++) {

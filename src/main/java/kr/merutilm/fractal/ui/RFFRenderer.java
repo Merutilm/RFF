@@ -8,7 +8,6 @@ import kr.merutilm.base.parallel.DoubleArrayDispatcher;
 import kr.merutilm.base.parallel.ProcessVisualizer;
 import kr.merutilm.base.parallel.RenderState;
 import kr.merutilm.base.struct.DoubleMatrix;
-import kr.merutilm.base.util.TaskManager;
 import kr.merutilm.fractal.formula.DeepMandelbrotPerturbator;
 import kr.merutilm.fractal.formula.LightMandelbrotPerturbator;
 import kr.merutilm.fractal.formula.MandelbrotPerturbator;
@@ -38,7 +37,6 @@ final class RFFRenderer extends JPanel {
     private transient BufferedImage currentImage;
     private transient RFFMap currentMap;
     private transient Perturbator currentPerturbator;
-    private transient Thread currentThread;
     private final transient RFF master;
     private static final double EXP_DEADLINE = 290;
     private static final String FINISHING_TEXT = "Finishing... ";
@@ -185,23 +183,23 @@ final class RFFRenderer extends JPanel {
 
     public synchronized void recompute() {
 
-        if (currentThread != null) {
-            try {
-                state.createBreakpoint();
-                currentThread.interrupt();
-                waitUntilRenderEnds();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return;
-            }
+        try {
+            state.createThread(id -> {
+                try{
+                    compute(id);
+                } catch (IllegalRenderStateException e) {
+                    RFFLoggers.logCancelledMessage("Recompute", id);
+                }
+            });
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
-        int id = state.getId();
-        currentThread = TaskManager.runTask(() -> compute(id));
+
     }
 
-
+    
     //this method can be thread-safe only when called via recompute()
-    private void compute(int currentID) {
+    public void compute(int currentID) throws IllegalRenderStateException{
         
         int w = getImgWidth();
         int h = getImgHeight();
@@ -213,115 +211,94 @@ final class RFFRenderer extends JPanel {
         Settings settings = master.getSettings();
         CalculationSettings calc = settings.calculationSettings();
         
-        currentMap = new RFFMap(RFFMap.LATEST, calc.logZoom(), calc.maxIteration(),new DoubleMatrix(w, h));
-        DoubleMatrix iterations = currentMap.iterations();
+        DoubleMatrix iterations = new DoubleMatrix(w, h);
         ShaderProcessor.fillInit(iterations);
 
         int precision = Perturbator.precision(calc.logZoom());
         double logZoom = calc.logZoom();
 
-        try {
-         
-            StatusPanel panel = master.getWindow().getStatusPanel();
-            panel.initTime();
-            panel.setZoomText(logZoom);
+       
+        StatusPanel panel = master.getWindow().getStatusPanel();
+        panel.initTime();
+        panel.setZoomText(logZoom);
 
-            DoubleArrayDispatcher generator = new DoubleArrayDispatcher(state, currentID, iterations);
-            DoubleExponent[] offset = offsetConversion(0, 0);
-            DoubleExponent dcMax = DoubleExponentMath.hypot(offset[0], offset[1]);
+        DoubleArrayDispatcher generator = new DoubleArrayDispatcher(state, currentID, iterations);
+        DoubleExponent[] offset = offsetConversion(0, 0);
+        DoubleExponent dcMax = DoubleExponentMath.hypot(offset[0], offset[1]);
 
-            Thread t1 = TaskManager.runTask(() -> {
-                try {
-                    while (currentPerturbator != null && state.getId() == currentID) {
-                        Thread.sleep(500);
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            });
+        int refreshInterval = ActionsExplore.periodPanelRefreshInterval(master);
+        IntConsumer actionPerRefCalcIteration = p -> {
+            if(p % refreshInterval == 0){
+                panel.setProcess("Period " + p);
+            }
+        };
 
-            int refreshInterval = ActionsExplore.periodPanelRefreshInterval(master);
-            IntConsumer actionPerRefCalcIteration = p -> {
-                if(p % refreshInterval == 0){
-                    panel.setProcess("Period " + p);
-                }
-            };
-
-            switch (calc.reuseReference()) {
-                case CURRENT_REFERENCE -> {
-                    currentPerturbator = currentPerturbator.reuse(state, currentID, calc, currentPerturbator.getDcMaxByDoubleExponent(), precision);
-                }
-                case CENTERED_REFERENCE ->  {
-                    int period = currentPerturbator.getReference().period();
-                    MandelbrotLocator center = MandelbrotLocator.locateMinibrot(state, currentID, (MandelbrotPerturbator)currentPerturbator,
-                        ActionsExplore.getActionWhileFindingMinibrotCenter(master, period), 
-                        ActionsExplore.getActionWhileFindingMinibrotZoom(master)
-                    );
-                    if(center != null){
-                        
-                        CalculationSettings refCalc = calc.edit().setCenter(center.center()).setLogZoom(center.logZoom()).build();
-                        int refPrecision = Perturbator.precision(center.logZoom());
-                        if (refCalc.logZoom() > EXP_DEADLINE) {
-                            currentPerturbator = new DeepMandelbrotPerturbator(state, currentID, refCalc, center.dcMax(), refPrecision, period, actionPerRefCalcIteration)
-                                    .reuse(state, currentID, calc, dcMax, precision);
-                        }else{
-                            currentPerturbator = new LightMandelbrotPerturbator(state, currentID, refCalc, center.dcMax().doubleValue(), refPrecision, period, actionPerRefCalcIteration)
-                                    .reuse(state, currentID, calc, dcMax, precision);
-                        }
-                    }
+        switch (calc.reuseReference()) {
+            case CURRENT_REFERENCE -> {
+                currentPerturbator = currentPerturbator.reuse(state, currentID, calc, currentPerturbator.getDcMaxByDoubleExponent(), precision);
+            }
+            case CENTERED_REFERENCE ->  {
+                int period = currentPerturbator.getReference().period();
+                MandelbrotLocator center = MandelbrotLocator.locateMinibrot(state, currentID, (MandelbrotPerturbator)currentPerturbator,
+                    ActionsExplore.getActionWhileFindingMinibrotCenter(master, period), 
+                    ActionsExplore.getActionWhileFindingMinibrotZoom(master)
+                );
+                if(center != null){
                     
-                }
-                case DISABLED -> {
-                    if (logZoom > EXP_DEADLINE) {
-                        currentPerturbator = new DeepMandelbrotPerturbator(state, currentID, calc, dcMax, precision, -1, actionPerRefCalcIteration);
-                    } else {
-                        currentPerturbator = new LightMandelbrotPerturbator(state, currentID, calc, dcMax.doubleValue(), precision, -1, actionPerRefCalcIteration);
+                    CalculationSettings refCalc = calc.edit().setCenter(center.center()).setLogZoom(center.logZoom()).build();
+                    int refPrecision = Perturbator.precision(center.logZoom());
+                    if (refCalc.logZoom() > EXP_DEADLINE) {
+                        currentPerturbator = new DeepMandelbrotPerturbator(state, currentID, refCalc, center.dcMax(), refPrecision, period, actionPerRefCalcIteration)
+                                .reuse(state, currentID, calc, dcMax, precision);
+                    }else{
+                        currentPerturbator = new LightMandelbrotPerturbator(state, currentID, refCalc, center.dcMax().doubleValue(), refPrecision, period, actionPerRefCalcIteration)
+                                .reuse(state, currentID, calc, dcMax, precision);
                     }
+                }
+                
+            }
+            case DISABLED -> {
+                if (logZoom > EXP_DEADLINE) {
+                    currentPerturbator = new DeepMandelbrotPerturbator(state, currentID, calc, dcMax, precision, -1, actionPerRefCalcIteration);
+                } else {
+                    currentPerturbator = new LightMandelbrotPerturbator(state, currentID, calc, dcMax.doubleValue(), precision, -1, actionPerRefCalcIteration);
                 }
             }
+        }
+        
 
+        generator.createRenderer((x, y, xRes, yRes, rx, ry, i, v, t) -> {
+            DoubleExponent[] dc = offsetConversion(x, y);
+            return currentPerturbator.iterate(dc[0], dc[1]);
+        });
 
-            t1.interrupt();
-            t1.join();
+        period = currentPerturbator.getReference().period();
+        currentMap = new RFFMap(calc.logZoom(), period, calc.maxIteration(), iterations);
+        
+        panel.setPeriodText(period);
+        panel.setProcess("Preparing...");
+        generator.process(p -> {
+
+            boolean processing = p < 1;
+
+            if (ShaderProcessor.getCompressDivisor(settings.imageSettings()) > 1 || processing) {
+                reloadAndPaint(currentID, true);
+            }
+
+            if (processing) {
+                panel.setProcess("Calculating... " + TextFormatter.processText(p));
+            } else {
+                reloadAndPaint(currentID, false);
+                panel.setProcess("Done");
+            }
+            panel.refreshTime();
+        }, 500);
+         
 
             
-
-            generator.createRenderer((x, y, xRes, yRes, rx, ry, i, v, t) -> {
-                DoubleExponent[] dc = offsetConversion(x, y);
-                return currentPerturbator.iterate(dc[0], dc[1]);
-            });
-
-            period = currentPerturbator.getReference().period();
-            panel.setPeriodText(period);
-            panel.setProcess("Preparing...");
-            generator.process(p -> {
-
-                boolean processing = p < 1;
-
-                if (ShaderProcessor.getCompressDivisor(settings.imageSettings()) > 1 || processing) {
-                    reloadAndPaint(currentID, true);
-                }
-
-                if (processing) {
-                    panel.setProcess("Calculating... " + TextFormatter.processText(p));
-                } else {
-                    reloadAndPaint(currentID, false);
-                    panel.setProcess("Done");
-                }
-                panel.refreshTime();
-            }, 500);
-
-        } catch (IllegalRenderStateException ignored) {
-            //noop
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        
 
 
-    }
-
-    public RenderState getState() {
-        return state;
     }
 
     public Perturbator getCurrentPerturbator() {
@@ -335,9 +312,9 @@ final class RFFRenderer extends JPanel {
     public RFFMap getCurrentMap() {
         return currentMap;
     }
-
-    public void waitUntilRenderEnds() throws InterruptedException {
-        currentThread.join();
+    
+    public RenderState getState() {
+        return state;
     }
 
 
@@ -347,7 +324,11 @@ final class RFFRenderer extends JPanel {
         + TextFormatter.frac(fracA, fracB, TextFormatter.Parentheses.SQUARE));
     }
 
-    public synchronized void reloadAndPaint(int currentID, boolean compressed) throws IllegalRenderStateException, InterruptedException {
+    /**
+     * It is not Thread-safe.
+     * Invoke via safe method.{@link RFFRenderer#createThread(IntConsumer)}.
+     */
+    public void reloadAndPaint(int currentID, boolean compressed) throws IllegalRenderStateException, InterruptedException {
         ProcessVisualizer[] pv = new ProcessVisualizer[]{
             gvf(1, 3), 
             gvf(2, 3),

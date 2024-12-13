@@ -26,7 +26,7 @@
         <dependency>
 	        <groupId>com.github.Merutilm</groupId>
 	        <artifactId>Base-Structures</artifactId>
-	        <version>v1.0.01</version>
+	        <version>v1.0.2</version>
 	    </dependency>
         <dependency>
             <groupId>org.bytedeco</groupId>
@@ -48,14 +48,6 @@
                 <exclusion>
                     <groupId>org.bytedeco</groupId>
                     <artifactId>artoolkitplus</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.bytedeco</groupId>
-                    <artifactId>javacpp-platform</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.bytedeco</groupId>
-                    <artifactId>javacpp</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>org.bytedeco</groupId>

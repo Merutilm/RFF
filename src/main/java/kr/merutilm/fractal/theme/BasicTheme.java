@@ -34,8 +34,8 @@ public interface BasicTheme extends Theme {
 
     VideoSettings DEFAULT_VID = new VideoSettings(
             new DataSettings(2),
-            new AnimationSettings( Ease.IN_EXPONENTIAL, 1),
-            new ExportSettings(30, 1, 2, 1, 5000));
+            new AnimationSettings(2, true, Ease.LINEAR, 1),
+            new ExportSettings(30, 1, 1, 5000));
 
     @Override
     default Settings generate() {

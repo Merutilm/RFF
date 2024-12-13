@@ -24,7 +24,7 @@ final class RFF {
     private static final int INIT_WIDTH = 1280;
     private static final int INIT_HEIGHT = 720;
     
-    public static final BasicThemes DEFAULT_THEME = BasicThemes.ADVANCED_RAINBOW;
+    public static final BasicThemes DEFAULT_THEME = BasicThemes.RANDOMIZED_RAINBOW_SHADED;
 
     private Theme theme = DEFAULT_THEME.getTheme();
     private Settings settings = theme.generate();

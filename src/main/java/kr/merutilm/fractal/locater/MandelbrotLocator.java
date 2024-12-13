@@ -70,7 +70,7 @@ public record MandelbrotLocator(LWBigComplex center, DoubleExponent dcMax, doubl
         return doubledZoomScene;
     }
     
-    public static MandelbrotLocator locateMinibrot(RenderState state, int currentID, MandelbrotPerturbator scene, BiConsumer<Integer, Integer> actionWhileFindingMinibrotCenter, DoubleConsumer actionWhileFindingMinibrotZoom) {
+    public static MandelbrotLocator locateMinibrot(RenderState state, int currentID, MandelbrotPerturbator scene, BiConsumer<Integer, Integer> actionWhileFindingMinibrotCenter, DoubleConsumer actionWhileFindingMinibrotZoom) throws IllegalRenderStateException {
 
         // code flowing
         // e.g zoom * 2 -> zoom * 1.5 -> zoom * 1.75.....
@@ -80,36 +80,33 @@ public record MandelbrotLocator(LWBigComplex center, DoubleExponent dcMax, doubl
         // it can approximate zoom when repeats until zoom increment is lower than
         // specific small number. O(log N)
 
-        try {
-           
-            MandelbrotPerturbator resultScene = findAccurateCenterPerturbator(state, currentID, scene, actionWhileFindingMinibrotCenter);
-            DoubleExponent resultDcMax = resultScene.getDcMaxByDoubleExponent();
-            CalculationSettings resultCalc = resultScene.getCalc();
-            double resultZoom = resultCalc.logZoom();
-            long maxIteration = resultCalc.maxIteration();
-            double zoomIncrement = resultZoom / 4;
-            MandelbrotPerturbator resultSceneTemp = resultScene;
+        
+        MandelbrotPerturbator resultScene = findAccurateCenterPerturbator(state, currentID, scene, actionWhileFindingMinibrotCenter);
+        DoubleExponent resultDcMax = resultScene.getDcMaxByDoubleExponent();
+        CalculationSettings resultCalc = resultScene.getCalc();
+        double resultZoom = resultCalc.logZoom();
+        long maxIteration = resultCalc.maxIteration();
+        double zoomIncrement = resultZoom / 4;
+        MandelbrotPerturbator resultSceneTemp = resultScene;
 
-            while (zoomIncrement > ZOOM_INCREMENT_LIMIT) {
-                if(checkMaxIterationOnly(resultScene, resultDcMax, maxIteration)){
-                    resultZoom -= zoomIncrement;
-                    resultDcMax = resultDcMax.multiply(DoubleExponentMath.pow10(zoomIncrement));
-                }else{
-                    resultZoom += zoomIncrement;
-                    resultDcMax = resultDcMax.divide(DoubleExponentMath.pow10(zoomIncrement));
-                }
-
-                actionWhileFindingMinibrotZoom.accept(resultZoom);
-                
-                resultCalc = resultCalc.edit().setLogZoom(resultZoom).build();
-                resultScene = resultSceneTemp.reuse(state, currentID, resultCalc, resultDcMax, Perturbator.precision(resultZoom));
-                zoomIncrement /= 2;
+        while (zoomIncrement > ZOOM_INCREMENT_LIMIT) {
+            if(checkMaxIterationOnly(resultScene, resultDcMax, maxIteration)){
+                resultZoom -= zoomIncrement;
+                resultDcMax = resultDcMax.multiply(DoubleExponentMath.pow10(zoomIncrement));
+            }else{
+                resultZoom += zoomIncrement;
+                resultDcMax = resultDcMax.divide(DoubleExponentMath.pow10(zoomIncrement));
             }
 
-            return new MandelbrotLocator(resultCalc.center(), resultDcMax, resultZoom + MINIBROT_LOG_ZOOM_OFFSET);
-        } catch (IllegalRenderStateException e) {
-            return null;
+            actionWhileFindingMinibrotZoom.accept(resultZoom);
+            
+            resultCalc = resultCalc.edit().setLogZoom(resultZoom).build();
+            resultScene = resultSceneTemp.reuse(state, currentID, resultCalc, resultDcMax, Perturbator.precision(resultZoom));
+            zoomIncrement /= 2;
         }
+
+        return new MandelbrotLocator(resultCalc.center(), resultDcMax, resultZoom + MINIBROT_LOG_ZOOM_OFFSET);
+        
     }
 
     private static boolean checkMaxIterationOnly(MandelbrotPerturbator scene, DoubleExponent resultDcMax, long maxIteration){

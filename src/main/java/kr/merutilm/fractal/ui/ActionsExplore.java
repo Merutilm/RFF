@@ -4,7 +4,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.function.BiConsumer;
 import java.util.function.DoubleConsumer;
-
 import javax.annotation.Nullable;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
@@ -24,40 +23,68 @@ enum ActionsExplore implements Actions {
         KeyStroke.getKeyStroke(KeyEvent.VK_C, 0)),
     REFRESH_COLOR("Refresh Color", (master, name) -> {
         RFFRenderer render = Actions.getRenderer(master);
-        TaskManager.runTask(() -> {
-            try {
-                StatusPanel panel = master.getWindow().getStatusPanel();
-                render.reloadAndPaint(render.getState().getId(), false);
-                panel.setProcess("Done");
-            } catch (IllegalRenderStateException | InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        });
+        try {
+            render.getState().createThread(id -> {
+                try {
+                    StatusPanel panel = master.getWindow().getStatusPanel();
+                    render.reloadAndPaint(id, false);
+                    panel.setProcess("Done");
+                } catch (IllegalRenderStateException | InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }, KeyStroke.getKeyStroke(KeyEvent.VK_R, 0)),
     RESET("Reset", (master, name) -> {
-        master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit()
-        .setCenter(BasicTheme.INIT_C)
-        .setLogZoom(BasicTheme.INIT_LOG_ZOOM)
-        .build()).build());
-        Actions.getRenderer(master).recompute();
+        RFFRenderer render = Actions.getRenderer(master);
+        try {
+            render.getState().cancel();
+            master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit()
+            .setCenter(BasicTheme.INIT_C)
+            .setLogZoom(BasicTheme.INIT_LOG_ZOOM)
+            .build()).build());
+            Actions.getRenderer(master).recompute();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }, KeyStroke.getKeyStroke(KeyEvent.VK_N, 0)),
-    CANCEL("Cencel Render", (master, name) -> 
-        Actions.getRenderer(master).getState().createBreakpoint(),
-        KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0)),
+    CANCEL("Cencel Render", (master, name) -> {
+                try {
+            Actions.getRenderer(master).getState().cancel();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0)),
     FIND_CENTER("Find Center", (master, name) -> {
         RFFRenderer render = Actions.getRenderer(master);
         if (render.getCurrentPerturbator() == null) {
             return;
-        }
-        LWBigComplex c = MandelbrotLocator.findCenter((MandelbrotPerturbator) render.getCurrentPerturbator());
-
-        if (c == null) {
-            checkNullLocator(null);
-        }else{
-            master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit()
-                    .setCenter(c)
-                    .build()).build());
-            RECOMPUTE.accept(master);
+        } 
+        try {
+            render.getState().createThread(id -> {
+                
+                try{
+                    LWBigComplex c = MandelbrotLocator.findCenter((MandelbrotPerturbator) render.getCurrentPerturbator());
+                
+                    if (c == null) {
+                        checkNullLocator(null);
+                    } else {
+                        master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit()
+                                .setCenter(c)
+                                .build()).build());
+                        render.compute(id);
+                    }
+                }catch (IllegalRenderStateException e) {
+                    RFFLoggers.logCancelledMessage(name, id);
+                }
+                
+                
+            });
+                
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }, KeyStroke.getKeyStroke(KeyEvent.VK_9, InputEvent.CTRL_DOWN_MASK)),
     LOCATE_MINIBROT("Locate Minibrot", (master, name) -> {
@@ -65,22 +92,32 @@ enum ActionsExplore implements Actions {
         if (render.getCurrentPerturbator() == null) {
             return;
         }
-        TaskManager.runTask(() -> {
-            
-            int period = render.getCurrentPerturbator().getReference().period();
-            MandelbrotLocator locator = MandelbrotLocator.locateMinibrot(render.getState(), render.getState().getId(), (MandelbrotPerturbator) render.getCurrentPerturbator(),
-                    getActionWhileFindingMinibrotCenter(master, period),
-                    getActionWhileFindingMinibrotZoom(master)
-                    );
+        try{
+            render.getState().createThread(id -> {
+                try{
+                    int period = render.getCurrentPerturbator().getReference().period();
+                    MandelbrotLocator locator = MandelbrotLocator.locateMinibrot(render.getState(),
+                                    id, (MandelbrotPerturbator) render.getCurrentPerturbator(),
+                            getActionWhileFindingMinibrotCenter(master, period),
+                            getActionWhileFindingMinibrotZoom(master)
+                            );
+        
+                    if (checkNullLocator(locator)) {
+                        master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit()
+                                .setCenter(locator.center())
+                                .setLogZoom(locator.logZoom())
+                                .build()).build());
+                        render.compute(id);
+                    }
+                }catch (IllegalRenderStateException e) {
+                    RFFLoggers.logCancelledMessage(name, id);
+                }
+            });
+        }catch(InterruptedException e){
+            Thread.currentThread().interrupt();
+        }
+        
 
-            if (checkNullLocator(locator)) {
-                master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit()
-                        .setCenter(locator.center())
-                        .setLogZoom(locator.logZoom())
-                        .build()).build());
-                RECOMPUTE.accept(master);
-            }
-        });
     }, KeyStroke.getKeyStroke(KeyEvent.VK_0, InputEvent.CTRL_DOWN_MASK))
     ;
 

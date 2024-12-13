@@ -2,7 +2,6 @@ package kr.merutilm.fractal.settings;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 import kr.merutilm.base.struct.Struct;
@@ -55,15 +54,6 @@ public record DataSettings(double defaultZoomIncrement) implements Struct<DataSe
             
             return new DataSettings(defaultZoomIncrement);
         }catch (IOException e) {
-            throw new IllegalStateException();
-        }
-    }
-    public void export(File dir){
-        File file = generateFile(dir);
-        try(FileOutputStream stream = new FileOutputStream(file)) {
-            
-            stream.write(IOBinaryParser.doubleToByteArray(defaultZoomIncrement));
-        } catch (IOException e) {
             throw new IllegalStateException();
         }
     }

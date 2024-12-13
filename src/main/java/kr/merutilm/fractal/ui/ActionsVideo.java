@@ -11,11 +11,12 @@ import java.util.function.UnaryOperator;
 
 import javax.swing.KeyStroke;
 
+import kr.merutilm.base.exception.IllegalRenderStateException;
 import kr.merutilm.base.selectable.Ease;
 import kr.merutilm.base.util.ConsoleUtils;
-import kr.merutilm.base.util.TaskManager;
 import kr.merutilm.fractal.io.IOUtilities;
 import kr.merutilm.fractal.settings.AnimationSettings;
+import kr.merutilm.fractal.settings.CalculationSettings;
 import kr.merutilm.fractal.settings.DataSettings;
 import kr.merutilm.fractal.settings.ExportSettings;
 import kr.merutilm.fractal.settings.VideoSettings;
@@ -32,12 +33,18 @@ enum ActionsVideo implements Actions {
         );
     }), null),
 
-    ANIMATE("Animation", (master, name) -> new SettingsWindow(name, panel -> {
+    ANIMATION("Animation", (master, name) -> new SettingsWindow(name, panel -> {
         AnimationSettings animation = getVideoSettings(master).animationSettings();
         
         Consumer<UnaryOperator<AnimationSettings.Builder>> applier = e -> 
             master.setSettings(e1 -> e1.edit().setVideoSettings(e2 -> e2.edit().setAnimationSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
 
+        panel.createTextInput("Over Zoom", animation.overZoom(), Double::parseDouble, e -> 
+        	applier.accept(f -> f.setOverZoom(e))
+        );
+        panel.createBoolInput("Show Text", animation.showText(), e -> 
+        	applier.accept(f -> f.setShowText(e))
+        );
         panel.createSelectInput("Animation Ease", animation.stripeAnimationEase(), Ease.values(), e -> 
             applier.accept(f -> f.setStripeAnimationEase(e)), true);
         panel.createTextInput("Animation Speed", animation.stripeAnimationSpeed(), Double::parseDouble, e -> 
@@ -57,9 +64,6 @@ enum ActionsVideo implements Actions {
         panel.createTextInput("MPS", export.mps(), Double::parseDouble, e -> 
             applier.accept(f -> f.setMps(e))
         );
-        panel.createTextInput("Over Zoom", export.overZoom(), Double::parseDouble, e -> 
-        	applier.accept(f -> f.setOverZoom(e))
-        );
         panel.createTextInput("Multi Sampling", export.multiSampling(), Double::parseDouble, e -> 
             applier.accept(f -> f.setMultiSampling(e))
         );
@@ -74,39 +78,36 @@ enum ActionsVideo implements Actions {
         RFFRenderer render = Actions.getRenderer(master);
         if(dir == null){
             return;
-        }   
+        }
+
         try{
-            if(dir.exists()){
-                for (File f : dir.listFiles()) {
-                    Files.delete(f.toPath());
-                }
-            }
 
-            TaskManager.runTask(() -> {
-
-                try{
-                    int id = render.getState().getId();
-
-                    while(master.getSettings().calculationSettings().logZoom() > 1 && id == render.getState().getId()){
-                        id++;
-                        ActionsExplore.RECOMPUTE.accept(master);
-                        render.waitUntilRenderEnds();
-                        render.getCurrentMap().exportAsVideoData(dir);
-                        master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit().zoomOut(Math.log10(dataSettings.defaultZoomIncrement())).build()).build());
+            render.getState().createThread(id -> {
+                try {
+                    if (dir.exists()) {
+                        for (File f : dir.listFiles()) {
+                            Files.delete(f.toPath());
+                        }
                     }
 
-                    dataSettings.export(dir);
+                    while (master.getSettings().calculationSettings().logZoom() > CalculationSettings.MININUM_ZOOM) {
+                        render.compute(id);
+                        render.getCurrentMap().exportAsVideoData(dir);
+                        master.setSettings(e -> e.edit().setCalculationSettings(
+                                e1 -> e1.edit().zoomOut(Math.log10(dataSettings.defaultZoomIncrement())).build())
+                                .build());
+                    }
 
-                }catch(InterruptedException e){
-                    Thread.currentThread().interrupt();
+                } catch (IOException e) {
+                    ConsoleUtils.logError(e);
+                } catch (IllegalRenderStateException e) {
+                    RFFLoggers.logCancelledMessage(name, id);
                 }
             });
-
-           
-
-        }catch(IOException e){
-            ConsoleUtils.logError(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
+
     }, KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK)),
     EXPORT_ZOOMING_VIDEO("Export Zooming Video", (master, name) -> {
         File defOpen = new File(IOUtilities.getOriginalResource(), IOUtilities.DefaultDirectory.MAP_AS_VIDEO_DATA.toString());

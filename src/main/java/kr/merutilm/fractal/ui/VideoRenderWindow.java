@@ -96,7 +96,11 @@ final class VideoRenderWindow extends JFrame{
         addWindowListener(new WindowAdapter(){
             @Override
             public void windowClosing(WindowEvent e){
-                state.createBreakpoint();
+                try{
+                    state.cancel();
+                }catch(InterruptedException f){
+                    Thread.currentThread().interrupt();
+                }
             }
         });
         
@@ -106,13 +110,14 @@ final class VideoRenderWindow extends JFrame{
 
     public static void createVideo(Settings settings, File dir, File out) {
                 
+        DataSettings vds = settings.videoSettings().dataSettings();
+        AnimationSettings animationSettings = settings.videoSettings().animationSettings();
         ExportSettings exportSettings = settings.videoSettings().exportSettings();
         double fps = exportSettings.fps();
         double frameInterval = exportSettings.mps() / fps;
-        DataSettings vds = DataSettings.read(dir);
         
         RenderState state = new RenderState();
-        int currentID = state.getId();
+        int currentID = state.currentID();
         RFFMap targetMap = RFFMap.readByID(dir, 1);
         if(targetMap == null){
             JOptionPane.showMessageDialog(null, "Cannot create video. There is no samples in the directory : Videos", "Export video", JOptionPane.ERROR_MESSAGE);
@@ -136,7 +141,7 @@ final class VideoRenderWindow extends JFrame{
                 RFFMap frame;
                 avutil.av_log_set_level(avutil.AV_LOG_QUIET);
                 int maxNumber = IOUtilities.generateFileNameNumber(dir, IOUtilities.Extension.MAP.toString()) - 1;
-                double minNumber = -exportSettings.overZoom();
+                double minNumber = -animationSettings.overZoom();
                 double currentFrameNumber = maxNumber;
                 recorder.setFrameRate(fps);
                 recorder.setVideoQuality(0); // maximum quality  
@@ -156,7 +161,7 @@ final class VideoRenderWindow extends JFrame{
                     currentFrameNumber -= frameInterval;
                     currentSec += 1 / fps;
 
-                    frame = getFrame(state, currentID, dir, currentFrameNumber, vds.defaultZoomIncrement(), multiplier);
+                    frame = getFrame(state, currentID, dir, currentFrameNumber, vds, multiplier);
 
                     Settings settingsModified = modifyToVideoSettings(frame, settings, currentSec);
                     
@@ -164,7 +169,7 @@ final class VideoRenderWindow extends JFrame{
                     
                     Java2DFrameConverter.copy(window.img, f);
                     recorder.record(f, avutil.AV_PIX_FMT_ABGR);
-                    double progressRatio = (maxNumber - currentFrameNumber) / (maxNumber + exportSettings.overZoom());
+                    double progressRatio = (maxNumber - currentFrameNumber) / (maxNumber + animationSettings.overZoom());
                     long spent = System.currentTimeMillis() - startMillis;
                     long remained = (long)((1 - progressRatio) / progressRatio * spent);
 
@@ -206,7 +211,7 @@ final class VideoRenderWindow extends JFrame{
     }
 
 
-    private static RFFMap getFrame(RenderState state, int currentID, File dir, double frame, double defaultZoomIncrement, double multiplier) throws IllegalRenderStateException, InterruptedException{
+    private static RFFMap getFrame(RenderState state, int currentID, File dir, double frame, DataSettings vds, double multiplier) throws IllegalRenderStateException, InterruptedException{
         
         if (frame < 1) {
 
@@ -225,8 +230,8 @@ final class VideoRenderWindow extends JFrame{
             long im = im1.maxIteration();
             
             double z1 = im1.zoom();
-            double zc = AdvancedMath.ratioDivide(z1, z1 + Math.log10(defaultZoomIncrement), r);
-            double lsr = Math.pow(defaultZoomIncrement, r);
+            double zc = AdvancedMath.ratioDivide(z1, z1 + Math.log10(vds.defaultZoomIncrement()), r);
+            double lsr = Math.pow(vds.defaultZoomIncrement(), r);
             
             DoubleMatrix result = new DoubleMatrix((int) (w * multiplier), (int) (h * multiplier));
 
@@ -240,7 +245,7 @@ final class VideoRenderWindow extends JFrame{
                 return m1.pipetteAdvanced(x1, y1);
             });
             dispatcher.dispatch();
-            return new RFFMap(RFFMap.LATEST, zc, im, result);
+            return new RFFMap(zc, im1.period(), im, result);
 
         } else {
             int f1 = (int) frame; // it is smaller
@@ -289,7 +294,7 @@ final class VideoRenderWindow extends JFrame{
                 return m1.pipetteAdvanced(x1, y1);
             });
             dispatcher.dispatch();
-            return new RFFMap(RFFMap.LATEST, zc, im, result);
+            return new RFFMap(zc, im1.period(), im, result);
         }
     }
 

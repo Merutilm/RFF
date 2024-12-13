@@ -13,6 +13,7 @@ final class MUIConstants {
     }
 
     public static final int UI_HEIGHT = 30;
+    
     public static final int UI_SELECTION_HEIGHT = 25;
 
     public static final int SCROLL_BAR_WIDTH = 10;
