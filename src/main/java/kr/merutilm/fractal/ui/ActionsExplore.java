@@ -22,11 +22,11 @@ enum ActionsExplore implements Actions {
         Actions.getRenderer(master).recompute(), 
         KeyStroke.getKeyStroke(KeyEvent.VK_C, 0)),
     REFRESH_COLOR("Refresh Color", (master, name) -> {
-        RFFRenderer render = Actions.getRenderer(master);
+        RFFRenderPanel render = Actions.getRenderer(master);
         try {
             render.getState().createThread(id -> {
                 try {
-                    StatusPanel panel = master.getWindow().getStatusPanel();
+                    RFFStatusPanel panel = master.getWindow().getStatusPanel();
                     render.reloadAndPaint(id, false);
                     panel.setProcess("Done");
                 } catch (IllegalRenderStateException | InterruptedException e) {
@@ -38,7 +38,7 @@ enum ActionsExplore implements Actions {
         }
     }, KeyStroke.getKeyStroke(KeyEvent.VK_R, 0)),
     RESET("Reset", (master, name) -> {
-        RFFRenderer render = Actions.getRenderer(master);
+        RFFRenderPanel render = Actions.getRenderer(master);
         try {
             render.getState().cancel();
             master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit()
@@ -58,7 +58,7 @@ enum ActionsExplore implements Actions {
         }
     }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0)),
     FIND_CENTER("Find Center", (master, name) -> {
-        RFFRenderer render = Actions.getRenderer(master);
+        RFFRenderPanel render = Actions.getRenderer(master);
         if (render.getCurrentPerturbator() == null) {
             return;
         } 
@@ -88,7 +88,7 @@ enum ActionsExplore implements Actions {
         }
     }, KeyStroke.getKeyStroke(KeyEvent.VK_9, InputEvent.CTRL_DOWN_MASK)),
     LOCATE_MINIBROT("Locate Minibrot", (master, name) -> {
-        RFFRenderer render = Actions.getRenderer(master);
+        RFFRenderPanel render = Actions.getRenderer(master);
         if (render.getCurrentPerturbator() == null) {
             return;
         }
@@ -154,7 +154,7 @@ enum ActionsExplore implements Actions {
         return true;
     }
     public static BiConsumer<Integer, Integer> getActionWhileFindingMinibrotCenter(RFF master, int period){
-        StatusPanel panel = master.getWindow().getStatusPanel();
+        RFFStatusPanel panel = master.getWindow().getStatusPanel();
         int interval = periodPanelRefreshInterval(master);
         return (p, i) -> {
                             
@@ -168,7 +168,7 @@ enum ActionsExplore implements Actions {
     }
 
     public static DoubleConsumer getActionWhileFindingMinibrotZoom(RFF master){
-        StatusPanel panel = master.getWindow().getStatusPanel();
+        RFFStatusPanel panel = master.getWindow().getStatusPanel();
         return d -> TaskManager.runTask(() -> panel.setProcess("Finding Zoom... 10^-" + String.format("%.2f", d)));
     }
 

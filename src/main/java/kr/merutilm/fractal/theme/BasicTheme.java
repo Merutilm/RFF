@@ -10,12 +10,14 @@ public interface BasicTheme extends Theme {
     long INIT_ITERATION = 300;
     double INIT_LOG_ZOOM = 2;
     double INIT_BAILOUT = 2;
-    DecimalIterationSettings INIT_DECIMAL_ITERATION = DecimalIterationSettings.LINEAR;
+    BasicThemes DEFAULT_THEME = BasicThemes.RANDOMIZED_RAINBOW;
+    DecimalizeIterationMethod INIT_DECIMAL_ITERATION = DecimalizeIterationMethod.LINEAR;
     boolean INIT_AUTO_ITERATION = true;
-    ReuseReferenceSettings INIT_REUSE_REFERENCE = ReuseReferenceSettings.DISABLED;
+    ReuseReferenceMethod INIT_REUSE_REFERENCE = ReuseReferenceMethod.DISABLED;
     BLASettings INIT_BLA = new BLASettings(
-            -5,
-            3
+            -3,
+            3,
+            BLASelectionMethod.HIGHEST
     );
     String INIT_RE = "-0.85";
     String INIT_IM = "0";
@@ -34,8 +36,8 @@ public interface BasicTheme extends Theme {
 
     VideoSettings DEFAULT_VID = new VideoSettings(
             new DataSettings(2),
-            new AnimationSettings(2, true, Ease.LINEAR, 1),
-            new ExportSettings(30, 1, 1, 5000));
+            new AnimationSettings(2, true, 30, Ease.LINEAR, 1),
+            new ExportSettings(1, 1, 5000));
 
     @Override
     default Settings generate() {

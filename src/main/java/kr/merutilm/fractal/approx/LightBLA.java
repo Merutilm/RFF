@@ -8,6 +8,8 @@ import kr.merutilm.base.util.AdvancedMath;
  * On specific case, it is significantly fast than Series Approximation.
  */
 public interface LightBLA extends BLA{
+
+
     double radius();
     double anr();
     double ani();

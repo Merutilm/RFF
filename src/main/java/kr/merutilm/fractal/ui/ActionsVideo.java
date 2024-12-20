@@ -22,7 +22,7 @@ import kr.merutilm.fractal.settings.ExportSettings;
 import kr.merutilm.fractal.settings.VideoSettings;
 
 enum ActionsVideo implements Actions {
-    DATA("Data", (master, name) -> new SettingsWindow(name, panel -> {
+    DATA("Data", (master, name) -> new RFFSettingsWindow(name, panel -> {
         DataSettings data = getVideoSettings(master).dataSettings();
         
         Consumer<UnaryOperator<DataSettings.Builder>> applier = e -> 
@@ -33,7 +33,7 @@ enum ActionsVideo implements Actions {
         );
     }), null),
 
-    ANIMATION("Animation", (master, name) -> new SettingsWindow(name, panel -> {
+    ANIMATION("Animation", (master, name) -> new RFFSettingsWindow(name, panel -> {
         AnimationSettings animation = getVideoSettings(master).animationSettings();
         
         Consumer<UnaryOperator<AnimationSettings.Builder>> applier = e -> 
@@ -45,6 +45,9 @@ enum ActionsVideo implements Actions {
         panel.createBoolInput("Show Text", animation.showText(), e -> 
         	applier.accept(f -> f.setShowText(e))
         );
+        panel.createTextInput("MPS", animation.mps(), Double::parseDouble, e -> 
+            applier.accept(f -> f.setMps(e))
+        );
         panel.createSelectInput("Animation Ease", animation.stripeAnimationEase(), Ease.values(), e -> 
             applier.accept(f -> f.setStripeAnimationEase(e)), true);
         panel.createTextInput("Animation Speed", animation.stripeAnimationSpeed(), Double::parseDouble, e -> 
@@ -52,7 +55,7 @@ enum ActionsVideo implements Actions {
         );
     }), null),
 
-    EXPORT_SETTINGS("Export Settings", (master, name) -> new SettingsWindow(name, panel -> {
+    EXPORT_SETTINGS("Export Settings", (master, name) -> new RFFSettingsWindow(name, panel -> {
         ExportSettings export = getVideoSettings(master).exportSettings();
         
         Consumer<UnaryOperator<ExportSettings.Builder>> applier = e -> 
@@ -60,9 +63,6 @@ enum ActionsVideo implements Actions {
 
         panel.createTextInput("FPS",export.fps(), Double::parseDouble, e -> 
             applier.accept(f -> f.setFps(e))
-        );
-        panel.createTextInput("MPS", export.mps(), Double::parseDouble, e -> 
-            applier.accept(f -> f.setMps(e))
         );
         panel.createTextInput("Multi Sampling", export.multiSampling(), Double::parseDouble, e -> 
             applier.accept(f -> f.setMultiSampling(e))
@@ -75,7 +75,7 @@ enum ActionsVideo implements Actions {
         File defOpen = new File(IOUtilities.getOriginalResource(), IOUtilities.DefaultDirectory.MAP_AS_VIDEO_DATA.toString());
         File dir = defOpen.isDirectory() ? defOpen : IOUtilities.selectFolder("Folder to Export Samples");
         DataSettings dataSettings = master.getSettings().videoSettings().dataSettings();
-        RFFRenderer render = Actions.getRenderer(master);
+        RFFRenderPanel render = Actions.getRenderer(master);
         if(dir == null){
             return;
         }
@@ -119,7 +119,7 @@ enum ActionsVideo implements Actions {
             if(toSave == null){
                 return;
             }
-            VideoRenderWindow.createVideo(master.getSettings(), selected, toSave);
+            RFFVideoWindow.createVideo(master.getSettings(), selected, toSave);
     }, KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK)),
     ;
    

@@ -12,7 +12,7 @@ public class LightBLASingle implements LightBLA {
     private final int skip;
     private final double radius;
 
-    public LightBLASingle(int targetIter, double zr, double zi, double dcMax, double epsilon) {
+    public LightBLASingle(int targetIter, double zr, double zi, double epsilon, double dcMax) {
         this.targetIter = targetIter;
         this.anr = 2 * zr;
         this.ani = 2 * zi;
@@ -20,7 +20,8 @@ public class LightBLASingle implements LightBLA {
         this.bni = 0;
         this.skip = 1;
         double rz = AdvancedMath.hypotApproximate(zr, zi);
-        this.radius =  Math.max(0, 2 * epsilon * rz - dcMax / (2 * rz));
+        
+        this.radius = Math.max(0, 2 * epsilon * rz - dcMax / (2 * rz));
     }
 
     @Override

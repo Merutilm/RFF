@@ -13,7 +13,7 @@ import kr.merutilm.fractal.settings.*;
 
 enum ActionsShader implements Actions {
 
-    PALETTE("Palette", (master, name) -> new SettingsWindow(name, panel -> {
+    PALETTE("Palette", (master, name) -> new RFFSettingsWindow(name, panel -> {
         ColorSettings color = getShaderSettings(master).colorSettings();
         
         Consumer<UnaryOperator<ColorSettings.Builder>> applier = e -> {
@@ -32,7 +32,7 @@ enum ActionsShader implements Actions {
         );
     }), null),
 
-    STRIPE("Stripe", (master, name) -> new SettingsWindow(name, panel -> {
+    STRIPE("Stripe", (master, name) -> new RFFSettingsWindow(name, panel -> {
         StripeSettings color = getShaderSettings(master).stripeSettings();
         
         Consumer<UnaryOperator<StripeSettings.Builder>> applier = e -> {
@@ -57,7 +57,7 @@ enum ActionsShader implements Actions {
             applier.accept(f -> f.setOffset(e))
         );
     }), null),
-    SLOPE("Slope", (master, name) -> new SettingsWindow(name, panel -> {
+    SLOPE("Slope", (master, name) -> new RFFSettingsWindow(name, panel -> {
         SlopeSettings slope = getShaderSettings(master).slopeSettings();
         
         Consumer<UnaryOperator<SlopeSettings.Builder>> applier = e -> {
@@ -84,7 +84,7 @@ enum ActionsShader implements Actions {
         
     }), null),
     COLOR_FILTER("Color Filter", (master, name) -> 
-        new SettingsWindow(name, panel -> {
+        new RFFSettingsWindow(name, panel -> {
             ColorFilterSettings colorFilter = getShaderSettings(master).colorFilterSettings();
         
             Consumer<UnaryOperator<ColorFilterSettings.Builder>> applier = e -> {
@@ -108,7 +108,7 @@ enum ActionsShader implements Actions {
                 applier.accept(f -> f.setContrast(e))
             );
         }), null),
-    FOG("Fog", (master, name) -> new SettingsWindow(name, panel -> {
+    FOG("Fog", (master, name) -> new RFFSettingsWindow(name, panel -> {
         FogSettings fog = getShaderSettings(master).fogSettings();
         
         Consumer<UnaryOperator<FogSettings.Builder>> applier = e -> {
@@ -123,7 +123,7 @@ enum ActionsShader implements Actions {
         	applier.accept(f -> f.setOpacity(e))
         );
     }), null),
-    BLOOM("Bloom", (master, name) -> new SettingsWindow(name, panel -> {
+    BLOOM("Bloom", (master, name) -> new RFFSettingsWindow(name, panel -> {
         BloomSettings bloom = getShaderSettings(master).bloomSettings();
     
         Consumer<UnaryOperator<BloomSettings.Builder>> applier = e -> {

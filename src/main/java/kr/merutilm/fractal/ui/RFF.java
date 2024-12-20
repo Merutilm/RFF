@@ -4,9 +4,10 @@ import kr.merutilm.fractal.settings.CalculationSettings;
 import kr.merutilm.fractal.settings.ImageSettings;
 import kr.merutilm.fractal.settings.Settings;
 import kr.merutilm.fractal.theme.BasicTheme;
-import kr.merutilm.fractal.theme.BasicThemes;
 import kr.merutilm.fractal.theme.Theme;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.UnaryOperator;
 
 import javax.swing.UIManager;
@@ -19,22 +20,22 @@ import javax.swing.UnsupportedLookAndFeelException;
  */
 final class RFF {
 
-    private final RFFWindow window;
+    private final RFFRenderWindow window;
 
     private static final int INIT_WIDTH = 1280;
     private static final int INIT_HEIGHT = 720;
     
-    public static final BasicThemes DEFAULT_THEME = BasicThemes.RANDOMIZED_RAINBOW_SHADED;
+    public final List<String> activeWindows = new ArrayList<>();
 
-    private Theme theme = DEFAULT_THEME.getTheme();
+    private Theme theme = BasicTheme.DEFAULT_THEME.getTheme();
     private Settings settings = theme.generate();
 
     public RFF() throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException{
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        this.window = new RFFWindow(this, INIT_WIDTH, INIT_HEIGHT);
+        this.window = new RFFRenderWindow(this, INIT_WIDTH, INIT_HEIGHT);
     }
 
-    public RFFWindow getWindow() {
+    public RFFRenderWindow getWindow() {
         return window;
     }
 

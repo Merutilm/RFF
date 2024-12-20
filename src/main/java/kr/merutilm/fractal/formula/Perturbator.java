@@ -8,7 +8,6 @@ import kr.merutilm.fractal.struct.LWBigComplex;
 
 
 public abstract class Perturbator {
-    public static final double INTERIOR_DETECTION_ERROR = 1.0E-6;
     private static final int PRECISION_ADDITION = 18;
     private static final double LN2 = Math.log(2);
     protected final RenderState state;

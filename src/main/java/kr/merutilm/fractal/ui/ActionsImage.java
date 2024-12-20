@@ -16,14 +16,14 @@ import kr.merutilm.fractal.settings.ImageSettings;
 import kr.merutilm.fractal.theme.BasicThemes;
 
 enum ActionsImage implements Actions {
-    THEME("Set Theme", (master, name) -> new SettingsWindow(name, panel -> {panel.createSelectInput(name,
+    THEME("Set Theme", (master, name) -> new RFFSettingsWindow(name, panel -> {panel.createSelectInput(name,
             BasicThemes.tryMatch(master.getTheme()), BasicThemes.values(), e -> {
                 master.setTheme(e.getTheme());
                 ActionsExplore.REFRESH_COLOR.accept(master);
             }, true);
             panel.setSize(panel.getWidth(), 150);
         }), KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_DOWN_MASK)),
-    RESOLUTION("Set Resolution", (master, name) -> new SettingsWindow(name, panel -> {
+    RESOLUTION("Set Resolution", (master, name) -> new RFFSettingsWindow(name, panel -> {
 
         ImageSettings image = getImageSettings(master);
 

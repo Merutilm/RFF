@@ -49,7 +49,7 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
         
         long iteration = 0;
         int refIteration = 0;
-        int maxRefIteration = rr.length - 1;
+        int maxRefIteration = reference.period();
 
         DoubleExponent dzr = DoubleExponent.ZERO; // delta z
         DoubleExponent dzi = DoubleExponent.ZERO;
@@ -64,7 +64,7 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
 
             if(table != null){
                 DeepBLA bla = table.lookup(refIteration, dzr, dzi);
-                if (bla != null && refIteration + bla.skip() < maxRefIteration) {
+                if (bla != null) {
                     DoubleExponent dzr1 = bla.anr().multiply(dzr).subtract(bla.ani().multiply(dzi)).add(bla.bnr().multiply(dcr)).subtract(bla.bni().multiply(dci));
                     DoubleExponent dzi1 = bla.anr().multiply(dzi).add(bla.ani().multiply(dzr)).add(bla.bnr().multiply(dci)).add(bla.bni().multiply(dcr));
     
@@ -113,7 +113,7 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
 
         }
 
-        if (iteration == maxIteration) {
+        if (iteration >= maxIteration) {
             return maxIteration;
         }
 

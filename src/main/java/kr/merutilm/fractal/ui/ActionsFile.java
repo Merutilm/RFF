@@ -13,7 +13,7 @@ import kr.merutilm.fractal.io.RFFMap;
 enum ActionsFile implements Actions{
     
     OPEN_MAP("Open Map", (master, name) -> {
-        RFFRenderer renderer = master.getWindow().getRenderer();
+        RFFRenderPanel renderer = master.getWindow().getRenderer();
         File file = IOUtilities.selectFile(name, IOUtilities.Extension.MAP.toString(), "RFF Map");
         if(file == null){
             return;

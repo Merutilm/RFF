@@ -12,22 +12,26 @@ public class LightBLATable implements BLATable{
 
     public final int iterationInterval;
 
+    private final BLASettings settings;
     private final LightBLA[] table;
     private final int[] indices;
-    private final int max;
+    private final int period;
 
-    public LightBLATable(RenderState state, int currentID, BLASettings blaSettings, double[] zr, double[] zi, double dcMax) throws IllegalRenderStateException {
+    public LightBLATable(RenderState state, int currentID, BLASettings blaSettings, double[] zr, double[] zi, int period, double dcMax) throws IllegalRenderStateException {
         List<LightBLA> table = new ArrayList<>();
         int minLevel = blaSettings.minLevel();
-        this.max = zr.length;
+        this.settings = blaSettings;
+        this.period = period;
         this.iterationInterval = (int) Math.pow(2, minLevel);
         double epsilon = Math.pow(10, blaSettings.epsilonPower());
 
-        for (int i = 1; i <= max - iterationInterval; i += iterationInterval) {
+        for (int i = 1; i < BLATable.getMaxSkippableIteration(period, iterationInterval); i += iterationInterval) {
             List<LightBLA> merged = new ArrayList<>();
             for (int j = 0; j < iterationInterval; j++) {
-                merged.add(new LightBLASingle(i + j, zr[i + j], zi[i + j], dcMax, epsilon));
+                LightBLASingle single = new LightBLASingle(i + j, zr[i + j], zi[i + j], epsilon, dcMax);
+                merged.add(single);
             }
+
             while (merged.size() > 1) {
 
                 List<LightBLA> temp = new ArrayList<>();
@@ -43,20 +47,21 @@ public class LightBLATable implements BLATable{
         }
 
         List<LightBLA> higherBLA = table;
-
+        
         while (higherBLA.size() > 1) {
             List<LightBLA> higherBLATemp = new ArrayList<>();
 
-            for (int j = 0; j <= higherBLA.size() - 2; j += 2) {
+            for (int j = 0; j < higherBLA.size() - 1; j += 2) {
                 higherBLATemp.add(new LightBLAMerged(higherBLA.get(j), higherBLA.get(j + 1), dcMax));
             }
             table.addAll(higherBLATemp);
             higherBLA = higherBLATemp;
             state.tryBreak(currentID);
         }
+
         table = table.stream().sorted(Comparator.comparing(BLA::targetIter)).toList();
 
-        indices = new int[max];
+        indices = new int[period];
         Arrays.fill(indices, -1);
         for (int i = 0; i < table.size(); i++) {
             int iteration = table.get(i).targetIter();
@@ -72,29 +77,51 @@ public class LightBLATable implements BLATable{
 
 
     public LightBLA lookup(int iteration, double dzr, double dzi) {
-
-        if (iteration >= max - iterationInterval) {
+        //iterationInterval is power of 2, 
+        // use a bit operator because remainder operation (%) is slow
+        if (iteration >= BLATable.getMaxSkippableIteration(period, iterationInterval) || ((iteration - 1) & (iterationInterval - 1)) > 0) {
             return null;
         }
 
-        int i = indices[iteration];
-        int iNext = indices[iteration + iterationInterval];
-        iNext = iNext == -1 ? table.length - 1 : iNext;
 
+        int i = indices[iteration];
 
         if (i == -1) {
             return null;
         }
 
+
+        int iNext = indices[iteration + iterationInterval];
+        iNext = iNext == -1 ? table.length - 1 : iNext;
+
         if(!table[i].isValid(dzr, dzi)){
             return null;
         }
 
-        for (int j = iNext - 1; j >= i; j--) {
-            if (table[j].isValid(dzr, dzi)) {
-                return table[j];
+        switch (settings.blaSelectionMethod()) {
+            case LOWEST -> {
+                LightBLA valid = null;
+                for (int j = i + 1; j < iNext; j++) {
+                    if (table[j].isValid(dzr, dzi)) {
+                        valid = table[j];
+                    }else break;
+                }
+                return valid;
+            }
+            case HIGHEST -> {
+
+                for (int j = iNext - 1; j >= i + 1; j--) {
+                    if (table[j].isValid(dzr, dzi)) {
+                        return table[j];
+                    }
+                }
+            }
+            default -> {
+                throw new UnsupportedOperationException();
             }
         }
+
+        
         return null;
     }
 

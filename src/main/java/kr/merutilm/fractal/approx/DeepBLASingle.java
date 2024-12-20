@@ -13,7 +13,7 @@ public class DeepBLASingle implements DeepBLA {
     private final int skip;
     private final DoubleExponent radius;
 
-    public DeepBLASingle(int targetIter, DoubleExponent zr, DoubleExponent zi, DoubleExponent dcMax, DoubleExponent epsilon) {
+    public DeepBLASingle(int targetIter, DoubleExponent zr, DoubleExponent zi, DoubleExponent epsilon, DoubleExponent dcMax) {
         this.targetIter = targetIter;
         this.anr = zr.doubled();
         this.ani = zi.doubled();

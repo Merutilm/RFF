@@ -13,16 +13,16 @@ public record CalculationSettings(
         double logZoom,
         long maxIteration,
         double bailout,
-        DecimalIterationSettings decimalIterationSettings,
+        DecimalizeIterationMethod decimalIterationSettings,
         LWBigComplex center,
         boolean autoIteration,
-        ReuseReferenceSettings reuseReference,
+        ReuseReferenceMethod reuseReference,
         BLASettings blaSettings
 ) implements Struct<CalculationSettings> {
 
     public static final double ZOOM_VALUE = 0.235;
 
-    public static final double MININUM_ZOOM = 2;
+    public static final double MININUM_ZOOM = 1;
 
     @Override
     public Builder edit() {
@@ -42,10 +42,10 @@ public record CalculationSettings(
         private double logZoom;
         private long maxIteration;
         private double bailout;
-        private DecimalIterationSettings decimalIterationSettings;
+        private DecimalizeIterationMethod decimalIterationSettings;
         private LWBigComplex center;
         private boolean autoIteration;
-        private ReuseReferenceSettings reuseReference;
+        private ReuseReferenceMethod reuseReference;
         private BLASettings blaSettings;
 
         public Builder setLogZoom(double logZoom) {
@@ -73,12 +73,12 @@ public record CalculationSettings(
             return this;
         }
 
-        public Builder setDecimalIterationSettings(DecimalIterationSettings decimalIterationSettings) {
+        public Builder setDecimalIterationSettings(DecimalizeIterationMethod decimalIterationSettings) {
             this.decimalIterationSettings = decimalIterationSettings;
             return this;
         }
 
-        public Builder setReuseReference(ReuseReferenceSettings reuseReference) {
+        public Builder setReuseReference(ReuseReferenceMethod reuseReference) {
             this.reuseReference = reuseReference;
             return this;
         }

@@ -8,7 +8,7 @@ import kr.merutilm.base.selectable.Selectable;
 
 interface Actions extends Consumer<RFF>, Selectable{
     
-    static RFFRenderer getRenderer(RFF master) {
+    static RFFRenderPanel getRenderer(RFF master) {
         return master.getWindow().getRenderer();
     }
 

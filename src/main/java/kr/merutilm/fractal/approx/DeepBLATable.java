@@ -16,19 +16,20 @@ public class DeepBLATable implements BLATable{
 
     private final DeepBLA[] table;
     private final int[] indices;
-    private final int max;
+    private final int period;
 
-    public DeepBLATable(RenderState state, int currentID, BLASettings blaSettings, DoubleExponent[] zr, DoubleExponent[] zi, DoubleExponent dcMax) throws IllegalRenderStateException {
+    public DeepBLATable(RenderState state, int currentID, BLASettings blaSettings, DoubleExponent[] zr, DoubleExponent[] zi, int period, DoubleExponent dcMax) throws IllegalRenderStateException {
         List<DeepBLA> table = new ArrayList<>();
         int minLevel = blaSettings.minLevel();
-        this.max = zr.length;
+        this.period = period;
         this.iterationInterval = (int) Math.pow(2, minLevel);
         DoubleExponent epsilon = DoubleExponentMath.pow10(blaSettings.epsilonPower());
 
-        for (int i = 1; i <= max - iterationInterval; i += iterationInterval) {
+        for (int i = 1; i < BLATable.getMaxSkippableIteration(period, iterationInterval); i += iterationInterval) {
             List<DeepBLA> merged = new ArrayList<>();
             for (int j = 0; j < iterationInterval; j++) {
-                merged.add(new DeepBLASingle(i + j, zr[i + j], zi[i + j], dcMax, epsilon));
+                DeepBLASingle single = new DeepBLASingle(i + j, zr[i + j], zi[i + j], epsilon, dcMax);
+                merged.add(single);
             }
             while (merged.size() > 1) {
 
@@ -49,16 +50,17 @@ public class DeepBLATable implements BLATable{
         while (higherBLA.size() > 1) {
             List<DeepBLA> higherBLATemp = new ArrayList<>();
 
-            for (int j = 0; j <= higherBLA.size() - 2; j += 2) {
+            for (int j = 0; j < higherBLA.size() - 1; j += 2) {
                 higherBLATemp.add(new DeepBLAMerged(higherBLA.get(j), higherBLA.get(j + 1), dcMax));
             }
             table.addAll(higherBLATemp);
             higherBLA = higherBLATemp;
             state.tryBreak(currentID);
         }
+
         table = table.stream().sorted(Comparator.comparing(BLA::targetIter)).toList();
 
-        indices = new int[max];
+        indices = new int[period];
         Arrays.fill(indices, -1);
         for (int i = 0; i < table.size(); i++) {
             int iteration = table.get(i).targetIter();
@@ -74,18 +76,22 @@ public class DeepBLATable implements BLATable{
 
 
     public DeepBLA lookup(int iteration, DoubleExponent dzr, DoubleExponent dzi) {
-        if (iteration >= max - iterationInterval) {
+        //iterationInterval is power of 2, 
+        // use a bit operator because remainder operation (%) is slow
+        if (iteration >= BLATable.getMaxSkippableIteration(period, iterationInterval) || ((iteration - 1) & (iterationInterval - 1)) > 0) {
             return null;
         }
 
-        int i = indices[iteration];
-        int iNext = indices[iteration + iterationInterval];
-        iNext = iNext == -1 ? table.length - 1 : iNext;
 
+        int i = indices[iteration];
 
         if (i == -1) {
             return null;
         }
+
+
+        int iNext = indices[iteration + iterationInterval];
+        iNext = iNext == -1 ? table.length - 1 : iNext;
 
         if(!table[i].isValid(dzr, dzi)){
             return null;

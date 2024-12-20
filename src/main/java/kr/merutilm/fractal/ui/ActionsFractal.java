@@ -10,11 +10,12 @@ import kr.merutilm.fractal.struct.LWBigComplex;
 import kr.merutilm.fractal.struct.LWBigDecimal;
 import kr.merutilm.fractal.settings.CalculationSettings;
 import kr.merutilm.fractal.settings.BLASettings;
-import kr.merutilm.fractal.settings.DecimalIterationSettings;
-import kr.merutilm.fractal.settings.ReuseReferenceSettings;
+import kr.merutilm.fractal.settings.DecimalizeIterationMethod;
+import kr.merutilm.fractal.settings.BLASelectionMethod;
+import kr.merutilm.fractal.settings.ReuseReferenceMethod;
 
 enum ActionsFractal implements Actions {
-    BLA("BLA", (master, name) -> new SettingsWindow(name, panel -> {
+    BLA("BLA", (master, name) -> new RFFSettingsWindow(name, panel -> {
         BLASettings bla = getCalculationSettings(master).blaSettings();
         
         Consumer<UnaryOperator<BLASettings.Builder>> applier = e -> 
@@ -27,9 +28,13 @@ enum ActionsFractal implements Actions {
         panel.createTextInput("Minimum Level", bla.minLevel(), Integer::parseInt, e -> 
             applier.accept(f -> f.setMinLevel(e))
         );
+
+        panel.createSelectInput("Selection Method", bla.blaSelectionMethod(), BLASelectionMethod.values(), e -> 
+            applier.accept(f -> f.setBlaSelectionMethod(e)), false
+        );
     }), null),
 
-    ITERATIONS("Iterations", (master, name) -> new SettingsWindow(name, panel -> {
+    ITERATIONS("Iterations", (master, name) -> new RFFSettingsWindow(name, panel -> {
         CalculationSettings calc = getCalculationSettings(master);
         
         Consumer<UnaryOperator<CalculationSettings.Builder>> applier = e -> 
@@ -41,7 +46,7 @@ enum ActionsFractal implements Actions {
         panel.createTextInput("Bailout", calc.bailout(), Double::parseDouble, e -> 
             applier.accept(f -> f.setBailout(e))
         );
-        panel.createSelectInput("Decimal Iteration", calc.decimalIterationSettings(), DecimalIterationSettings.values(), e -> 
+        panel.createSelectInput("Decimal Iteration", calc.decimalIterationSettings(), DecimalizeIterationMethod.values(), e -> 
             applier.accept(f -> f.setDecimalIterationSettings(e)), true
         );
         panel.createBoolInput("Automatic Iterations", calc.autoIteration(), e -> 
@@ -50,7 +55,7 @@ enum ActionsFractal implements Actions {
     }), null),
 
 
-    REFERENCE("Reference", (master, name) -> new SettingsWindow(name, panel -> {
+    REFERENCE("Reference", (master, name) -> new RFFSettingsWindow(name, panel -> {
         CalculationSettings calc = getCalculationSettings(master);
         
         Consumer<UnaryOperator<CalculationSettings.Builder>> applier = e -> 
@@ -67,7 +72,7 @@ enum ActionsFractal implements Actions {
         panel.createTextInput("Log Zoom", calc.logZoom(), Double::parseDouble, e -> 
             applier.accept(f -> f.setLogZoom(e))
         );
-        panel.createSelectInput("Reuse Reference",  calc.reuseReference(), ReuseReferenceSettings.values(), e -> 
+        panel.createSelectInput("Reuse Reference",  calc.reuseReference(), ReuseReferenceMethod.values(), e -> 
             applier.accept(f -> f.setReuseReference(e)), false
         );
         

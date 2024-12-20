@@ -56,7 +56,7 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
             DoubleExponent prz2 = DoubleExponentMath.hypot2(pzr, pzi);
             
             //use Fast-Period-Guessing 
-            DoubleExponent limit = limit(prz2, dcMax);
+            DoubleExponent limit = prz2.divide(dcMax);
             DoubleExponent fpgBnrTemp = fpgBnr.multiply(pzr.doubled()).subtract(fpgBni.multiply(pzi.doubled())).add(DoubleExponent.ONE);
             DoubleExponent fpgBniTemp = fpgBnr.multiply(pzi.doubled()).add(fpgBni.multiply(pzr.doubled()));
             DoubleExponent r = DoubleExponentMath.hypotApproximate(fpgBnrTemp, fpgBniTemp);
@@ -89,12 +89,9 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
         return new DeepMandelbrotReference(formula, center, rr1, ri1, period, lastRef, fpgBn);
     }
 
-    private static DoubleExponent limit(DoubleExponent prz2, DoubleExponent dcMax){
-        return prz2.multiply(32 * FPG_MAX_EPSILON).divide(dcMax);
-    }
 
     public DeepBLATable generateBLA(RenderState state, int renderID, BLASettings blaSettings, DoubleExponent dcMax) throws IllegalRenderStateException{
-        return new DeepBLATable(state, renderID, blaSettings, refReal, refImag, dcMax);
+        return new DeepBLATable(state, renderID, blaSettings, refReal, refImag, period, dcMax);
     }
 
     @Override
