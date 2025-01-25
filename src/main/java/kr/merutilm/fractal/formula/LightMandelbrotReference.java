@@ -9,11 +9,10 @@ import kr.merutilm.base.parallel.RenderState;
 import kr.merutilm.base.util.AdvancedMath;
 import kr.merutilm.base.util.ArrayFunction;
 import kr.merutilm.fractal.approx.LightBLATable;
-import kr.merutilm.fractal.approx.LightRRA;
 import kr.merutilm.fractal.settings.BLASettings;
 import kr.merutilm.fractal.struct.LWBigComplex;
 
-public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter,double[] refReal, double[] refImag, int period, LWBigComplex lastReference, LWBigComplex fpgBn, LightRRA[] rraTable) implements MandelbrotReference{
+public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter,double[] refReal, double[] refImag, int period, LWBigComplex lastReference, LWBigComplex fpgBn) implements MandelbrotReference{
 
     public static LightMandelbrotReference generate(RenderState state, int renderID, LWBigComplex center, int precision, long maxIteration, double bailout, int initialPeriod, double dcMax, boolean strictFPGBn, IntConsumer actionPerRefCalcIteration) throws IllegalRenderStateException{
         state.tryBreak(renderID);
@@ -24,12 +23,12 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter,d
         rr[0] = 0;
         ri[0] = 0;
 
+       
+
         LWBigComplex z = LWBigComplex.zero(precision);
         LWBigComplex lastRef = z;
         LWBigComplex fpgBn = LWBigComplex.zero(precision);
 
-        double rraQnr = 1;
-        double rraQni = 0;
         double fpgBnr = 0;
         double fpgBni = 0;
 
@@ -40,13 +39,10 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter,d
         double zi = 0;
         int period = 1;
 
-        int rraLength = Math.max(0, -Math.getExponent(dcMax) / RRA_UNIT_POWER);
         
-        int rraIndex = 0;
-        double epsilon = 1.0E-3;
-
-        LightRRA[] table = new LightRRA[rraLength];
-        double checkDzLength = 1;
+        int[] periodArrayTemp = new int[1];
+        int periodArrayIndex = 0;
+        double minZRadius = Double.MAX_VALUE;
         
         while (zr * zr + zi * zi < bailout * bailout && iteration < maxIteration) {
 
@@ -60,40 +56,43 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter,d
             zr = z.re().doubleValue();
             zi = z.im().doubleValue();
 
-            double prz2 = pzr * pzr + pzi * pzi;
+            double prevZRadius2 = pzr * pzr + pzi * pzi;
 
             // use Fast-Period-Guessing, and create RRA Table
-            double fpgLimit = prz2 / dcMax;
-
-            double rraQnrTemp = iteration == 0 ? 1 : rraQnr * pzr * 2 - rraQni * pzi * 2;
-            double rraQniTemp = iteration == 0 ? 0 : rraQnr * pzi * 2 + rraQni * pzr * 2;
-            double rraRadius = AdvancedMath.hypotApproximate(rraQnrTemp, rraQniTemp);
+            double fpgLimit = prevZRadius2 / dcMax;
 
             double fpgBnrTemp = fpgBnr * pzr * 2 - fpgBni * pzi * 2 + 1;
             double fpgBniTemp = fpgBnr * pzi * 2 + fpgBni * pzr * 2;
             double fpgRadius = AdvancedMath.hypotApproximate(fpgBnrTemp, fpgBniTemp);
 
-
-            
             actionPerRefCalcIteration.accept(iteration);
 
-            while(iteration >= 1 && rraIndex < rraLength && rraRadius * checkDzLength + fpgRadius * dcMax > epsilon *  2 * AdvancedMath.hypotApproximate(zr, zi)){
-                table[rraIndex] = new LightRRA(rraQnr, rraQni, fpgBnr, fpgBni, iteration);
-                rraIndex++;
-                checkDzLength /= (2 << RRA_UNIT_POWER);
+            if(minZRadius > prevZRadius2 && prevZRadius2 > 0){
+                minZRadius = prevZRadius2;
+                if(periodArrayIndex == periodArrayTemp.length){
+                    periodArrayTemp = ArrayFunction.exp2xArr(periodArrayTemp);
+                }
+                
+                periodArrayTemp[periodArrayIndex] = iteration;
+                periodArrayIndex++;
             }
 
             if ((iteration >= 1 && fpgRadius > fpgLimit) || iteration == maxIteration - 1 || initialPeriod == iteration) {
                 period = iteration;
+
+                if(periodArrayIndex == periodArrayTemp.length){
+                    periodArrayTemp = ArrayFunction.exp2xArr(periodArrayTemp);
+                }
+                periodArrayTemp[periodArrayIndex] = iteration;
                 break;
             }
+
+            
 
             if(strictFPGBn){
                 fpgBn = fpgBn.multiply(lastRef, precision).doubled().add(LWBigComplex.valueOf(1,0, precision), precision);
             }
 
-            rraQnr = rraQnrTemp;
-            rraQni = rraQniTemp;
             fpgBnr = fpgBnrTemp;
             fpgBni = fpgBniTemp;
             
@@ -109,20 +108,87 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter,d
             ri[iteration] = zi;
         }
 
-        for (int i = 0; i < table.length; i++) {
-            if(i >= 1 && table[i] == null){
-                table[i] = table[i - 1];
+        boolean useSwirlGuessing = true; // TODO : create parameters
+        if(useSwirlGuessing){
+            int swirlPeriod = 1;
+            double swirlDzrTemp = 0;
+            double swirlDziTemp = 0;
+            double swirlDzr = 0;
+            double swirlDzi = 0;
+            double squaredSwirlDzThreshold = dcMax * 100;
+            double swirlDetectionThreshold = 2;
+            
+            z = LWBigComplex.zero(precision);
+            iteration = 0;
+            double prevSwirlDz2 = 0;
+
+            while (zr * zr + zi * zi < bailout * bailout && iteration < maxIteration) {
+
+                state.tryBreak(renderID);
+    
+                pzr = zr;
+                pzi = zi;
+                z = formula.apply(z, center, precision);
+    
+                zr = z.re().doubleValue();
+                zi = z.im().doubleValue();
+    
+                
+                if(iteration % swirlPeriod == 0){  
+                    swirlDzr = pzr - swirlDzrTemp;
+                    swirlDzi = pzi - swirlDziTemp;
+                    swirlDzrTemp = pzr;
+                    swirlDziTemp = pzi;
+                    double swirlDz2 = swirlDzr * swirlDzr + swirlDzi * swirlDzi;
+
+                    if(0 < prevSwirlDz2 && prevSwirlDz2 <= swirlDz2 && swirlDz2 / prevSwirlDz2 < swirlDetectionThreshold && swirlDz2 < squaredSwirlDzThreshold){
+                        break;
+                    }
+                    prevSwirlDz2 = swirlDz2;
+                }
+    
+                actionPerRefCalcIteration.accept(iteration);
+                iteration++;
             }
+
+            System.out.println(iteration - 1);
         }
-        System.out.println(Arrays.stream(table).map(e -> e == null ? null : e.skip()).toList());
+        
+
         if(!strictFPGBn){
             fpgBn = LWBigComplex.valueOf(fpgBnr, fpgBni, precision);
+        }
+        
+        int currentPeriod = periodArrayTemp[0];
+        int[] periodArray = new int[1];
+        int validPeriodCount = 0;
+
+        for (int i = 0; i < periodArrayTemp.length; i++) {
+
+            if(currentPeriod * 2 < periodArrayTemp[i]){
+                validPeriodCount++;
+            }
+
+            if(periodArrayTemp[i] == 0){
+                break;
+            }
+
+            currentPeriod = periodArrayTemp[i];
+
+            if(validPeriodCount == periodArray.length){
+                periodArray = ArrayFunction.exp2xArr(periodArray);
+            }
+            periodArray[validPeriodCount] = currentPeriod;
         }
 
         rr = Arrays.copyOfRange(rr, 0, period + 1);
         ri = Arrays.copyOfRange(ri, 0, period + 1);
+        periodArray = Arrays.copyOfRange(periodArray, 0, validPeriodCount + 1);
 
-        return new LightMandelbrotReference(formula, center, rr, ri, period, lastRef, fpgBn, table);
+        System.out.println(Arrays.toString(periodArray));
+
+
+        return new LightMandelbrotReference(formula, center, rr, ri, period, lastRef, fpgBn);
     }
 
     public LightBLATable generateBLA(RenderState state, int renderID, BLASettings blaSettings, double dcMax) throws IllegalRenderStateException{

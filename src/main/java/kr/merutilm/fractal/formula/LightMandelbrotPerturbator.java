@@ -4,10 +4,8 @@ import java.util.function.IntConsumer;
 
 import kr.merutilm.base.exception.IllegalRenderStateException;
 import kr.merutilm.base.parallel.RenderState;
-import kr.merutilm.base.util.AdvancedMath;
 import kr.merutilm.fractal.approx.LightBLA;
 import kr.merutilm.fractal.approx.LightBLATable;
-import kr.merutilm.fractal.approx.LightRRA;
 import kr.merutilm.fractal.settings.CalculationSettings;
 import kr.merutilm.fractal.struct.DoubleExponent;
 import kr.merutilm.fractal.struct.LWBigComplex;
@@ -35,6 +33,7 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
         this.reference = reusedTable == null ? LightMandelbrotReference.generate(state, currentID, calc.center(), precision, calc.maxIteration(), bailout, period, dcMax, strictFPGBn, actionPerRefCalcIteration) : reusedReference;
         this.table = reusedTable == null ? reference.generateBLA(state, currentID, calc.blaSettings(), dcMax) : reusedTable;
     }
+ // AtomicInteger a = new AtomicInteger();
 
     // it returns the double value of iteration
     // Performs the corresponding action on all pixels
@@ -44,7 +43,7 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
         double dci1 = dci.doubleValue() + offI;
         double[] rr = reference.refReal();
         double[] ri = reference.refImag();
-
+ // int i = a.incrementAndGet();
 
         long iteration = 0;
         int refIteration = 0;
@@ -58,7 +57,12 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
 
         double cd = 0;
         double pd = cd;
-
+//        if (i == 1) {
+//            System.out.println("[SKIP VALUES]");
+//        }
+//        int startRef = 0;
+//        int skipCount = 0;
+//        boolean isFirst = true;
         while (iteration < maxIteration) {
 
             if(table != null){
@@ -76,6 +80,23 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
                     if (iteration >= maxIteration) {
                         return maxIteration;
                     }
+                    
+    //                if (i == 1) { //Tracking refIteration Skips
+    //                    if (isFirst) {
+    //                        startRef = refIteration;
+    //                    }
+    //
+    //                    if (!isFirst && startRef + skipCount != refIteration) {
+    //                        System.out.println("S " + startRef + ", K " + skipCount + ", E " + (startRef + skipCount));
+    //                        skipCount = 0;
+    //                        isFirst = true;
+    //                    } else {
+    //                        skipCount += bla.skip();
+    //                        isFirst = false;
+    //                    }
+    //
+    //                }
+    
                     continue;
                 }
             }
@@ -102,25 +123,9 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
             cd = zr * zr + zi * zi;
 
             if (refIteration == maxRefIteration || cd < dzr * dzr + dzi * dzi) {
-                
-                int index = Math.max(0, -Math.getExponent(AdvancedMath.hypotApproximate(dzr, dzi)) / MandelbrotReference.RRA_UNIT_POWER);
-                LightRRA[] table = reference.rraTable();
-                LightRRA rra = table.length == 0 ? null : table[Math.min(index, table.length - 1)];
-                
-                if(rra == null || rra.skip() <= 1){
-                    refIteration = 0;
-                    dzr = zr;
-                    dzi = zi;
-                }else{
-
-                    iteration += rra.skip();
-                    refIteration = rra.skip();
-                    double zrp = zr * zr - zi * zi;
-                    double zip = 2 * zr * zi;
-
-                    dzr = rra.qnr() * zrp - rra.qni() * zip + rra.bnr() * dcr1 - rra.bni() * dci1;
-                    dzi = rra.qnr() * zip + rra.qni() * zrp + rra.bnr() * dci1 + rra.bni() * dcr1;    
-                }
+                refIteration = 0;
+                dzr = zr;
+                dzi = zi;
             }
 
             if (cd > bailout * bailout) {

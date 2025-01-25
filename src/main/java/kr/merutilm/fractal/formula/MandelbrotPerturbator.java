@@ -23,7 +23,7 @@ public abstract class MandelbrotPerturbator extends Perturbator {
     }
 
     protected static final double FPG_EPSILON = Math.pow(10, -3);
-
+    
     @Override
     public abstract MandelbrotPerturbator reuse(RenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision) throws IllegalRenderStateException;
     

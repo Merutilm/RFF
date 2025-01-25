@@ -7,7 +7,7 @@ public interface MandelbrotReference extends Reference{
     String STR_REFERENCE_IMAG = "\nReferance Imag : ";
     String STR_LAST_REF = "\nLast Reference : ";
     String STR_FPG_BN = "\nFPGBn : ";
-    int RRA_UNIT_POWER = 4;
+    int PERIOD_UNIT_POWER = 4;
 
     /**
      * Gets last valid reference just before exiting. 
