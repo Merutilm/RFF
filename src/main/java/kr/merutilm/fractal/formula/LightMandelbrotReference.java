@@ -8,8 +8,8 @@ import kr.merutilm.base.exception.IllegalRenderStateException;
 import kr.merutilm.base.parallel.RenderState;
 import kr.merutilm.base.util.AdvancedMath;
 import kr.merutilm.base.util.ArrayFunction;
-import kr.merutilm.fractal.approx.LightBLATable;
-import kr.merutilm.fractal.settings.BLASettings;
+import kr.merutilm.fractal.approx.LightR3ATable;
+import kr.merutilm.fractal.settings.R3ASettings;
 import kr.merutilm.fractal.struct.LWBigComplex;
 
 public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter,double[] refReal, double[] refImag, int period, LWBigComplex lastReference, LWBigComplex fpgBn) implements MandelbrotReference{
@@ -108,7 +108,7 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter,d
             ri[iteration] = zi;
         }
 
-        boolean useSwirlGuessing = true; // TODO : create parameters
+        boolean useSwirlGuessing = false; // TODO : create parameters
         if(useSwirlGuessing){
             int swirlPeriod = 1;
             double swirlDzrTemp = 0;
@@ -191,8 +191,8 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter,d
         return new LightMandelbrotReference(formula, center, rr, ri, period, lastRef, fpgBn);
     }
 
-    public LightBLATable generateBLA(RenderState state, int renderID, BLASettings blaSettings, double dcMax) throws IllegalRenderStateException{
-        return new LightBLATable(state, renderID, blaSettings, refReal, refImag, period, dcMax);
+    public LightR3ATable generateBLA(RenderState state, int renderID, R3ASettings blaSettings, double dcMax) throws IllegalRenderStateException{
+        return new LightR3ATable(state, renderID, blaSettings, refReal, refImag, null, dcMax); //TODO
     }
 
     @Override

@@ -17,7 +17,7 @@ public record CalculationSettings(
         LWBigComplex center,
         boolean autoIteration,
         ReuseReferenceMethod reuseReference,
-        BLASettings blaSettings
+        R3ASettings r3aSettings
 ) implements Struct<CalculationSettings> {
 
     public static final double ZOOM_VALUE = 0.235;
@@ -34,7 +34,7 @@ public record CalculationSettings(
                 .setCenter(center)
                 .setAutoIteration(autoIteration)
                 .setReuseReference(reuseReference)
-                .setBLASettings(blaSettings);
+                .setR3ASettings(r3aSettings);
     }
 
     public static final class Builder implements StructBuilder<CalculationSettings> {
@@ -46,7 +46,7 @@ public record CalculationSettings(
         private LWBigComplex center;
         private boolean autoIteration;
         private ReuseReferenceMethod reuseReference;
-        private BLASettings blaSettings;
+        private R3ASettings r3aSettings;
 
         public Builder setLogZoom(double logZoom) {
             this.logZoom = logZoom;
@@ -83,8 +83,8 @@ public record CalculationSettings(
             return this;
         }
 
-        public Builder setBLASettings(BLASettings blaSettings) {
-            this.blaSettings = blaSettings;
+        public Builder setR3ASettings(R3ASettings r3aSettings) {
+            this.r3aSettings = r3aSettings;
             return this;
         }
 
@@ -98,8 +98,8 @@ public record CalculationSettings(
             return this;
         }
 
-        public Builder setBLASettings(UnaryOperator<BLASettings> changes) {
-            this.blaSettings = changes.apply(blaSettings);
+        public Builder setR3ASettings(UnaryOperator<R3ASettings> changes) {
+            this.r3aSettings = changes.apply(r3aSettings);
             return this;
         }
 
@@ -134,7 +134,7 @@ public record CalculationSettings(
 
         @Override
         public CalculationSettings build() {
-            return new CalculationSettings(logZoom, maxIteration, bailout, decimalIterationSettings, center, autoIteration, reuseReference, blaSettings);
+            return new CalculationSettings(logZoom, maxIteration, bailout, decimalIterationSettings, center, autoIteration, reuseReference, r3aSettings);
         }
     }
 

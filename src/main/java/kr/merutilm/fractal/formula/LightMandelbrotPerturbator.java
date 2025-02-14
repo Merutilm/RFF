@@ -4,15 +4,15 @@ import java.util.function.IntConsumer;
 
 import kr.merutilm.base.exception.IllegalRenderStateException;
 import kr.merutilm.base.parallel.RenderState;
-import kr.merutilm.fractal.approx.LightBLA;
-import kr.merutilm.fractal.approx.LightBLATable;
+import kr.merutilm.fractal.approx.LightR3A;
+import kr.merutilm.fractal.approx.LightR3ATable;
 import kr.merutilm.fractal.settings.CalculationSettings;
 import kr.merutilm.fractal.struct.DoubleExponent;
 import kr.merutilm.fractal.struct.LWBigComplex;
 
 public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
     private final LightMandelbrotReference reference;
-    private final LightBLATable table;
+    private final LightR3ATable table;
     private final double dcMax;
     private final double offR;
     private final double offI;
@@ -25,13 +25,13 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
     }
 
     public LightMandelbrotPerturbator(RenderState state, int currentID, CalculationSettings calc, double dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, boolean arbitaryPrecisionFPGBn,
-            LightMandelbrotReference reusedReference, LightBLATable reusedTable, double offR, double offI) throws IllegalRenderStateException{
+            LightMandelbrotReference reusedReference, LightR3ATable reusedTable, double offR, double offI) throws IllegalRenderStateException{
         super(state, currentID, calc, arbitaryPrecisionFPGBn);
         this.dcMax = dcMax;
         this.offR = offR;
         this.offI = offI;
         this.reference = reusedTable == null ? LightMandelbrotReference.generate(state, currentID, calc.center(), precision, calc.maxIteration(), bailout, period, dcMax, strictFPGBn, actionPerRefCalcIteration) : reusedReference;
-        this.table = reusedTable == null ? reference.generateBLA(state, currentID, calc.blaSettings(), dcMax) : reusedTable;
+        this.table = reusedTable == null ? reference.generateBLA(state, currentID, calc.r3aSettings(), dcMax) : reusedTable;
     }
  // AtomicInteger a = new AtomicInteger();
 
@@ -66,7 +66,7 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
         while (iteration < maxIteration) {
 
             if(table != null){
-                LightBLA bla = table.lookup(refIteration, dzr, dzi);
+                LightR3A bla = table.lookup(refIteration, dzr, dzi);
                 
                 if (bla != null){
                     double dzr1 = bla.anr() * dzr - bla.ani() * dzi + bla.bnr() * dcr1 - bla.bni() * dci1;

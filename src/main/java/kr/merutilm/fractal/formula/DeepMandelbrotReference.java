@@ -9,7 +9,7 @@ import java.util.function.IntConsumer;
 import kr.merutilm.base.exception.IllegalRenderStateException;
 import kr.merutilm.base.parallel.RenderState;
 import kr.merutilm.fractal.approx.DeepBLATable;
-import kr.merutilm.fractal.settings.BLASettings;
+import kr.merutilm.fractal.settings.R3ASettings;
 import kr.merutilm.fractal.struct.DoubleExponent;
 import kr.merutilm.fractal.struct.LWBigComplex;
 import kr.merutilm.fractal.util.DoubleExponentMath;
@@ -90,7 +90,7 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
     }
 
 
-    public DeepBLATable generateBLA(RenderState state, int renderID, BLASettings blaSettings, DoubleExponent dcMax) throws IllegalRenderStateException{
+    public DeepBLATable generateBLA(RenderState state, int renderID, R3ASettings blaSettings, DoubleExponent dcMax) throws IllegalRenderStateException{
         return new DeepBLATable(state, renderID, blaSettings, refReal, refImag, period, dcMax);
     }
 

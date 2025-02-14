@@ -14,10 +14,11 @@ public interface BasicTheme extends Theme {
     DecimalizeIterationMethod INIT_DECIMAL_ITERATION = DecimalizeIterationMethod.LINEAR;
     boolean INIT_AUTO_ITERATION = true;
     ReuseReferenceMethod INIT_REUSE_REFERENCE = ReuseReferenceMethod.DISABLED;
-    BLASettings INIT_BLA = new BLASettings(
-            -3,
-            3,
-            BLASelectionMethod.HIGHEST
+    R3ASettings INIT_BLA = new R3ASettings(
+            8,
+            32,
+            -3.0,
+            R3ASelectionMethod.HIGHEST
     );
     String INIT_RE = "-0.85";
     String INIT_IM = "0";

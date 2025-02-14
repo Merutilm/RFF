@@ -3,7 +3,7 @@ package kr.merutilm.fractal.approx;
 import kr.merutilm.fractal.struct.DoubleExponent;
 import kr.merutilm.fractal.util.DoubleExponentMath;
 
-public interface DeepBLA extends BLA{
+public interface DeepBLA extends R3A{
     DoubleExponent radius();
     DoubleExponent anr();
     DoubleExponent ani();

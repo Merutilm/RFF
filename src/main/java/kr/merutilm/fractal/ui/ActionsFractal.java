@@ -9,28 +9,30 @@ import javax.swing.KeyStroke;
 import kr.merutilm.fractal.struct.LWBigComplex;
 import kr.merutilm.fractal.struct.LWBigDecimal;
 import kr.merutilm.fractal.settings.CalculationSettings;
-import kr.merutilm.fractal.settings.BLASettings;
+import kr.merutilm.fractal.settings.R3ASettings;
 import kr.merutilm.fractal.settings.DecimalizeIterationMethod;
-import kr.merutilm.fractal.settings.BLASelectionMethod;
+import kr.merutilm.fractal.settings.R3ASelectionMethod;
 import kr.merutilm.fractal.settings.ReuseReferenceMethod;
 
 enum ActionsFractal implements Actions {
-    BLA("BLA", (master, name) -> new RFFSettingsWindow(name, panel -> {
-        BLASettings bla = getCalculationSettings(master).blaSettings();
+    RRRA("RRRA", (master, name) -> new RFFSettingsWindow(name, panel -> {
+        R3ASettings bla = getCalculationSettings(master).r3aSettings();
         
-        Consumer<UnaryOperator<BLASettings.Builder>> applier = e -> 
-            master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 -> e2.edit().setBLASettings(e3 -> e.apply(e3.edit()).build()).build()).build());
+        Consumer<UnaryOperator<R3ASettings.Builder>> applier = e -> 
+            master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 -> e2.edit().setR3ASettings(e3 -> e.apply(e3.edit()).build()).build()).build());
 
+        panel.createTextInput("Min Skip Reference", bla.minSkipReference(), Integer::parseInt, e -> 
+            applier.accept(f -> f.setMinSkipReference(e))
+        );
+        panel.createTextInput("Max Multiplier Between Level", bla.maxMultiplierBetweenLevel(), Integer::parseInt, e -> 
+            applier.accept(f -> f.setMaxMultiplierBetweenLevel(e))
+        );
         panel.createTextInput("Epsilon Power", bla.epsilonPower(), Double::parseDouble, e -> 
             applier.accept(f -> f.setEpsilonPower(e))
         );
 
-        panel.createTextInput("Minimum Level", bla.minLevel(), Integer::parseInt, e -> 
-            applier.accept(f -> f.setMinLevel(e))
-        );
-
-        panel.createSelectInput("Selection Method", bla.blaSelectionMethod(), BLASelectionMethod.values(), e -> 
-            applier.accept(f -> f.setBlaSelectionMethod(e)), false
+        panel.createSelectInput("Selection Method", bla.r3aSelectionMethod(), R3ASelectionMethod.values(), e -> 
+            applier.accept(f -> f.setR3ASelectionMethod(e)), false
         );
     }), null),
 

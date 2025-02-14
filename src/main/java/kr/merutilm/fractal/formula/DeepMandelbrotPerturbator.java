@@ -34,7 +34,7 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
         this.offR = offR;
         this.offI = offI;
         this.reference = reusedReference == null ? DeepMandelbrotReference.generate(state, currentID, calc.center(), precision, calc.maxIteration(), bailout, period, dcMax, strictFPGBn, actionPerRefCalcIteration) : reusedReference;
-        this.table = reusedTable == null ? reference.generateBLA(state, currentID, calc.blaSettings(), dcMax) : reusedTable;
+        this.table = reusedTable == null ? reference.generateBLA(state, currentID, calc.r3aSettings(), dcMax) : reusedTable;
     }
 
     // it returns the double value of iteration

@@ -1,6 +1,6 @@
 package kr.merutilm.fractal.approx;
 
-public interface BLA{
+public interface R3A{
     int targetIter();
     int skip();
 

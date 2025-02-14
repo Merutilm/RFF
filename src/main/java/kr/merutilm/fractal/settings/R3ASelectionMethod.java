@@ -2,7 +2,7 @@ package kr.merutilm.fractal.settings;
 
 import kr.merutilm.base.selectable.Selectable;
 
-public enum BLASelectionMethod implements Selectable{
+public enum R3ASelectionMethod implements Selectable{
     /**
      * Check the lowest-level bla first, increases the level until not valid bla.
      */
@@ -19,7 +19,7 @@ public enum BLASelectionMethod implements Selectable{
         return name;
     }
 
-    private BLASelectionMethod(String name){
+    private R3ASelectionMethod(String name){
         this.name = name;
     }
 }
