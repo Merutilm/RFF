@@ -18,14 +18,14 @@ public interface Matrix {
         return convertLocation(index, getWidth(), getHeight());
     }
 
-    public static int convertLocation(int x, int y, int width, int height) {
+    static int convertLocation(int x, int y, int width, int height) {
         x = AdvancedMath.restrict(0, width - 1, x);
         y = AdvancedMath.restrict(0, height - 1, y);
 
         return width * y + x;
     }
     
-    public static Point2D convertLocation(int index, int width, int height) {
+    static Point2D convertLocation(int index, int width, int height) {
         int x = index % width;
         int y = index / width;
         if (y >= height) {

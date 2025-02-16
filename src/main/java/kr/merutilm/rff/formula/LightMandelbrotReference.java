@@ -12,9 +12,11 @@ import kr.merutilm.rff.approx.LightR3ATable;
 import kr.merutilm.rff.settings.R3ASettings;
 import kr.merutilm.rff.struct.LWBigComplex;
 
-public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, double[] refReal, double[] refImag, int[] period, LWBigComplex lastReference, LWBigComplex fpgBn) implements MandelbrotReference{
+public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, double[] refReal, double[] refImag,
+                                       int[] period, LWBigComplex lastReference,
+                                       LWBigComplex fpgBn) implements MandelbrotReference {
 
-    public static LightMandelbrotReference generate(RenderState state, int renderID, LWBigComplex center, int precision, long maxIteration, double bailout, int initialPeriod, double dcMax, boolean strictFPGBn, IntConsumer actionPerRefCalcIteration) throws IllegalRenderStateException{
+    public static LightMandelbrotReference generate(RenderState state, int renderID, LWBigComplex center, int precision, long maxIteration, double bailout, int initialPeriod, double dcMax, boolean strictFPGBn, IntConsumer actionPerRefCalcIteration) throws IllegalRenderStateException {
         state.tryBreak(renderID);
         Formula formula = new Mandelbrot();
 
@@ -23,7 +25,6 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
         rr[0] = 0;
         ri[0] = 0;
 
-       
 
         LWBigComplex z = LWBigComplex.zero(precision);
         LWBigComplex lastRef = z;
@@ -38,11 +39,11 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
         double zr = 0;
         double zi = 0;
         int period = 1;
-        
+
         int[] periodArray = new int[1];
         int periodArrayLength = 0;
         double minZRadius = Double.MAX_VALUE;
-        
+
         while (zr * zr + zi * zi < bailout * bailout && iteration < maxIteration) {
 
             state.tryBreak(renderID);
@@ -66,12 +67,12 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
 
             actionPerRefCalcIteration.accept(iteration);
 
-            if(minZRadius > prevZRadius2 && prevZRadius2 > 0){
+            if (minZRadius > prevZRadius2 && prevZRadius2 > 0) {
                 minZRadius = prevZRadius2;
-                if(periodArrayLength == periodArray.length){
+                if (periodArrayLength == periodArray.length) {
                     periodArray = ArrayFunction.exp2xArr(periodArray);
                 }
-                
+
                 periodArray[periodArrayLength] = iteration;
                 periodArrayLength++;
             }
@@ -79,7 +80,7 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
             if ((iteration >= 1 && fpgRadius > fpgLimit) || iteration == maxIteration - 1 || initialPeriod == iteration) {
                 period = iteration;
 
-                if(periodArrayLength == periodArray.length){
+                if (periodArrayLength == periodArray.length) {
                     periodArray = ArrayFunction.exp2xArr(periodArray);
                 }
                 periodArray[periodArrayLength] = iteration;
@@ -87,19 +88,18 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
                 break;
             }
 
-            
 
-            if(strictFPGBn){
-                fpgBn = fpgBn.multiply(lastRef, precision).doubled().add(LWBigComplex.valueOf(1,0, precision), precision);
+            if (strictFPGBn) {
+                fpgBn = fpgBn.multiply(lastRef, precision).doubled().add(LWBigComplex.valueOf(1, 0, precision), precision);
             }
 
             fpgBnr = fpgBnrTemp;
             fpgBni = fpgBniTemp;
-            
+
 
             iteration++;
-            
-            if(iteration == rr.length){
+
+            if (iteration == rr.length) {
                 rr = ArrayFunction.exp2xArr(rr);
                 ri = ArrayFunction.exp2xArr(ri);
             }
@@ -153,9 +153,9 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
 //
 //            System.out.println(iteration - 1);
 //        }
-        
 
-        if(!strictFPGBn){
+
+        if (!strictFPGBn) {
             fpgBn = LWBigComplex.valueOf(fpgBnr, fpgBni, precision);
         }
 
@@ -166,36 +166,36 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
         return new LightMandelbrotReference(formula, center, rr, ri, periodArray, lastRef, fpgBn);
     }
 
-    public LightR3ATable generateBLA(RenderState state, int renderID, R3ASettings blaSettings, double dcMax) throws IllegalRenderStateException{
+    public LightR3ATable generateBLA(RenderState state, int renderID, R3ASettings blaSettings, double dcMax) throws IllegalRenderStateException {
         return new LightR3ATable(state, renderID, blaSettings, refReal, refImag, period, dcMax); //TODO
     }
 
     @Override
-    public final int hashCode() {
+    public int hashCode() {
         return Objects.hash(Arrays.hashCode(refReal), Arrays.hashCode(refImag), Arrays.hashCode(period), lastReference, fpgBn);
-    }
-    @Override
-    public final boolean equals(Object o) {
-        return o instanceof LightMandelbrotReference r && 
-        Arrays.equals(refReal, r.refReal) && 
-        Arrays.equals(refImag, r.refImag) &&
-        period == r.period &&
-        Objects.equals(lastReference, r.lastReference) &&
-        Objects.equals(fpgBn, r.fpgBn);
     }
 
     @Override
-    public final String toString() {
-        return getClass().toString() + "[ " + 
-        STR_FORMULA + formula +
-        STR_CENTER + refCenter +
-        STR_REFERENCE_REAL + Arrays.toString(refReal) + 
-        STR_REFERENCE_IMAG + Arrays.toString(refImag) +
-        STR_PERIOD + period +
-        STR_LAST_REF + lastReference +
-        STR_FPG_BN + fpgBn + "\n]";
+    public boolean equals(Object o) {
+        return o instanceof LightMandelbrotReference r &&
+               Arrays.equals(refReal, r.refReal) &&
+               Arrays.equals(refImag, r.refImag) &&
+               Arrays.equals(period, r.period) &&
+               Objects.equals(lastReference, r.lastReference) &&
+               Objects.equals(fpgBn, r.fpgBn);
     }
-    
- 
-    
+
+    @Override
+    public String toString() {
+        return getClass() + "[ " +
+               STR_FORMULA + formula +
+               STR_CENTER + refCenter +
+               STR_REFERENCE_REAL + Arrays.toString(refReal) +
+               STR_REFERENCE_IMAG + Arrays.toString(refImag) +
+               STR_PERIOD + Arrays.toString(period) +
+               STR_LAST_REF + lastReference +
+               STR_FPG_BN + fpgBn + "\n]";
+    }
+
+
 }

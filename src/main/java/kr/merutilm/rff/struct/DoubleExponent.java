@@ -65,7 +65,6 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
             bits = (bits << 8) | (bt[i] & 0xff);
         }
 
-        //XXXXXXXXXXXXXXXXXXXXXXXXXXXX
         //exp : 52, 51, 50, ....
         //double : 0, -1, -2, -3, ....
         int shift = Long.bitCount((Long.highestOneBit(bits) - 1) << 1) - DOUBLE_PRECISION;

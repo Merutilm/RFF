@@ -14,7 +14,6 @@ public abstract class Perturbator {
     protected final Formula formula;
     protected final int currentID;
     protected final double bailout;
-    protected int currentReferenceIteration;
     protected final long maxIteration;
     protected final LWBigComplex center;
     protected final double logZoom;
@@ -86,17 +85,6 @@ public abstract class Perturbator {
         return iteration + ratio;
     }
 
-    public synchronized int getCurrentReferenceIteration() {
-        return currentReferenceIteration;
-    }
-
-    public RenderState getState() {
-        return state;
-    }
-
-    public int getCurrentID() {
-        return currentID;
-    }
 
     public abstract DoubleExponent getDcMaxByDoubleExponent();
 
@@ -104,7 +92,7 @@ public abstract class Perturbator {
 
     public abstract Perturbator reuse(RenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision) throws IllegalRenderStateException;
 
-    public abstract double iterate(DoubleExponent dcr, DoubleExponent dci);
+    public abstract double iterate(DoubleExponent dcr, DoubleExponent dci) throws IllegalRenderStateException;
 
 
 }

@@ -2,8 +2,6 @@ package kr.merutilm.rff.shader;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import kr.merutilm.rff.struct.DoubleMatrix;
 import kr.merutilm.rff.struct.Point2D;

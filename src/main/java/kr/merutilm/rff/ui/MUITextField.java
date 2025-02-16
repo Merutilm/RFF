@@ -18,11 +18,11 @@ final class MUITextField<T> extends JPanel {
 
     private transient T previousValue;
 
-    public MUITextField(String name, T defaultValue, Function<String, T> mapper, Consumer<T> enterFunction) {
-        this(name, defaultValue, mapper, enterFunction, true, "");
+    public MUITextField(String name, String description, T defaultValue, Function<String, T> mapper, Consumer<T> enterFunction) {
+        this(name, description, defaultValue, mapper, enterFunction, true, "");
     }
 
-    public MUITextField(String name, T defaultValue, Function<String, T> mapper, Consumer<T> enterFunction,
+    public MUITextField(String name, String description, T defaultValue, Function<String, T> mapper, Consumer<T> enterFunction,
             boolean validCondition, String invalidConditionMessage) {
         super(new GridLayout(1, 2, 10, 0));
         JLabel label = new JLabel(name);
@@ -31,6 +31,7 @@ final class MUITextField<T> extends JPanel {
         label.setForeground(MUIConstants.TEXT_COLOR);
         
         JTextField textField = new JTextField(defaultValue.toString());
+        textField.setToolTipText("<html>"+description+"</html>");
         textField.setHorizontalAlignment(SwingConstants.RIGHT);
         textField.setBackground(MUIConstants.INPUT_BACKGROUND);
         textField.setFont(MUIConstants.DEFAULT_FONT);
@@ -85,6 +86,6 @@ final class MUITextField<T> extends JPanel {
 
     
     private void invokeError(String message) {
-        JOptionPane.showMessageDialog(null, message, "ERROR", 0);
+        JOptionPane.showMessageDialog(null, message, "ERROR", JOptionPane.ERROR_MESSAGE);
     }
 }

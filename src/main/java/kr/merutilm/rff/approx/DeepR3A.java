@@ -1,7 +1,6 @@
 package kr.merutilm.rff.approx;
 
 import kr.merutilm.rff.struct.DoubleExponent;
-import kr.merutilm.rff.util.AdvancedMath;
 import kr.merutilm.rff.util.DoubleExponentMath;
 
 public record DeepR3A(DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr, DoubleExponent bni, int start, int skip, DoubleExponent radius) implements R3A{

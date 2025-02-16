@@ -30,8 +30,7 @@ public class Slope implements BitMapRenderer {
     }
 
     @Override
-    public HexColor execute(int x, int y, int xRes, int yRes, double rx, double ry, int i, HexColor c, double t)
-            throws IllegalRenderStateException {
+    public HexColor execute(int x, int y, int xRes, int yRes, double rx, double ry, int i, HexColor c, double t) {
                 if(c == null){
                     return null;
                 }
@@ -51,10 +50,10 @@ public class Slope implements BitMapRenderer {
                 double u = altitudes.pipette(xd, yd - ad);
                 double ru = altitudes.pipette(xd + ad, yd - ad);
 
-                double dzdx = ((rd + 2 * r + ru) - (ld + 2 * l + lu)) * depth * resolutionMultiplier / ad; 
-                double dzdy = ((lu + 2 * u + ru) - (ld + 2 * d + rd)) * depth * resolutionMultiplier / ad; 
-                double slope = atan(toRadians(hypot(dzdx, dzdy)));
-                double aspect = atan2(dzdy, -dzdx); 
+                double dzDx = ((rd + 2 * r + ru) - (ld + 2 * l + lu)) * depth * resolutionMultiplier / ad;
+                double dzDy = ((lu + 2 * u + ru) - (ld + 2 * d + rd)) * depth * resolutionMultiplier / ad;
+                double slope = atan(toRadians(hypot(dzDx, dzDy)));
+                double aspect = atan2(dzDy, -dzDx);
                 double shade = Math.max(reflectionRatio, cos(zRad) * cos(slope) + sin(zRad) * sin(slope) * cos(aRad + aspect)); 
                 double fShade = AdvancedMath.ratioDivide(1 - opacity, 1, shade);
                 return c.functionExceptAlpha(e -> (int)(e * fShade));    

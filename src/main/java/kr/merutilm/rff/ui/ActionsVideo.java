@@ -29,7 +29,7 @@ enum ActionsVideo implements Actions {
         Consumer<UnaryOperator<DataSettings.Builder>> applier = e -> 
             master.setSettings(e1 -> e1.edit().setVideoSettings(e2 -> e2.edit().setDataSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
 
-        panel.createTextInput("Default Zoom Increment", data.defaultZoomIncrement(), Double::parseDouble, e -> 
+        panel.createTextInput("Default Zoom Increment", "Set the log-Zoom interval between two adjacent video data.", data.defaultZoomIncrement(), Double::parseDouble, e ->
             applier.accept(f -> f.setDefaultZoomIncrement(e))
         );
     }), null),
@@ -40,18 +40,18 @@ enum ActionsVideo implements Actions {
         Consumer<UnaryOperator<AnimationSettings.Builder>> applier = e -> 
             master.setSettings(e1 -> e1.edit().setVideoSettings(e2 -> e2.edit().setAnimationSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
 
-        panel.createTextInput("Over Zoom", animation.overZoom(), Double::parseDouble, e -> 
+        panel.createTextInput("Over Zoom", "Zoom the final video data.", animation.overZoom(), Double::parseDouble, e ->
         	applier.accept(f -> f.setOverZoom(e))
         );
-        panel.createBoolInput("Show Text", animation.showText(), e -> 
+        panel.createBoolInput("Show Text", "Show the text on video.", animation.showText(), e ->
         	applier.accept(f -> f.setShowText(e))
         );
-        panel.createTextInput("MPS", animation.mps(), Double::parseDouble, e -> 
+        panel.createTextInput("MPS", "Map per second, Number of video data used per second in video", animation.mps(), Double::parseDouble, e ->
             applier.accept(f -> f.setMps(e))
         );
-        panel.createSelectInput("Animation Ease", animation.stripeAnimationEase(), Ease.values(), e -> 
+        panel.createSelectInput("Animation Ease", "Stripe Animation Ease", animation.stripeAnimationEase(), Ease.values(), e ->
             applier.accept(f -> f.setStripeAnimationEase(e)), true);
-        panel.createTextInput("Animation Speed", animation.stripeAnimationSpeed(), Double::parseDouble, e -> 
+        panel.createTextInput("Animation Speed", "Stripe Animation Speed, The stripes' offset(iterations) per second.", animation.stripeAnimationSpeed(), Double::parseDouble, e ->
             applier.accept(f -> f.setStripeAnimationSpeed(e))
         );
     }), null),
@@ -62,13 +62,13 @@ enum ActionsVideo implements Actions {
         Consumer<UnaryOperator<ExportSettings.Builder>> applier = e -> 
             master.setSettings(e1 -> e1.edit().setVideoSettings(e2 -> e2.edit().setExportSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
 
-        panel.createTextInput("FPS",export.fps(), Double::parseDouble, e -> 
+        panel.createTextInput("FPS", "Frame per second of the video to export", export.fps(), Double::parseDouble, e ->
             applier.accept(f -> f.setFps(e))
         );
-        panel.createTextInput("Multi Sampling", export.multiSampling(), Double::parseDouble, e -> 
+        panel.createTextInput("Multi Sampling", "Video frame size multiplier", export.multiSampling(), Double::parseDouble, e ->
             applier.accept(f -> f.setMultiSampling(e))
         );
-        panel.createTextInput("Bitrate", export.bitrate(), Integer::parseInt, e -> 
+        panel.createTextInput("Bitrate", "The Bitrate of the video to export", export.bitrate(), Integer::parseInt, e ->
             applier.accept(f -> f.setBitrate(e))
         );
     }), null),
@@ -91,7 +91,7 @@ enum ActionsVideo implements Actions {
                         }
                     }
 
-                    while (master.getSettings().calculationSettings().logZoom() > CalculationSettings.MININUM_ZOOM) {
+                    while (master.getSettings().calculationSettings().logZoom() > CalculationSettings.MINIMUM_ZOOM) {
                         render.compute(id);
                         render.getCurrentMap().exportAsVideoData(dir);
                         master.setSettings(e -> e.edit().setCalculationSettings(

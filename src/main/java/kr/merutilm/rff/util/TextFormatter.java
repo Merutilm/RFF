@@ -28,7 +28,6 @@ public class TextFormatter {
             case CURLY -> "{" + a + "}";
             case SQUARE -> "[" + a + "]";
             case ANGLE -> "<" + a + ">";
-            default -> a;
         };
     }
 

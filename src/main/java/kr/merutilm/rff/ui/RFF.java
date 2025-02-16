@@ -14,14 +14,14 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  * <h2>Ridiculously Fast Fractal</h2>
- * Check how RFF works : https://docs.google.com/document/d/1IZMfTcF_-2f3HcX7AS9v8I57P8M1yTJgpzfBPYq9JIg/edit?pli=1&tab=t.jphmxxug3mna#heading=h.j5b0q4ufohul
+ * Check how RFF works : <a href="https://docs.google.com/document/d/1IZMfTcF_-2f3HcX7AS9v8I57P8M1yTJgpzfBPYq9JIg/edit?pli=1&tab=t.jphmxxug3mna#heading=h.j5b0q4ufohul">...</a>
  */
 final class RFF {
 
     private final RFFRenderWindow window;
 
-    private static final int INIT_WIDTH = 1280;
-    private static final int INIT_HEIGHT = 720;
+    private static final int INIT_WIDTH = 1294;
+    private static final int INIT_HEIGHT = 803;
 
     private Theme theme = BasicTheme.DEFAULT_THEME.getTheme();
     private Settings settings = theme.generate();

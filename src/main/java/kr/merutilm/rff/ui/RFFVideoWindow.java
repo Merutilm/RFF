@@ -137,8 +137,8 @@ final class RFFVideoWindow extends JFrame{
         
             try(
                 FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(out, imgWidth, imgHeight);
-                Frame f = new Frame(imgWidth, imgHeight, Frame.DEPTH_BYTE, 4);
-                ){  
+                Frame f = new Frame(imgWidth, imgHeight, Frame.DEPTH_BYTE, 4)
+            ){
                 RFFMap frame;
                 avutil.av_log_set_level(avutil.AV_LOG_QUIET);
                 int maxNumber = IOUtilities.generateFileNameNumber(dir, IOUtilities.Extension.MAP.toString()) - 1;
@@ -164,6 +164,9 @@ final class RFFVideoWindow extends JFrame{
 
                     frame = getFrame(state, currentID, dir, currentFrameNumber, dataSettings, multiplier);
 
+                    if(frame == null){
+                        break;
+                    }
                     Settings settingsModified = modifyToVideoSettings(frame, settings, currentSec);
                     BufferedImage img = RFFShaderProcessor.createImage(state, currentID, frame, settingsModified, false);
                     if(animationSettings.showText()){

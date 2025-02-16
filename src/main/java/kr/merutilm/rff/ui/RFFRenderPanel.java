@@ -243,19 +243,16 @@ final class RFFRenderPanel extends JPanel {
                     ActionsExplore.getActionWhileFindingMinibrotCenter(master, period), 
                     ActionsExplore.getActionWhileFindingMinibrotZoom(master)
                 );
-                if(center != null){
-                    
-                    CalculationSettings refCalc = calc.edit().setCenter(center.center()).setLogZoom(center.logZoom()).build();
-                    int refPrecision = Perturbator.precision(center.logZoom());
-                    if (refCalc.logZoom() > EXP_DEADLINE) {
-                        currentPerturbator = new DeepMandelbrotPerturbator(state, currentID, refCalc, center.dcMax(), refPrecision, period, actionPerRefCalcIteration)
-                                .reuse(state, currentID, calc, dcMax, precision);
-                    }else{
-                        currentPerturbator = new LightMandelbrotPerturbator(state, currentID, refCalc, center.dcMax().doubleValue(), refPrecision, period, actionPerRefCalcIteration)
-                                .reuse(state, currentID, calc, dcMax, precision);
-                    }
+                CalculationSettings refCalc = calc.edit().setCenter(center.center()).setLogZoom(center.logZoom()).build();
+                int refPrecision = Perturbator.precision(center.logZoom());
+                if (refCalc.logZoom() > EXP_DEADLINE) {
+                    currentPerturbator = new DeepMandelbrotPerturbator(state, currentID, refCalc, center.dcMax(), refPrecision, period, actionPerRefCalcIteration)
+                            .reuse(state, currentID, calc, dcMax, precision);
+                }else{
+                    currentPerturbator = new LightMandelbrotPerturbator(state, currentID, refCalc, center.dcMax().doubleValue(), refPrecision, period, actionPerRefCalcIteration)
+                            .reuse(state, currentID, calc, dcMax, precision);
                 }
-                
+
             }
             case DISABLED -> {
                 if (logZoom > EXP_DEADLINE) {

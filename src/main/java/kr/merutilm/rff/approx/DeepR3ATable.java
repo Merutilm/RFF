@@ -89,6 +89,7 @@ public class DeepR3ATable implements R3ATable{
         // 27 + 2
         // ...
 
+        int perturbationCount = r3aSettings.fixFloatingPointErrors() ? 2 : 1;
 
         DeepR3A[] currentStep = new DeepR3A[period.length];
 
@@ -99,12 +100,12 @@ public class DeepR3ATable implements R3ATable{
             for (int j = period.length - 1; j >= 0; j--) {
                 if(currentStep[j] == null){
                     currentStep[j] = DeepR3A.create(i).step(rr, ri, epsilon, dcMax); // step 1
-                }else if(currentStep[j].skip() + 1 == period[j]){
+                }else if(currentStep[j].skip() + perturbationCount == period[j]){
 
                     for(int k = j; k >= 0; k--){ //Stop all lower level iteration
                         DeepR3A currentLevel = currentStep[k];
 
-                        if(currentLevel != null && currentLevel.skip() + 1 == period[k]){
+                        if(currentLevel != null && currentLevel.skip() + perturbationCount == period[k]){
                             List<DeepR3A> elem = table.get(currentLevel.start());
 
                             if(elem == null){

@@ -39,7 +39,7 @@ public record DataSettings(double defaultZoomIncrement) implements Struct<DataSe
     public static DataSettings read(File dir){
 
         File file = generateFile(dir);
-        if(file == null || !file.exists()){
+        if(!file.exists()){
             return null;
         }
 

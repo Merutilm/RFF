@@ -80,11 +80,11 @@ final class RFFShaderProcessor {
         double si2 = stp.secondInterval();
         double sof = stp.offset();
         
-        double m = ((value - sof) % si1) * ((value - sof) % si2) / (si1 * si2);
+        double m = (((value - sof) % si1 + si1) % si1) * (((value - sof) % si2 + si2) % si2) / (si1 * si2);
         
         return HexColor.ratioDivide(c1, HexColor.BLACK, m * stp.opacity());
     }
-    
+
 
     public static int getCompressDivisor(ImageSettings img) {
         return Math.max(1, (int) ((int) img.resolutionMultiplier() / COMPRESSION_CRITERIA));
@@ -96,7 +96,7 @@ final class RFFShaderProcessor {
         BitMapDispatcher pp1 = new BitMapDispatcher(state, currentID, bitMap);
         int fitResolutionMultiplier = iterations.getWidth() / bitMap.getWidth();
 
-        pp1.createRenderer((x, y, xRes, yRes, rx, ry, i, c, t) -> {
+        pp1.createRenderer((x, y, _, _, _, _, _, _, _) -> {
             int ix = x * fitResolutionMultiplier;
             int iy = y * fitResolutionMultiplier;
             return getColorByIteration(settings, iterations.pipette(ix, iy));
@@ -136,7 +136,7 @@ final class RFFShaderProcessor {
         BitMapDispatcher pp3 = new BitMapDispatcher(state, currentID, bitMap);
 
         pp3.createRenderer(new Bloom(bitMap, compressedBitMap, shd.bloomSettings()));
-        pp3.createRenderer((x, y, xRes, yRes, rx, ry, i, c, t) -> {
+        pp3.createRenderer((x, y, _, _, _, _, _, c, _) -> {
             HexColor a1 = pp3.texture2D(x, y + 1);
             HexColor a2 = pp3.texture2D(x, y - 1);
             HexColor a3 = pp3.texture2D(x + 1, y);

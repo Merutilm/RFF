@@ -21,13 +21,13 @@ enum ActionsShader implements Actions {
             ActionsExplore.REFRESH_COLOR.accept(master);
         };
 
-        panel.createTextInput("Color Pulse Interval", color.iterationInterval(), Double::parseDouble, e -> 
+        panel.createTextInput("Color Pulse Interval", "Required iterations for the palette to cycle once", color.iterationInterval(), Double::parseDouble, e ->
             applier.accept(f -> f.setIterationInterval(e))
         );
-        panel.createTextInput(IOUtilities.Constants.OFFSET_RATIO.toString(), color.offsetRatio(), Double::parseDouble, e ->
+        panel.createTextInput(IOUtilities.Constants.OFFSET_RATIO.toString(), "Start offset ratio of cycling palette", color.offsetRatio(), Double::parseDouble, e ->
             applier.accept(f -> f.setOffsetRatio(e))
         );
-        panel.createSelectInput("Color Smoothing", color.colorSmoothing(), ColorSmoothingSettings.values(), e ->
+        panel.createSelectInput("Color Smoothing", "Color Smoothing method", color.colorSmoothing(), ColorSmoothingSettings.values(), e ->
             applier.accept(f -> f.setColorSmoothing(e)), false
         );
     }), null),
@@ -41,19 +41,19 @@ enum ActionsShader implements Actions {
         };
 
 
-        panel.createBoolInput("Use", color.use(), e -> 
+        panel.createBoolInput("Use", "Use Stripe", color.use(), e ->
             applier.accept(f -> f.setUse(e))
         );
-        panel.createTextInput("First Interval", color.firstInterval(), Double::parseDouble, e -> 
+        panel.createTextInput("First Interval", "Stripe interval 1", color.firstInterval(), Double::parseDouble, e ->
             applier.accept(f -> f.setFirstInterval(e))
         );
-        panel.createTextInput("Secondary Interval", color.secondInterval(), Double::parseDouble, e ->
+        panel.createTextInput("Secondary Interval", "Stripe interval 2", color.secondInterval(), Double::parseDouble, e ->
             applier.accept(f -> f.setSecondInterval(e))
         );
-        panel.createTextInput(IOUtilities.Constants.OPACITY.toString(), color.opacity(), Double::parseDouble, e ->
+        panel.createTextInput(IOUtilities.Constants.OPACITY.toString(), "Stripe Opacity", color.opacity(), Double::parseDouble, e ->
             applier.accept(f -> f.setOpacity(e))
         );
-        panel.createTextInput(IOUtilities.Constants.OFFSET_RATIO.toString(), color.offset(), Double::parseDouble, e ->
+        panel.createTextInput(IOUtilities.Constants.OFFSET_RATIO.toString(), "Stripe offset ratio", color.offset(), Double::parseDouble, e ->
             applier.accept(f -> f.setOffset(e))
         );
     }), null),
@@ -65,19 +65,19 @@ enum ActionsShader implements Actions {
             ActionsExplore.REFRESH_COLOR.accept(master);
         };
 
-        panel.createTextInput("Depth", slope.depth(), Double::parseDouble, e -> 
+        panel.createTextInput("Depth", "Slope depth", slope.depth(), Double::parseDouble, e ->
             applier.accept(f -> f.setDepth(e))
         );
-        panel.createTextInput("Reflection Ratio", slope.reflectionRatio(), Double::parseDouble, e -> 
+        panel.createTextInput("Reflection Ratio", "Slope reflection ratio, Darker part is set to the threshold.", slope.reflectionRatio(), Double::parseDouble, e ->
             applier.accept(f -> f.setReflectionRatio(e))
         );
-        panel.createTextInput(IOUtilities.Constants.OPACITY.toString(), slope.opacity(), Double::parseDouble, e -> 
+        panel.createTextInput(IOUtilities.Constants.OPACITY.toString(), "Slope opacity", slope.opacity(), Double::parseDouble, e ->
         	applier.accept(f -> f.setOpacity(e))
         );
-        panel.createTextInput("Zenith", slope.zenith(), Double::parseDouble, e -> 
+        panel.createTextInput("Zenith", "The zenith of light source", slope.zenith(), Double::parseDouble, e ->
             applier.accept(f -> f.setZenith(e))
         );
-        panel.createTextInput("Azimuth", slope.azimuth(), Double::parseDouble, e -> 
+        panel.createTextInput("Azimuth", "The azimuth of light source", slope.azimuth(), Double::parseDouble, e ->
             applier.accept(f -> f.setAzimuth(e))
         );
 
@@ -92,19 +92,19 @@ enum ActionsShader implements Actions {
                 ActionsExplore.REFRESH_COLOR.accept(master);
             };
     
-            panel.createTextInput("Gamma", colorFilter.gamma(), Double::parseDouble, e -> 
+            panel.createTextInput("Gamma", "Gamma value", colorFilter.gamma(), Double::parseDouble, e ->
                 applier.accept(f -> f.setGamma(e))
             );
-            panel.createTextInput("Exposure", colorFilter.exposure(), Double::parseDouble, e -> 
+            panel.createTextInput("Exposure", "Exposure value", colorFilter.exposure(), Double::parseDouble, e ->
                 applier.accept(f -> f.setExposure(e))        
             );
-            panel.createTextInput("Saturation", colorFilter.saturation(), Double::parseDouble, e -> 
+            panel.createTextInput("Saturation", "Saturation value", colorFilter.saturation(), Double::parseDouble, e ->
                    applier.accept(f -> f.setSaturation(e))
             );
-            panel.createTextInput("Brightness", colorFilter.brightness(), Double::parseDouble, e -> 
+            panel.createTextInput("Brightness", "Brightness value", colorFilter.brightness(), Double::parseDouble, e ->
                 applier.accept(f -> f.setBrightness(e))
             );
-            panel.createTextInput("Contrast", colorFilter.contrast(), Double::parseDouble, e -> 
+            panel.createTextInput("Contrast", "Contrast value", colorFilter.contrast(), Double::parseDouble, e ->
                 applier.accept(f -> f.setContrast(e))
             );
         }), null),
@@ -116,10 +116,10 @@ enum ActionsShader implements Actions {
             ActionsExplore.REFRESH_COLOR.accept(master);
         };
 
-        panel.createTextInput("Radius", fog.radius(), Double::parseDouble, e -> 
+        panel.createTextInput("Radius", "Fog radius ratio in rendered image, fully blurred when the value is 1.", fog.radius(), Double::parseDouble, e ->
         	applier.accept(f -> f.setRadius(e))
         );
-        panel.createTextInput(IOUtilities.Constants.OPACITY.toString(), fog.opacity(), Double::parseDouble, e -> 
+        panel.createTextInput(IOUtilities.Constants.OPACITY.toString(), "Fog opacity", fog.opacity(), Double::parseDouble, e ->
         	applier.accept(f -> f.setOpacity(e))
         );
     }), null),
@@ -131,16 +131,16 @@ enum ActionsShader implements Actions {
             ActionsExplore.REFRESH_COLOR.accept(master);
         };
 
-        panel.createTextInput("Threshold", bloom.threshold(), Double::parseDouble, e -> 
+        panel.createTextInput("Threshold", "Threshold to apply", bloom.threshold(), Double::parseDouble, e ->
         	applier.accept(f -> f.setThreshold(e))
         );
-        panel.createTextInput("Radius", bloom.radius(), Double::parseDouble, e -> 
+        panel.createTextInput("Radius", "Bloom radius ratio in rendered image, fully blurred when the value is 1.", bloom.radius(), Double::parseDouble, e ->
         	applier.accept(f -> f.setRadius(e))
         );
-        panel.createTextInput("Softness", bloom.softness(), Double::parseDouble, e -> 
+        panel.createTextInput("Softness", "Bloom softness", bloom.softness(), Double::parseDouble, e ->
         	applier.accept(f -> f.setSoftness(e))
         );
-        panel.createTextInput("Intensity", bloom.intensity(), Double::parseDouble, e -> 
+        panel.createTextInput("Intensity", "Bloom intensity", bloom.intensity(), Double::parseDouble, e ->
         	applier.accept(f -> f.setIntensity(e))
         );
     }), null);

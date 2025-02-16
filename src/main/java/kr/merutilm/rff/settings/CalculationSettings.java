@@ -22,7 +22,7 @@ public record CalculationSettings(
 
     public static final double ZOOM_VALUE = 0.235;
 
-    public static final double MININUM_ZOOM = 1;
+    public static final double MINIMUM_ZOOM = 1;
 
     @Override
     public Builder edit() {
@@ -109,7 +109,7 @@ public record CalculationSettings(
         }
 
         public Builder zoomOut(double v) {
-            logZoom = Math.max(MININUM_ZOOM, logZoom - v);
+            logZoom = Math.max(MINIMUM_ZOOM, logZoom - v);
             return this;
         }
         public Builder zoomIn() {

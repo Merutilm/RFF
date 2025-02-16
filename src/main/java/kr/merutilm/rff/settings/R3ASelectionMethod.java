@@ -19,7 +19,7 @@ public enum R3ASelectionMethod implements Selectable{
         return name;
     }
 
-    private R3ASelectionMethod(String name){
+    R3ASelectionMethod(String name){
         this.name = name;
     }
 }

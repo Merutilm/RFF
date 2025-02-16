@@ -1,8 +1,6 @@
 package kr.merutilm.rff.util;
 
 
-import java.util.function.IntFunction;
-
 public final class ArrayFunction {
     private ArrayFunction() {
 

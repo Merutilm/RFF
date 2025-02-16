@@ -12,14 +12,15 @@ import kr.merutilm.rff.approx.DeepR3ATable;
 import kr.merutilm.rff.settings.R3ASettings;
 import kr.merutilm.rff.struct.DoubleExponent;
 import kr.merutilm.rff.struct.LWBigComplex;
-import kr.merutilm.rff.util.AdvancedMath;
 import kr.merutilm.rff.util.ArrayFunction;
 import kr.merutilm.rff.util.DoubleExponentMath;
 
-public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, DoubleExponent[] refReal, DoubleExponent[] refImag, int[] period, LWBigComplex lastReference, LWBigComplex fpgBn) implements MandelbrotReference{
+public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, DoubleExponent[] refReal,
+                                      DoubleExponent[] refImag, int[] period, LWBigComplex lastReference,
+                                      LWBigComplex fpgBn) implements MandelbrotReference {
 
 
-    public static DeepMandelbrotReference generate(RenderState state, int renderID, LWBigComplex center, int precision, long maxIteration, double bailout, int initialPeriod, DoubleExponent dcMax, boolean strictFPGBn, IntConsumer actionPerRefCalcIteration) throws IllegalRenderStateException{
+    public static DeepMandelbrotReference generate(RenderState state, int renderID, LWBigComplex center, int precision, long maxIteration, double bailout, int initialPeriod, DoubleExponent dcMax, boolean strictFPGBn, IntConsumer actionPerRefCalcIteration) throws IllegalRenderStateException {
         state.tryBreak(renderID);
         Formula formula = new Mandelbrot();
 
@@ -27,7 +28,6 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
         List<DoubleExponent> ri = new ArrayList<>(initialPeriod == -1 ? 1 : initialPeriod);
         rr.add(DoubleExponent.ZERO);
         ri.add(DoubleExponent.ZERO);
-
 
 
         LWBigComplex z = LWBigComplex.zero(precision);
@@ -71,9 +71,9 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
 
             actionPerRefCalcIteration.accept(iteration);
 
-            if(minZRadius.isLargerThan(prevZRadius2) && prevZRadius2.isLargerThan(DoubleExponent.ZERO)){
+            if (minZRadius.isLargerThan(prevZRadius2) && prevZRadius2.isLargerThan(DoubleExponent.ZERO)) {
                 minZRadius = prevZRadius2;
-                if(periodArrayLength == periodArray.length){
+                if (periodArrayLength == periodArray.length) {
                     periodArray = ArrayFunction.exp2xArr(periodArray);
                 }
 
@@ -84,7 +84,7 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
             if ((iteration >= 1 && fpgRadius.isLargerThan(fpgLimit)) || iteration == maxIteration - 1 || initialPeriod == iteration) {
                 period = iteration;
 
-                if(periodArrayLength == periodArray.length){
+                if (periodArrayLength == periodArray.length) {
                     periodArray = ArrayFunction.exp2xArr(periodArray);
                 }
                 periodArray[periodArrayLength] = iteration;
@@ -93,9 +93,8 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
             }
 
 
-
-            if(strictFPGBn){
-                fpgBn = fpgBn.multiply(lastRef, precision).doubled().add(LWBigComplex.valueOf(1,0, precision), precision);
+            if (strictFPGBn) {
+                fpgBn = fpgBn.multiply(lastRef, precision).doubled().add(LWBigComplex.valueOf(1, 0, precision), precision);
             }
 
             fpgBnr = fpgBnrTemp;
@@ -154,7 +153,7 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
 //        }
 
 
-        if(!strictFPGBn){
+        if (!strictFPGBn) {
             fpgBn = LWBigComplex.valueOf(fpgBnr, fpgBni, precision);
         }
 
@@ -167,33 +166,34 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
     }
 
 
-    public DeepR3ATable generateBLA(RenderState state, int renderID, R3ASettings blaSettings, DoubleExponent dcMax) throws IllegalRenderStateException{
+    public DeepR3ATable generateBLA(RenderState state, int renderID, R3ASettings blaSettings, DoubleExponent dcMax) throws IllegalRenderStateException {
         return new DeepR3ATable(state, renderID, blaSettings, refReal, refImag, period, dcMax);
     }
 
     @Override
-    public final int hashCode() {
+    public int hashCode() {
         return Objects.hash(Arrays.hashCode(refReal), Arrays.hashCode(refImag), Arrays.hashCode(period), lastReference, fpgBn);
-    }
-    @Override
-    public final boolean equals(Object o) {
-        return o instanceof DeepMandelbrotReference r && 
-        Arrays.equals(refReal, r.refReal) && 
-        Arrays.equals(refImag, r.refImag) &&
-        period == r.period &&
-        Objects.equals(lastReference, r.lastReference) &&
-        Objects.equals(fpgBn, r.fpgBn);
     }
 
     @Override
-    public final String toString() {
-        return getClass().toString() + "[ " + 
-        STR_FORMULA + formula +
-        STR_CENTER + refCenter +
-        STR_REFERENCE_REAL + Arrays.toString(refReal) + 
-        STR_REFERENCE_IMAG + Arrays.toString(refImag) +
-        STR_PERIOD + period +
-        STR_LAST_REF + lastReference +
-        STR_FPG_BN + fpgBn + "\n]";
+    public boolean equals(Object o) {
+        return o instanceof DeepMandelbrotReference r &&
+               Arrays.equals(refReal, r.refReal) &&
+               Arrays.equals(refImag, r.refImag) &&
+               Arrays.equals(period, r.period) &&
+               Objects.equals(lastReference, r.lastReference) &&
+               Objects.equals(fpgBn, r.fpgBn);
+    }
+
+    @Override
+    public String toString() {
+        return getClass() + "[ " +
+               STR_FORMULA + formula +
+               STR_CENTER + refCenter +
+               STR_REFERENCE_REAL + Arrays.toString(refReal) +
+               STR_REFERENCE_IMAG + Arrays.toString(refImag) +
+               STR_PERIOD + Arrays.toString(period) +
+               STR_LAST_REF + lastReference +
+               STR_FPG_BN + fpgBn + "\n]";
     }
 }

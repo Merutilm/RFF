@@ -19,22 +19,22 @@ final class MUISettingElementsPanel extends JPanel{
     }
 
 
-    public <T> void createTextInput(String name, T defaultValue, Function<String, T> mapper, Consumer<T> enterFunction){
-        add(new MUITextField<T>(name, defaultValue, mapper, enterFunction));
+    public <T> void createTextInput(String name, String description, T defaultValue, Function<String, T> mapper, Consumer<T> enterFunction){
+        add(new MUITextField<>(name, description, defaultValue, mapper, enterFunction));
     }
-    public <T> void createTextInput(String name, T defaultValue, Function<String, T> mapper, Consumer<T> enterFunction, boolean validCondition, String invalidConditionMessage){
-        add(new MUITextField<T>(name, defaultValue, mapper, enterFunction, validCondition, invalidConditionMessage));
+    public <T> void createTextInput(String name, String description,  T defaultValue, Function<String, T> mapper, Consumer<T> enterFunction, boolean validCondition, String invalidConditionMessage){
+        add(new MUITextField<>(name, description, defaultValue, mapper, enterFunction, validCondition, invalidConditionMessage));
     }
-    public <S extends Enum<S> & Selectable> void createSelectInput(String name, S defaultValue, S[] options, Consumer<S> enterFunction, boolean useComboBox){
+    public <S extends Enum<S> & Selectable> void createSelectInput(String name, String description, S defaultValue, S[] options, Consumer<S> enterFunction, boolean useComboBox){
         if(useComboBox){
-            add(new MUISelectionBoxPanel<S>(name, defaultValue, options, enterFunction));
+            add(new MUISelectionBoxPanel<>(name, description, defaultValue, options, enterFunction));
         }else{
-            add(new MUISelectionFieldPanel<S>(name, defaultValue, options, enterFunction));
+            add(new MUISelectionFieldPanel<>(name, description, defaultValue, options, enterFunction));
         }
     }
     
-    public void createBoolInput(String name, boolean defaultValue, BooleanConsumer enterFunction){
-        createSelectInput(name, BooleanValue.typeOf(defaultValue), BooleanValue.values(), e -> enterFunction.accept(e.bool()), false);
+    public void createBoolInput(String name, String description, boolean defaultValue, BooleanConsumer enterFunction){
+        createSelectInput(name, description, BooleanValue.typeOf(defaultValue), BooleanValue.values(), e -> enterFunction.accept(e.bool()), false);
     }
 
 

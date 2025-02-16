@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 
 final class MUISelectionBoxPanel<S extends Enum<S> & Selectable> extends JPanel{
 
-    public MUISelectionBoxPanel(String name, S defaultValue, S[] options, Consumer<S> enterFunction){
+    public MUISelectionBoxPanel(String name, String description, S defaultValue, S[] options, Consumer<S> enterFunction){
         super(new GridLayout(1, 2, 10, 0));
         JLabel label = new JLabel(name);
         label.setHorizontalAlignment(SwingConstants.CENTER);
@@ -29,8 +29,9 @@ final class MUISelectionBoxPanel<S extends Enum<S> & Selectable> extends JPanel{
         label.setFont(MUIConstants.DEFAULT_FONT);
 
         JComboBox<S> comboBox = new JComboBox<>(options);
+        comboBox.setToolTipText("<html>"+description+"</html>");
         comboBox.setSelectedIndex(defaultValue.ordinal());
-        comboBox.addActionListener($ -> enterFunction.accept(options[comboBox.getSelectedIndex()]));
+        comboBox.addActionListener(_ -> enterFunction.accept(options[comboBox.getSelectedIndex()]));
         comboBox.setBorder(MUIConstants.INPUT_BORDER);
         comboBox.setBackground(MUIConstants.BUTTON_BACKGROUND);
         comboBox.setForeground(MUIConstants.TEXT_COLOR);

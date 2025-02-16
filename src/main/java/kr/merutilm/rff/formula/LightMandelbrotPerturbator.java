@@ -38,7 +38,7 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
     // it returns the double value of iteration
     // Performs the corresponding action on all pixels
     @Override
-    public double iterate(DoubleExponent dcr, DoubleExponent dci) {
+    public double iterate(DoubleExponent dcr, DoubleExponent dci) throws IllegalRenderStateException {
         double dcr1 = dcr.doubleValue() + offR;
         double dci1 = dci.doubleValue() + offI;
         double[] rr = reference.refReal();
@@ -121,7 +121,6 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
             zi = ri[refIteration] + dzi;
 
 
-
             pd = cd;
             cd = zr * zr + zi * zi;
 
@@ -135,7 +134,7 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
                 break;
             }
 
-
+            state.tryBreak(currentID);
 
         }
 

@@ -29,7 +29,7 @@ public final class IOUtilities {
             return name;
         }
         
-        private Extension(String name){
+        Extension(String name){
             this.name = name;
         }
     }
@@ -45,7 +45,7 @@ public final class IOUtilities {
             return name;
         }
         
-        private DefaultDirectory(String name){
+        DefaultDirectory(String name){
             this.name = name;
         }
     }
@@ -62,7 +62,7 @@ public final class IOUtilities {
             return name;
         }
         
-        private DefaultFileName(String name){
+        DefaultFileName(String name){
             this.name = name;
         }
     }
@@ -79,7 +79,7 @@ public final class IOUtilities {
             return name;
         }
         
-        private Constants(String name){
+        Constants(String name){
             this.name = name;
         }
     }
@@ -148,9 +148,7 @@ public final class IOUtilities {
 
     public static File mkdir(String dir) {
         File file = new File(IOUtilities.getOriginalResource(), dir);
-        if (file.mkdir()) {
-            //noop
-        } 
+        file.mkdir();//noop
         return file;
     }
 

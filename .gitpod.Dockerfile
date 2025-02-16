@@ -5,5 +5,5 @@ FROM gitpod/workspace-full-vnc
 USER gitpod
 
 RUN bash -c ". /home/gitpod/.sdkman/bin/sdkman-init.sh && \
-    sdk install java 17.0.12-amzn && \
-    sdk default java 17.0.12-amzn"
+    sdk install java 23.0.2-amzn && \
+    sdk default java 23.0.2-amzn"

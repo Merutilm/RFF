@@ -2,8 +2,6 @@ package kr.merutilm.rff.shader;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import kr.merutilm.rff.io.BitMap;
 import kr.merutilm.rff.io.BitMapImage;
@@ -33,7 +31,6 @@ public class BitMapDispatcher extends ArrayDispatcher<BitMap, BitMapRenderer>{
     /**
      * 셰이더를 객체 생성에 전달한 원본 canvas 배열에 반영합니다.
      *
-     * @return 결과 배열
      * @throws InterruptedException        스레드가 대기 상태일 때 강제 종료될 경우 호출됩니다
      * @throws IllegalStateException       렌더러가 없을 때 호출됩니다
      */

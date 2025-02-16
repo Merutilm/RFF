@@ -45,8 +45,8 @@ enum RFFSettingsMenu {
         Arrays.stream(items).forEach(e -> {
             JMenuItem item = new JMenuItem(e.toString());
             
-            item.addActionListener(k -> e.accept(master));
-            item.setToolTipText(e.description());
+            item.addActionListener(_ -> e.accept(master));
+            item.setToolTipText("<html>"+ e.description() + "</html>");
             item.setAccelerator(e.keyStroke());
             menu.add(item);
             menu.setFont(MUIConstants.DEFAULT_FONT);
@@ -59,7 +59,7 @@ enum RFFSettingsMenu {
     }
 
 
-    private RFFSettingsMenu(Function<RFF, JMenu> getter){
+    RFFSettingsMenu(Function<RFF, JMenu> getter){
         this.function = getter;
     }
 }

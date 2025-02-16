@@ -47,7 +47,7 @@ public record RFFMap(double zoom, int period, long maxIteration, DoubleMatrix it
         }
     }
     /**
-     * read map with name to XXXX.extension. (ID is XXXX)
+     * read map with name to XXX.extension. (ID is XXX)
      * @param dir Directory to read
      */
     public static RFFMap readByID(File dir, int id){
@@ -55,7 +55,7 @@ public record RFFMap(double zoom, int period, long maxIteration, DoubleMatrix it
     }
 
     /**
-     * export map with name to XXXX.extension.
+     * export map with name to XXX.extension.
      * This format must always be followed when creating a video.
      * 
      * @param dir Directory to export

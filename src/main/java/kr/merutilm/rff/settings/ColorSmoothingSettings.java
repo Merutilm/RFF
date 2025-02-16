@@ -14,7 +14,7 @@ public enum ColorSmoothingSettings implements Selectable{
         return name;
     }
 
-    private ColorSmoothingSettings(String name){
+    ColorSmoothingSettings(String name){
         this.name = name;
     }
     

@@ -3,8 +3,8 @@ import kr.merutilm.rff.struct.LWBigComplex;
 
 public interface MandelbrotReference extends Reference{
 
-    String STR_REFERENCE_REAL = "\nReferance Real : ";
-    String STR_REFERENCE_IMAG = "\nReferance Imag : ";
+    String STR_REFERENCE_REAL = "\nReference Real : ";
+    String STR_REFERENCE_IMAG = "\nReference Imag : ";
     String STR_LAST_REF = "\nLast Reference : ";
     String STR_FPG_BN = "\nFPGBn : ";
 

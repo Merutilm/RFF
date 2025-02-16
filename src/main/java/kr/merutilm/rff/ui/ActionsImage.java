@@ -16,7 +16,8 @@ import kr.merutilm.rff.settings.ImageSettings;
 import kr.merutilm.rff.theme.BasicThemes;
 
 enum ActionsImage implements Actions {
-    THEME("Set Theme", "Set theme.", (master, name) -> new RFFSettingsWindow(name, panel -> {panel.createSelectInput(name,
+    THEME("Set Theme", "Set theme.", (master, name) -> new RFFSettingsWindow(name, panel -> {
+        panel.createSelectInput(name, "Select the theme type",
             BasicThemes.tryMatch(master.getTheme()), BasicThemes.values(), e -> {
                 master.setTheme(e.getTheme());
                 ActionsExplore.REFRESH_COLOR.accept(master);
@@ -30,7 +31,7 @@ enum ActionsImage implements Actions {
         Consumer<UnaryOperator<ImageSettings.Builder>> applier = e -> master
                 .setSettings(e1 -> e1.edit().setImageSettings(e2 -> e.apply(e2.edit()).build()).build());
 
-        panel.createTextInput(name, image.resolutionMultiplier(), Double::parseDouble, e -> {
+        panel.createTextInput(name, "The resolution multiplier of current window.", image.resolutionMultiplier(), Double::parseDouble, e -> {
             applier.accept(t -> t.setResolutionMultiplier(e));
             Actions.getRenderer(master).recompute();
         });

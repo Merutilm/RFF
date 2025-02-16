@@ -14,7 +14,7 @@ import kr.merutilm.rff.selectable.Selectable;
 
 final class MUISelectionFieldPanel<S extends Enum<S> & Selectable> extends JPanel{
 
-    public MUISelectionFieldPanel(String name, S defaultValue, S[] options, Consumer<S> enterFunction){
+    public MUISelectionFieldPanel(String name, String description, S defaultValue, S[] options, Consumer<S> enterFunction){
         super(new GridLayout(1, 2, 10, 0));
         JLabel label = new JLabel(name);
         label.setFont(MUIConstants.DEFAULT_FONT);
@@ -40,7 +40,8 @@ final class MUISelectionFieldPanel<S extends Enum<S> & Selectable> extends JPane
                     button.setBackground(MUIConstants.BUTTON_BACKGROUND);
                 }
             });
-            
+
+            button.setToolTipText("<html>"+description+"</html>");
             button.setUI(new BasicToggleButtonUI());
             button.setFont(MUIConstants.DEFAULT_FONT);
             button.setForeground(MUIConstants.TEXT_COLOR);

@@ -131,7 +131,7 @@ public record ColorSettings(
     }
 
     @Override
-    public final String toString() {
+    public String toString() {
         return Arrays.toString(colors) + ", " + colorSmoothing + ", " + iterationInterval + ", " + offsetRatio;
     }
 

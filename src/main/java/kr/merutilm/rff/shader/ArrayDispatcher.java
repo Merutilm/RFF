@@ -1,12 +1,10 @@
 package kr.merutilm.rff.shader;
 
 import kr.merutilm.rff.struct.Matrix;
-import kr.merutilm.rff.util.ConsoleUtils;
 import kr.merutilm.rff.util.TaskManager;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 

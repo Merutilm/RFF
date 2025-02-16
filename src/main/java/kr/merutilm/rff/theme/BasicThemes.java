@@ -25,7 +25,7 @@ public enum BasicThemes implements Selectable{
     }
 
 
-    private BasicThemes(BasicTheme generator) {
+    BasicThemes(BasicTheme generator) {
         this.generator = generator;
     }
 

@@ -20,9 +20,6 @@ public interface BitMapRenderer extends ArrayRenderer{
      * @param c  해당 픽셀의 색상
      * @param t  시각(초)
      */
-    HexColor execute(int x, int y, int xRes, int yRes, double rx, double ry, int i, HexColor c, double t) throws IllegalRenderStateException;
+    HexColor execute(int x, int y, int xRes, int yRes, double rx, double ry, int i, HexColor c, double t);
 
-    default boolean isValid(){
-        return true;
-    }
 }

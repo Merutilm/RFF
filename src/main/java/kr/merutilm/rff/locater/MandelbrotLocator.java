@@ -110,7 +110,11 @@ public record MandelbrotLocator(LWBigComplex center, DoubleExponent dcMax, doubl
     }
 
     private static boolean checkMaxIterationOnly(MandelbrotPerturbator scene, DoubleExponent resultDcMax, long maxIteration){
-        return (long) scene.iterate(resultDcMax, DoubleExponent.ZERO) == maxIteration;
+        try {
+            return (long) scene.iterate(resultDcMax, DoubleExponent.ZERO) == maxIteration;
+        } catch (IllegalRenderStateException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

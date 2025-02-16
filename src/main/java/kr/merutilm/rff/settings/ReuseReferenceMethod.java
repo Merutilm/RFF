@@ -12,7 +12,7 @@ public enum ReuseReferenceMethod implements Selectable{
      */
     CENTERED_REFERENCE("Centered"),
     /**
-     * Do not reuse refernce, and recalculate reference every perturbator.
+     * Do not reuse reference, and recalculate reference every perturbator.
      */
     DISABLED("Disabled");
     
@@ -23,7 +23,7 @@ public enum ReuseReferenceMethod implements Selectable{
         return name;
     }
 
-    private ReuseReferenceMethod(String name){
+    ReuseReferenceMethod(String name){
         this.name = name;
     }
 }

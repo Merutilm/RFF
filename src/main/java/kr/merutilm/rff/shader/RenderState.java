@@ -2,8 +2,6 @@ package kr.merutilm.rff.shader;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntConsumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import kr.merutilm.rff.util.TaskManager;
 
@@ -34,9 +32,7 @@ public final class RenderState {
         }
 
         int currentID = currentID();
-        currentThread = TaskManager.runTask(() -> {
-            run.accept(currentID);
-        });
+        currentThread = TaskManager.runTask(() -> run.accept(currentID));
     }
 
     /**

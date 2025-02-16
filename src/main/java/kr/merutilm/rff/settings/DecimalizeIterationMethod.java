@@ -8,7 +8,7 @@ public enum DecimalizeIterationMethod implements Selectable{
      */
     NONE("None"),
     /**
-     * Use triangle inequation once.
+     * Use triangle inequality once.
      */
     LINEAR("Linear"),
     /**
@@ -31,7 +31,7 @@ public enum DecimalizeIterationMethod implements Selectable{
         return name;
     }
 
-    private DecimalizeIterationMethod(String name){
+    DecimalizeIterationMethod(String name){
         this.name = name;
     }
 }
