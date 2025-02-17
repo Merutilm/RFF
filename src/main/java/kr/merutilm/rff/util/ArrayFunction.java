@@ -7,8 +7,8 @@ public final class ArrayFunction {
     }
 
 
-    public static long[] exp2xArr(long[] arr){
-        long[] arr2 = new long[arr.length * 2];
+    public static boolean[] exp2xArr(boolean[] arr){
+        boolean[] arr2 = new boolean[arr.length * 2];
         System.arraycopy(arr, 0, arr2, 0, arr.length);
         return arr2;
     }

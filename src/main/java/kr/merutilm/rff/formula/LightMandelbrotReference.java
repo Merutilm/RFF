@@ -2,6 +2,8 @@ package kr.merutilm.rff.formula;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
 
 import kr.merutilm.rff.shader.IllegalRenderStateException;
@@ -166,8 +168,8 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
         return new LightMandelbrotReference(formula, center, rr, ri, periodArray, lastRef, fpgBn);
     }
 
-    public LightR3ATable generateBLA(RenderState state, int renderID, R3ASettings blaSettings, double dcMax) throws IllegalRenderStateException {
-        return new LightR3ATable(state, renderID, blaSettings, refReal, refImag, period, dcMax); //TODO
+    public LightR3ATable generateR3A(RenderState state, int renderID, R3ASettings blaSettings, double dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalRenderStateException {
+        return new LightR3ATable(state, renderID, blaSettings, refReal, refImag, period, dcMax, actionPerCreatingTableIteration);
     }
 
     @Override

@@ -16,10 +16,10 @@ import kr.merutilm.rff.theme.BasicTheme;
 import kr.merutilm.rff.util.TextFormatter;
 
 enum ActionsExplore implements Actions {
-    RECOMPUTE("Recompute", "Recompute using current Location.", (master, name) ->
+    RECOMPUTE("Recompute", "Recompute using current Location.", (master, _) ->
         Actions.getRenderer(master).recompute(), 
         KeyStroke.getKeyStroke(KeyEvent.VK_C, 0)),
-    REFRESH_COLOR("Refresh Color", "Refresh color using current Settings.", (master, name) -> {
+    REFRESH_COLOR("Refresh Color", "Refresh color using current Settings.", (master, _) -> {
         RFFRenderPanel render = Actions.getRenderer(master);
         try {
             render.getState().createThread(id -> {
@@ -35,7 +35,7 @@ enum ActionsExplore implements Actions {
             Thread.currentThread().interrupt();
         }
     }, KeyStroke.getKeyStroke(KeyEvent.VK_R, 0)),
-    RESET("Reset", "Reset to Initial Location. It contains \"Recompute\" operation.", (master, name) -> {
+    RESET("Reset", "Reset to Initial Location. It contains \"Recompute\" operation.", (master, _) -> {
         RFFRenderPanel render = Actions.getRenderer(master);
         try {
             render.getState().cancel();
@@ -48,7 +48,7 @@ enum ActionsExplore implements Actions {
             Thread.currentThread().interrupt();
         }
     }, KeyStroke.getKeyStroke(KeyEvent.VK_N, 0)),
-    CANCEL("Cancel Render", "Cancels the render. If you want to continue, Use \"Recompute\" operation.", (master, name) -> {
+    CANCEL("Cancel Render", "Cancels the render. If you want to continue, Use \"Recompute\" operation.", (master, _) -> {
                 try {
             Actions.getRenderer(master).getState().cancel();
         } catch (InterruptedException e) {
@@ -98,6 +98,7 @@ enum ActionsExplore implements Actions {
                     MandelbrotLocator locator = MandelbrotLocator.locateMinibrot(render.getState(),
                                     id, (MandelbrotPerturbator) render.getCurrentPerturbator(),
                             getActionWhileFindingMinibrotCenter(master, period),
+                            getActionWhileCreatingTable(master),
                             getActionWhileFindingMinibrotZoom(master)
                             );
 
@@ -152,8 +153,21 @@ enum ActionsExplore implements Actions {
     }
 
     private static void sendCenterNotFoundMessage() {
-        JOptionPane.showMessageDialog(null, "Cannot find center. Zoom in a little and try again.", "Locate Minibrot", JOptionPane.ERROR_MESSAGE);
+        TaskManager.runTask(() -> JOptionPane.showMessageDialog(null, "Cannot find center. Zoom in a little and try again.", "Error", JOptionPane.ERROR_MESSAGE));
     }
+
+    public static BiConsumer<Integer, Double> getActionWhileCreatingTable(RFF master){
+        RFFStatusPanel panel = master.getWindow().getStatusPanel();
+        int interval = periodPanelRefreshInterval(master);
+        return (p, i) -> {
+
+            if (p % interval == 0) {
+                panel.setProcess("Creating Table... "
+                                 + TextFormatter.processText(i));
+            }
+        };
+    }
+
     public static BiConsumer<Integer, Integer> getActionWhileFindingMinibrotCenter(RFF master, int period){
         RFFStatusPanel panel = master.getWindow().getStatusPanel();
         int interval = periodPanelRefreshInterval(master);
@@ -167,6 +181,8 @@ enum ActionsExplore implements Actions {
             }
         };
     }
+
+
 
     public static DoubleConsumer getActionWhileFindingMinibrotZoom(RFF master){
         RFFStatusPanel panel = master.getWindow().getStatusPanel();

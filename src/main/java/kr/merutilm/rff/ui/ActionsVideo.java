@@ -23,7 +23,7 @@ import kr.merutilm.rff.settings.ExportSettings;
 import kr.merutilm.rff.settings.VideoSettings;
 
 enum ActionsVideo implements Actions {
-    DATA("Data", "Open the video data Settings. Used when generating video data files.", (master, name) -> new RFFSettingsWindow(name, panel -> {
+    DATA("Data", "Open the video data Settings. Used when generating video data files.", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         DataSettings data = getVideoSettings(master).dataSettings();
         
         Consumer<UnaryOperator<DataSettings.Builder>> applier = e -> 
@@ -34,7 +34,7 @@ enum ActionsVideo implements Actions {
         );
     }), null),
 
-    ANIMATION("Animation", "Open the video animation settings. Used when creating video.", (master, name) -> new RFFSettingsWindow(name, panel -> {
+    ANIMATION("Animation", "Open the video animation settings. Used when creating video.", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         AnimationSettings animation = getVideoSettings(master).animationSettings();
         
         Consumer<UnaryOperator<AnimationSettings.Builder>> applier = e -> 
@@ -56,7 +56,7 @@ enum ActionsVideo implements Actions {
         );
     }), null),
 
-    EXPORT_SETTINGS("Export Settings", "Open the video export settings. You can set the quality of the video to export.", (master, name) -> new RFFSettingsWindow(name, panel -> {
+    EXPORT_SETTINGS("Export Settings", "Open the video export settings. You can set the quality of the video to export.", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         ExportSettings export = getVideoSettings(master).exportSettings();
         
         Consumer<UnaryOperator<ExportSettings.Builder>> applier = e -> 
@@ -71,6 +71,7 @@ enum ActionsVideo implements Actions {
         panel.createTextInput("Bitrate", "The Bitrate of the video to export", export.bitrate(), Integer::parseInt, e ->
             applier.accept(f -> f.setBitrate(e))
         );
+
     }), null),
     GENERATE_VIDEO_DATA("Generate Video Data", "Generate the video data to directory.", (master, name) -> {
         File defOpen = new File(IOUtilities.getOriginalResource(), IOUtilities.DefaultDirectory.MAP_AS_VIDEO_DATA.toString());

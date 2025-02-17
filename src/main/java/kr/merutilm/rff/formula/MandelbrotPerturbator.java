@@ -29,12 +29,11 @@ public abstract class MandelbrotPerturbator extends Perturbator {
     public abstract MandelbrotReference getReference();
     
     public DoubleExponent getDcMaxByDoubleExponent() {
-        if (this instanceof LightMandelbrotPerturbator s) {
-            return DoubleExponent.valueOf(s.dcMax());
-        } else if (this instanceof DeepMandelbrotPerturbator s) {
-            return s.dcMax();
-        } else
-            throw new IllegalArgumentException();
+        return switch (this) {
+            case LightMandelbrotPerturbator s -> DoubleExponent.valueOf(s.dcMax());
+            case DeepMandelbrotPerturbator s -> s.dcMax();
+            default -> throw new IllegalArgumentException();
+        };
 
     }
 }

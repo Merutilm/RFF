@@ -16,7 +16,7 @@ import kr.merutilm.rff.settings.ImageSettings;
 import kr.merutilm.rff.theme.BasicThemes;
 
 enum ActionsImage implements Actions {
-    THEME("Set Theme", "Set theme.", (master, name) -> new RFFSettingsWindow(name, panel -> {
+    THEME("Set Theme", "Set theme.", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         panel.createSelectInput(name, "Select the theme type",
             BasicThemes.tryMatch(master.getTheme()), BasicThemes.values(), e -> {
                 master.setTheme(e.getTheme());
@@ -24,7 +24,7 @@ enum ActionsImage implements Actions {
             }, true);
             panel.setSize(panel.getWidth(), 150);
         }), KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_DOWN_MASK)),
-    RESOLUTION("Set Resolution", "Set the resolution of rendered image. It contains \"Recompute\" operation.", (master, name) -> new RFFSettingsWindow(name, panel -> {
+    RESOLUTION("Set Resolution", "Set the resolution of rendered image. It contains \"Recompute\" operation.", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
 
         ImageSettings image = getImageSettings(master);
 

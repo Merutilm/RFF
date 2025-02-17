@@ -44,7 +44,6 @@ enum RFFSettingsMenu {
     public static <T extends Actions> void addAll(RFF master, JMenu menu, T[] items){
         Arrays.stream(items).forEach(e -> {
             JMenuItem item = new JMenuItem(e.toString());
-            
             item.addActionListener(_ -> e.accept(master));
             item.setToolTipText("<html>"+ e.description() + "</html>");
             item.setAccelerator(e.keyStroke());

@@ -3,7 +3,9 @@ package kr.merutilm.rff.ui;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.util.Arrays;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.*;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
@@ -14,7 +16,8 @@ final class RFFRenderWindow extends JFrame {
 
     private final RFFRenderPanel drawPanel;
     private final RFFStatusPanel statusPanel;
-    
+    private RFFSettingsWindow currentSettingsWindow;
+
     public RFFRenderWindow(RFF master, int w, int h) {
         setTitle("RFF");
         setIconImage(IOUtilities.getApplicationIcon());
@@ -37,6 +40,16 @@ final class RFFRenderWindow extends JFrame {
             }
         });
 
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowActivated(WindowEvent e) {
+                super.windowActivated(e);
+                if(currentSettingsWindow != null) {
+                    currentSettingsWindow.toFront();
+                }
+            }
+        });
+
         add(menuBar, BorderLayout.NORTH);
         add(statusPanel, BorderLayout.SOUTH);
         add(drawPanel, BorderLayout.CENTER);
@@ -46,6 +59,10 @@ final class RFFRenderWindow extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
         drawPanel.recompute();
+    }
+
+    public void setCurrentSettingsWindow(RFFSettingsWindow currentSettingsWindow) {
+        this.currentSettingsWindow = currentSettingsWindow;
     }
 
     public RFFStatusPanel getStatusPanel() {

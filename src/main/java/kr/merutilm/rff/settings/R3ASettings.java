@@ -11,15 +11,16 @@ public record R3ASettings(int minSkipReference,
                           int maxMultiplierBetweenLevel,
                           double epsilonPower,
                           R3ASelectionMethod r3aSelectionMethod,
-                          boolean fixFloatingPointErrors) implements Struct<R3ASettings> {
-    
+                          boolean fixGlitches) implements Struct<R3ASettings> {
+
     @Override
     public Builder edit() {
         return new Builder()
-        .setMinSkipReference(minSkipReference)
-        .setMaxMultiplierBetweenLevel(maxMultiplierBetweenLevel)
-        .setEpsilonPower(epsilonPower)
-        .setR3ASelectionMethod(r3aSelectionMethod);
+                .setMinSkipReference(minSkipReference)
+                .setMaxMultiplierBetweenLevel(maxMultiplierBetweenLevel)
+                .setEpsilonPower(epsilonPower)
+                .setR3ASelectionMethod(r3aSelectionMethod)
+                .setFixGlitches(fixGlitches);
     }
 
 
@@ -28,7 +29,7 @@ public record R3ASettings(int minSkipReference,
         private int maxMultiplierBetweenLevel;
         private double epsilonPower;
         private R3ASelectionMethod r3aSelectionMethod;
-        private boolean fixFloatingPointErrors;
+        private boolean fixGlitches;
 
         public Builder setMinSkipReference(int minSkipReference) {
             this.minSkipReference = minSkipReference;
@@ -50,8 +51,8 @@ public record R3ASettings(int minSkipReference,
             return this;
         }
 
-        public Builder setFixFloatingPointErrors(boolean fixFloatingPointErrors) {
-            this.fixFloatingPointErrors = fixFloatingPointErrors;
+        public Builder setFixGlitches(boolean fixGlitches) {
+            this.fixGlitches = fixGlitches;
             return this;
         }
 
@@ -74,14 +75,15 @@ public record R3ASettings(int minSkipReference,
             this.r3aSelectionMethod = changes.apply(r3aSelectionMethod);
             return this;
         }
-        public Builder setFizFloatingPointErrors(UnaryOperator<Boolean> changes) {
-            this.fixFloatingPointErrors = changes.apply(fixFloatingPointErrors);
+
+        public Builder setFixGlitches(UnaryOperator<Boolean> changes) {
+            this.fixGlitches = changes.apply(fixGlitches);
             return this;
         }
 
         @Override
         public R3ASettings build() {
-            return new R3ASettings(minSkipReference, maxMultiplierBetweenLevel, epsilonPower, r3aSelectionMethod, fixFloatingPointErrors);
+            return new R3ASettings(minSkipReference, maxMultiplierBetweenLevel, epsilonPower, r3aSelectionMethod, fixGlitches);
         }
     }
 }

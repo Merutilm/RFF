@@ -29,6 +29,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
+import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
 
 final class RFFRenderPanel extends JPanel {
@@ -63,7 +65,7 @@ final class RFFRenderPanel extends JPanel {
                             getMouseY(e)
                     );
                     double mzo = 1.0 / Math.pow(10, -CalculationSettings.ZOOM_VALUE);
-                    master.setSettings(e1 -> e1.edit().setCalculationSettings(      
+                    master.setSettings(e1 -> e1.edit().setCalculationSettings(
                                     e2 -> e2.edit().addCenter(
                                             offset[0].multiply(1 - mzo), offset[1].multiply(1 - mzo), Perturbator.precision(e2.logZoom())
                                     ).zoomOut().build()
@@ -107,7 +109,7 @@ final class RFFRenderPanel extends JPanel {
             @Override
             public void mouseMoved(MouseEvent e) {
                 super.mouseMoved(e);
-                if(currentMap == null){
+                if (currentMap == null) {
                     return;
                 }
                 long it = (long) currentMap.iterations().pipette(getMouseX(e), getMouseY(e));
@@ -140,7 +142,6 @@ final class RFFRenderPanel extends JPanel {
     }
 
 
-
     private int getImgWidth() {
         ImageSettings img = master.getSettings().imageSettings();
         return (int) (getWidth() * img.resolutionMultiplier());
@@ -162,8 +163,6 @@ final class RFFRenderPanel extends JPanel {
     }
 
 
-
-
     private DoubleExponent getDivisor() {
         double logZoom = master.getSettings().calculationSettings().logZoom();
         return DoubleExponentMath.pow10(logZoom);
@@ -180,12 +179,11 @@ final class RFFRenderPanel extends JPanel {
     }
 
 
-
     public synchronized void recompute() {
 
         try {
             state.createThread(id -> {
-                try{
+                try {
                     compute(id);
                 } catch (IllegalRenderStateException e) {
                     RFFLoggers.logCancelledMessage("Recompute", id);
@@ -197,27 +195,27 @@ final class RFFRenderPanel extends JPanel {
 
     }
 
-    
+
     //this method can be thread-safe only when called via recompute()
-    public void compute(int currentID) throws IllegalRenderStateException{
+    public void compute(int currentID) throws IllegalRenderStateException {
 
         int w = getImgWidth();
         int h = getImgHeight();
-        
+
         if (master.getSettings().calculationSettings().autoIteration()) {
             master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit().setMaxIteration(Math.max(INIT_ITERATION, period * 50L)).build()).build());
         }
-        
+
         Settings settings = master.getSettings();
         CalculationSettings calc = settings.calculationSettings();
-        
+
         DoubleMatrix iterations = new DoubleMatrix(w, h);
         RFFShaderProcessor.fillInit(iterations);
 
         int precision = Perturbator.precision(calc.logZoom());
         double logZoom = calc.logZoom();
 
-       
+
         RFFStatusPanel panel = master.getWindow().getStatusPanel();
         panel.initTime();
         panel.setZoomText(logZoom);
@@ -228,37 +226,44 @@ final class RFFRenderPanel extends JPanel {
 
         int refreshInterval = ActionsExplore.periodPanelRefreshInterval(master);
         IntConsumer actionPerRefCalcIteration = p -> {
-            if(p % refreshInterval == 0){
+            if (p % refreshInterval == 0) {
                 panel.setProcess("Period " + p);
             }
         };
+        BiConsumer<Integer, Double> actionPerCreatingTableIteration = (p, i) -> {
+            if (p % refreshInterval == 0) {
+                panel.setProcess("Creating Table... " + TextFormatter.processText(i));
+            }
+        };
+
 
         switch (calc.reuseReference()) {
             case CURRENT_REFERENCE -> {
                 currentPerturbator = currentPerturbator.reuse(state, currentID, calc, currentPerturbator.getDcMaxByDoubleExponent(), precision);
             }
-            case CENTERED_REFERENCE ->  {
+            case CENTERED_REFERENCE -> {
                 int period = currentPerturbator.getReference().longestPeriod();
-                MandelbrotLocator center = MandelbrotLocator.locateMinibrot(state, currentID, (MandelbrotPerturbator)currentPerturbator,
-                    ActionsExplore.getActionWhileFindingMinibrotCenter(master, period), 
-                    ActionsExplore.getActionWhileFindingMinibrotZoom(master)
+                MandelbrotLocator center = MandelbrotLocator.locateMinibrot(state, currentID, (MandelbrotPerturbator) currentPerturbator,
+                        ActionsExplore.getActionWhileFindingMinibrotCenter(master, period),
+                        ActionsExplore.getActionWhileCreatingTable(master),
+                        ActionsExplore.getActionWhileFindingMinibrotZoom(master)
                 );
                 CalculationSettings refCalc = calc.edit().setCenter(center.center()).setLogZoom(center.logZoom()).build();
                 int refPrecision = Perturbator.precision(center.logZoom());
                 if (refCalc.logZoom() > EXP_DEADLINE) {
-                    currentPerturbator = new DeepMandelbrotPerturbator(state, currentID, refCalc, center.dcMax(), refPrecision, period, actionPerRefCalcIteration)
+                    currentPerturbator = new DeepMandelbrotPerturbator(state, currentID, refCalc, center.dcMax(), refPrecision, period, actionPerRefCalcIteration, actionPerCreatingTableIteration)
                             .reuse(state, currentID, calc, dcMax, precision);
-                }else{
-                    currentPerturbator = new LightMandelbrotPerturbator(state, currentID, refCalc, center.dcMax().doubleValue(), refPrecision, period, actionPerRefCalcIteration)
+                } else {
+                    currentPerturbator = new LightMandelbrotPerturbator(state, currentID, refCalc, center.dcMax().doubleValue(), refPrecision, period, actionPerRefCalcIteration, actionPerCreatingTableIteration)
                             .reuse(state, currentID, calc, dcMax, precision);
                 }
 
             }
             case DISABLED -> {
                 if (logZoom > EXP_DEADLINE) {
-                    currentPerturbator = new DeepMandelbrotPerturbator(state, currentID, calc, dcMax, precision, -1, actionPerRefCalcIteration);
+                    currentPerturbator = new DeepMandelbrotPerturbator(state, currentID, calc, dcMax, precision, -1, actionPerRefCalcIteration, actionPerCreatingTableIteration);
                 } else {
-                    currentPerturbator = new LightMandelbrotPerturbator(state, currentID, calc, dcMax.doubleValue(), precision, -1, actionPerRefCalcIteration);
+                    currentPerturbator = new LightMandelbrotPerturbator(state, currentID, calc, dcMax.doubleValue(), precision, -1, actionPerRefCalcIteration, actionPerCreatingTableIteration);
                 }
             }
         }
@@ -271,7 +276,7 @@ final class RFFRenderPanel extends JPanel {
 
         period = currentPerturbator.getReference().longestPeriod();
         currentMap = new RFFMap(calc.logZoom(), period, calc.maxIteration(), iterations);
-        
+
         panel.setPeriodText(period);
         panel.setProcess("Preparing...");
 
@@ -290,10 +295,6 @@ final class RFFRenderPanel extends JPanel {
             }
             panel.refreshTime();
         }, 500);
-         
-
-            
-        
 
 
     }
@@ -309,16 +310,16 @@ final class RFFRenderPanel extends JPanel {
     public RFFMap getCurrentMap() {
         return currentMap;
     }
-    
+
     public RenderState getState() {
         return state;
     }
 
 
-    private ProcessVisualizer gvf(int fracA){
+    private ProcessVisualizer gvf(int fracA) {
         RFFStatusPanel panel = master.getWindow().getStatusPanel();
         return a -> panel.setProcess(FINISHING_TEXT + TextFormatter.processText(a)
-        + TextFormatter.frac(fracA, 3, TextFormatter.Parentheses.SQUARE));
+                                     + TextFormatter.frac(fracA, 3, TextFormatter.Parentheses.SQUARE));
     }
 
     /**
@@ -326,13 +327,13 @@ final class RFFRenderPanel extends JPanel {
      */
     public void reloadAndPaint(int currentID, boolean compressed) throws IllegalRenderStateException, InterruptedException {
         ProcessVisualizer[] pv = new ProcessVisualizer[]{
-            gvf(1),
-            gvf(2),
-            gvf(3)
+                gvf(1),
+                gvf(2),
+                gvf(3)
         };
 
         currentImage = RFFShaderProcessor.createImageWithVisualizer(state, currentID, currentMap, master.getSettings(), compressed, pv);
-        
+
         repaint();
 
     }

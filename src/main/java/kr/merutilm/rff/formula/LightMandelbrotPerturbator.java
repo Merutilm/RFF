@@ -1,5 +1,7 @@
 package kr.merutilm.rff.formula;
 
+import java.util.function.BiConsumer;
+import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
 
 import kr.merutilm.rff.shader.IllegalRenderStateException;
@@ -17,21 +19,21 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
     private final double offR;
     private final double offI;
 
-    public LightMandelbrotPerturbator(RenderState state, int currentID, CalculationSettings calc, double dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration) throws IllegalRenderStateException{
-        this(state, currentID, calc, dcMax, precision, period, actionPerRefCalcIteration, false);
+    public LightMandelbrotPerturbator(RenderState state, int currentID, CalculationSettings calc, double dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalRenderStateException{
+        this(state, currentID, calc, dcMax, precision, period, actionPerRefCalcIteration, actionPerCreatingTableIteration,false);
     }
-    public LightMandelbrotPerturbator(RenderState state, int currentID, CalculationSettings calc, double dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, boolean arbitraryPrecisionFPGBn) throws IllegalRenderStateException{
-        this(state, currentID, calc, dcMax, precision, period, actionPerRefCalcIteration, arbitraryPrecisionFPGBn, null, null, 0, 0);
+    public LightMandelbrotPerturbator(RenderState state, int currentID, CalculationSettings calc, double dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, BiConsumer<Integer, Double> actionPerCreatingTableIteration, boolean arbitraryPrecisionFPGBn) throws IllegalRenderStateException{
+        this(state, currentID, calc, dcMax, precision, period, actionPerRefCalcIteration, actionPerCreatingTableIteration, arbitraryPrecisionFPGBn, null, null, 0, 0);
     }
 
-    public LightMandelbrotPerturbator(RenderState state, int currentID, CalculationSettings calc, double dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, boolean arbitraryPrecisionFPGBn,
-            LightMandelbrotReference reusedReference, LightR3ATable reusedTable, double offR, double offI) throws IllegalRenderStateException{
+    public LightMandelbrotPerturbator(RenderState state, int currentID, CalculationSettings calc, double dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, BiConsumer<Integer, Double> actionPerCreatingTableIteration, boolean arbitraryPrecisionFPGBn,
+                                      LightMandelbrotReference reusedReference, LightR3ATable reusedTable, double offR, double offI) throws IllegalRenderStateException{
         super(state, currentID, calc, arbitraryPrecisionFPGBn);
         this.dcMax = dcMax;
         this.offR = offR;
         this.offI = offI;
         this.reference = reusedTable == null ? LightMandelbrotReference.generate(state, currentID, calc.center(), precision, calc.maxIteration(), bailout, period, dcMax, strictFPGBn, actionPerRefCalcIteration) : reusedReference;
-        this.table = reusedTable == null ? reference.generateBLA(state, currentID, calc.r3aSettings(), dcMax) : reusedTable;
+        this.table = reusedTable == null ? reference.generateR3A(state, currentID, calc.r3aSettings(), dcMax, actionPerCreatingTableIteration) : reusedTable;
     }
  // AtomicInteger a = new AtomicInteger();
 
@@ -158,7 +160,7 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
         double offR = centerOffset.re().doubleValue();
         double offI = centerOffset.im().doubleValue();
 
-        return new LightMandelbrotPerturbator(state, currentID, calc, dcMax.doubleValue(), precision, reference.longestPeriod(), p -> {}, strictFPGBn, reference, table, offR, offI);
+        return new LightMandelbrotPerturbator(state, currentID, calc, dcMax.doubleValue(), precision, reference.longestPeriod(), _ -> {}, (_, _) -> {}, strictFPGBn, reference, table, offR, offI);
     }
 
     @Override

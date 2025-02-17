@@ -17,9 +17,9 @@ public interface BasicTheme extends Theme {
     R3ASettings INIT_BLA = new R3ASettings(
             16,
             4,
-            -4.0,
+            -3.0,
             R3ASelectionMethod.HIGHEST,
-            true
+            false
     );
     String INIT_RE = "-0.85";
     String INIT_IM = "0";

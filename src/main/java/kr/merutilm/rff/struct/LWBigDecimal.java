@@ -190,12 +190,12 @@ public class LWBigDecimal extends Number{
     private BigDecimal toBigDecimal(){
         BigDecimal d = new BigDecimal(value);
         if(exp2 < 0){
-            d = d.divide(BD_TWO.pow(-exp2));
+            d = d.divide(BD_TWO.pow(-exp2), -exp2ToPrecision(exp2), RoundingMode.FLOOR);
         }
         if(exp2 > 0){
-            d = d.multiply(BD_TWO.pow(exp2));    
+            d = d.multiply(BD_TWO.pow(exp2)).setScale(-exp2ToPrecision(exp2), RoundingMode.FLOOR);;
         }
-        d = d.setScale(-exp2ToPrecision(exp2), RoundingMode.FLOOR);
+
         return d;
     }
 

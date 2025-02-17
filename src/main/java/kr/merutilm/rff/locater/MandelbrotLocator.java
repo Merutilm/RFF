@@ -41,7 +41,7 @@ public record MandelbrotLocator(LWBigComplex center, DoubleExponent dcMax, doubl
     }
     
 
-    private static DeepMandelbrotPerturbator findAccurateCenterPerturbator(RenderState state, int currentID, MandelbrotPerturbator scene, BiConsumer<Integer, Integer> actionWhileFindingMinibrotCenter) throws IllegalRenderStateException{
+    private static DeepMandelbrotPerturbator findAccurateCenterPerturbator(RenderState state, int currentID, MandelbrotPerturbator scene, BiConsumer<Integer, Integer> actionWhileFindingMinibrotCenter, BiConsumer<Integer, Double> actionWhileCreatingTable) throws IllegalRenderStateException{
         
         // multiply zoom by 2 and find center offset.
         // set the center to center + centerOffset.
@@ -57,20 +57,22 @@ public record MandelbrotLocator(LWBigComplex center, DoubleExponent dcMax, doubl
         AtomicInteger centerFixCount = new AtomicInteger();
         DeepMandelbrotPerturbator doubledZoomScene = null;
         while (doubledZoomScene == null || !checkMaxIterationOnly(doubledZoomScene, doubledZoomDcMax, maxIteration)) {
-            
+
+            state.tryBreak(currentID);
+
             if(doubledZoomScene != null){
                 LWBigComplex off = findCenterOffset(doubledZoomScene);
                 doubledZoomCalc = doubledZoomCalc.edit().addCenter(off, doubledZoomPrecision).build();    
             }
             centerFixCount.getAndIncrement();
-            doubledZoomScene = new DeepMandelbrotPerturbator(state, currentID, doubledZoomCalc, doubledZoomDcMax, doubledZoomPrecision, period, p -> actionWhileFindingMinibrotCenter.accept(p, centerFixCount.get()), true);
+            doubledZoomScene = new DeepMandelbrotPerturbator(state, currentID, doubledZoomCalc, doubledZoomDcMax, doubledZoomPrecision, period, p -> actionWhileFindingMinibrotCenter.accept(p, centerFixCount.get()), actionWhileCreatingTable, true);
         }
 
 
         return doubledZoomScene;
     }
     
-    public static MandelbrotLocator locateMinibrot(RenderState state, int currentID, MandelbrotPerturbator scene, BiConsumer<Integer, Integer> actionWhileFindingMinibrotCenter, DoubleConsumer actionWhileFindingMinibrotZoom) throws IllegalRenderStateException {
+    public static MandelbrotLocator locateMinibrot(RenderState state, int currentID, MandelbrotPerturbator scene, BiConsumer<Integer, Integer> actionWhileFindingMinibrotCenter, BiConsumer<Integer, Double> actionWhileCreatingTable, DoubleConsumer actionWhileFindingMinibrotZoom) throws IllegalRenderStateException {
 
         // code flowing
         // e.g. zoom * 2 -> zoom * 1.5 -> zoom * 1.75.....
@@ -81,7 +83,7 @@ public record MandelbrotLocator(LWBigComplex center, DoubleExponent dcMax, doubl
         // specific small number. O(log N)
 
         
-        MandelbrotPerturbator resultScene = findAccurateCenterPerturbator(state, currentID, scene, actionWhileFindingMinibrotCenter);
+        MandelbrotPerturbator resultScene = findAccurateCenterPerturbator(state, currentID, scene, actionWhileFindingMinibrotCenter, actionWhileCreatingTable);
         DoubleExponent resultDcMax = resultScene.getDcMaxByDoubleExponent();
         CalculationSettings resultCalc = resultScene.getCalc();
         double resultZoom = resultCalc.logZoom();
@@ -90,6 +92,9 @@ public record MandelbrotLocator(LWBigComplex center, DoubleExponent dcMax, doubl
         MandelbrotPerturbator resultSceneTemp = resultScene;
 
         while (zoomIncrement > ZOOM_INCREMENT_LIMIT) {
+
+            state.tryBreak(currentID);
+
             if(checkMaxIterationOnly(resultScene, resultDcMax, maxIteration)){
                 resultZoom -= zoomIncrement;
                 resultDcMax = resultDcMax.multiply(DoubleExponentMath.pow10(zoomIncrement));
@@ -113,7 +118,8 @@ public record MandelbrotLocator(LWBigComplex center, DoubleExponent dcMax, doubl
         try {
             return (long) scene.iterate(resultDcMax, DoubleExponent.ZERO) == maxIteration;
         } catch (IllegalRenderStateException e) {
-            throw new RuntimeException(e);
+            return false;
+            //noop
         }
     }
 

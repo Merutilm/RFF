@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
 
 import kr.merutilm.rff.shader.IllegalRenderStateException;
@@ -166,8 +168,8 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
     }
 
 
-    public DeepR3ATable generateBLA(RenderState state, int renderID, R3ASettings blaSettings, DoubleExponent dcMax) throws IllegalRenderStateException {
-        return new DeepR3ATable(state, renderID, blaSettings, refReal, refImag, period, dcMax);
+    public DeepR3ATable generateR3A(RenderState state, int renderID, R3ASettings blaSettings, DoubleExponent dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalRenderStateException {
+        return new DeepR3ATable(state, renderID, blaSettings, refReal, refImag, period, dcMax, actionPerCreatingTableIteration);
     }
 
     @Override

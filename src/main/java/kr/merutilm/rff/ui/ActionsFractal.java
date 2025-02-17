@@ -1,11 +1,15 @@
 package kr.merutilm.rff.ui;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.BiConsumer;
 import java.util.function.UnaryOperator;
 
 import javax.swing.KeyStroke;
 
+import kr.merutilm.rff.formula.Perturbator;
 import kr.merutilm.rff.struct.LWBigComplex;
 import kr.merutilm.rff.struct.LWBigDecimal;
 import kr.merutilm.rff.settings.CalculationSettings;
@@ -15,7 +19,7 @@ import kr.merutilm.rff.settings.R3ASelectionMethod;
 import kr.merutilm.rff.settings.ReuseReferenceMethod;
 
 enum ActionsFractal implements Actions {
-    R3A("R3A", "<b> Recursive Reference Rebasing Approximation. </b> <br> Determine all of the period based on reference orbit, skips the period of iteration at once. <br>  The render speed will be significantly faster when using it recursively.", (master, name) -> new RFFSettingsWindow(name, panel -> {
+    R3A("R3A", "<b> Recursive Reference Rebasing Approximation. </b> <br> Determine all of the period based on reference orbit, skips the period of iteration at once. <br>  The render speed will be significantly faster when using it recursively.", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         R3ASettings r3a = getCalculationSettings(master).r3aSettings();
         
         Consumer<UnaryOperator<R3ASettings.Builder>> applier = e -> 
@@ -34,16 +38,16 @@ enum ActionsFractal implements Actions {
         panel.createSelectInput("Selection Method", "Set the selection method of R3A.", r3a.r3aSelectionMethod(), R3ASelectionMethod.values(), e ->
             applier.accept(f -> f.setR3ASelectionMethod(e)), false
         );
-        panel.createBoolInput("Fix floating-point Errors", "Set the skipping method. <br> If true, skip count decreases once, and glitches are solved. <br> If false, The rendering will be faster, but the image may have glitches.", r3a.fixFloatingPointErrors(), e ->
-                applier.accept(f -> f.setFixFloatingPointErrors(e))
+        panel.createBoolInput("Fix Glitches", "Set the skipping method. <br> If true, skip count decreases once, and glitches are solved. <br> If false, The rendering will be faster, but the image may have glitches.", r3a.fixGlitches(), e ->
+                applier.accept(f -> f.setFixGlitches(e))
         );
     }), null),
 
-    ITERATIONS("Iterations", "Open the iteration settings. You can set the Max Iteration, Auto Iteration, and etc. here.", (master, name) -> new RFFSettingsWindow(name, panel -> {
+    ITERATIONS("Iterations", "Open the iteration settings. You can set the Max Iteration, Auto Iteration, and etc. here.", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         CalculationSettings calc = getCalculationSettings(master);
-        
+
         Consumer<UnaryOperator<CalculationSettings.Builder>> applier = e -> 
-            master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 ->  e.apply(e2.edit()).build()).build());
+            master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 -> e.apply(e2.edit()).build()).build());
 
         panel.createTextInput("Max Iteration", "Set maximum iteration. It is disabled when Auto iteration is enabled.", calc.maxIteration(), Long::parseLong, e ->
             applier.accept(f -> f.setMaxIteration(e)));
@@ -60,27 +64,38 @@ enum ActionsFractal implements Actions {
     }), null),
 
 
-    REFERENCE("Reference", "Open the reference settings. You can set the Location, Zoom, and etc. here", (master, name) -> new RFFSettingsWindow(name, panel -> {
+    REFERENCE("Reference", "Open the reference settings. You can set the Location, Zoom, and etc. here.", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (window, panel) -> {
         CalculationSettings calc = getCalculationSettings(master);
         
         Consumer<UnaryOperator<CalculationSettings.Builder>> applier = e -> 
             master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 ->  e.apply(e2.edit()).build()).build());
-        
-        
+        AtomicReference<String> realStr = new AtomicReference<>(calc.center().re().toString());
+        AtomicReference<String> imagStr = new AtomicReference<>(calc.center().im().toString());
+        AtomicReference<Double> zoomStr = new AtomicReference<>(calc.logZoom());
 
-        panel.createTextInput("Center:Re", "Real part of center", calc.center().re(), s -> LWBigDecimal.valueOf(s, Math.min(-s.length(), (int)-calc.logZoom()) - 10), e ->
-            applier.accept(f -> f.setCenter(new LWBigComplex(e, calc.center().im())))
-        );
-        panel.createTextInput("Center:Im", "Imaginary part of center", calc.center().im(), s -> LWBigDecimal.valueOf(s, Math.min(-s.length(), (int)-calc.logZoom()) - 10), e ->
-            applier.accept(f -> f.setCenter(new LWBigComplex(calc.center().re(), e)))
-        );
-        panel.createTextInput("Log Zoom", "The logarithm by 10 of zoom", calc.logZoom(), Double::parseDouble, e ->
-            applier.accept(f -> f.setLogZoom(e))
-        );
+
+        panel.createTextInput("Center:Re", "Real part of center, The changes will be applied when this window is closed.", calc.center().re().toString(), s -> s, realStr::set);
+        panel.createTextInput("Center:Im", "Imaginary part of center, The changes will be applied when this window is closed.", calc.center().im().toString(), s -> s, imagStr::set);
+        panel.createTextInput("Log Zoom", "The logarithm by 10 of zoom, The changes will be applied when this window is closed.", calc.logZoom(), Double::parseDouble, zoomStr::set);
         panel.createSelectInput("Reuse Reference",  "Set the method of reference reusing.", calc.reuseReference(), ReuseReferenceMethod.values(), e ->
             applier.accept(f -> f.setReuseReference(e)), false
         );
-        
+
+        window.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                applier.accept(f -> {
+                    double zoom = zoomStr.get();
+                    int precision = Perturbator.precision(zoom);
+
+                    LWBigDecimal re = LWBigDecimal.valueOf(realStr.get(), precision);
+                    LWBigDecimal im = LWBigDecimal.valueOf(imagStr.get(), precision);
+
+                    return f.setCenter(new LWBigComplex(re, im)).setLogZoom(zoom);
+                });
+            }
+        });
         
     }), null);
 
