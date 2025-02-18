@@ -3,6 +3,7 @@ package kr.merutilm.rff.approx;
 import java.util.*;
 import java.util.function.BiConsumer;
 
+import kr.merutilm.rff.formula.LightMandelbrotReference;
 import kr.merutilm.rff.shader.IllegalRenderStateException;
 import kr.merutilm.rff.shader.RenderState;
 import kr.merutilm.rff.util.ArrayFunction;
@@ -12,10 +13,10 @@ public class LightR3ATable implements R3ATable{
     private final List<List<LightR3A>> table;
     private final R3ASettings settings;
 
-    public LightR3ATable(RenderState state, int currentID, R3ASettings r3aSettings, double[] rr, double[] ri, int[] period, double dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalRenderStateException {
+    public LightR3ATable(RenderState state, int currentID, LightMandelbrotReference reference, R3ASettings r3aSettings, double dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalRenderStateException {
         double epsilon = Math.pow(10, r3aSettings.epsilonPower());
 
-        int longestPeriod = period[period.length - 1];
+        int longestPeriod = reference.period()[reference.period().length - 1];
         this.table = new ArrayList<>(Collections.nCopies(longestPeriod + 1, null));
         this.settings = r3aSettings;
 
@@ -31,10 +32,10 @@ public class LightR3ATable implements R3ATable{
 
         periodTemp[0] = currentPeriod;
         //first period is always minimum skip iteration.
-        isArtificial[0] =  Arrays.binarySearch(period, currentPeriod) < 0;
+        isArtificial[0] =  Arrays.binarySearch(reference.period(), currentPeriod) < 0;
         //and it is artificially-created period if generated period is not an element of generated period.
 
-        for (int p : period) {
+        for (int p : reference.period()) {
 
             //Generate Period Array
 
@@ -71,7 +72,7 @@ public class LightR3ATable implements R3ATable{
             }
         }
 
-        period = Arrays.copyOfRange(periodTemp, 0, periodArraySize);
+        int[] period = Arrays.copyOfRange(periodTemp, 0, periodArraySize);
         isArtificial = Arrays.copyOfRange(isArtificial, 0, periodArraySize);
 
         // example 
@@ -116,7 +117,7 @@ public class LightR3ATable implements R3ATable{
                 int requiredPerturbationCount = R3ATable.getRequiredPerturbationCount(r3aSettings.fixGlitches(), isArtificial, j);
 
                 if(currentStep[j] == null){
-                    currentStep[j] = LightR3A.create(i).step(rr, ri, epsilon, dcMax); // step 1
+                    currentStep[j] = LightR3A.create(i).step(reference, epsilon, dcMax); // step 1
                 }else if(currentStep[j].skip() + requiredPerturbationCount == period[j]){
 
                     for(int k = j; k >= 0; k--){
@@ -146,7 +147,7 @@ public class LightR3ATable implements R3ATable{
                         //reuse upper level if both start iterations are the same
                         currentStep[j] = currentStep[j + 1];
                     }else{
-                        currentStep[j] = currentStep[j].step(rr, ri, epsilon, dcMax);
+                        currentStep[j] = currentStep[j].step(reference, epsilon, dcMax);
                     }
                 }
             }

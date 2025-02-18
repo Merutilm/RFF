@@ -14,7 +14,7 @@ public interface Reference {
     Formula formula();
 
     /**
-     * Gets the reference center.
+     * Gets the center of reference.
      */
     LWBigComplex refCenter();
     /**

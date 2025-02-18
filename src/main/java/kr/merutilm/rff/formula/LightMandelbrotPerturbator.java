@@ -43,8 +43,6 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
     public double iterate(DoubleExponent dcr, DoubleExponent dci) throws IllegalRenderStateException {
         double dcr1 = dcr.doubleValue() + offR;
         double dci1 = dci.doubleValue() + offI;
-        double[] rr = reference.refReal();
-        double[] ri = reference.refImag();
  // int i = a.incrementAndGet();
 
         long iteration = 0;
@@ -104,8 +102,8 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
             }
             
             if(refIteration != maxRefIteration){
-                double zr1 = rr[refIteration] * 2 + dzr;
-                double zi1 = ri[refIteration] * 2 + dzi;
+                double zr1 = reference.real(refIteration) * 2 + dzr;
+                double zi1 = reference.imag(refIteration) * 2 + dzi;
 
                 double zr2 = zr1 * dzr - zi1 * dzi + dcr1;
                 double zi2 = zr1 * dzi + zi1 * dzr + dci1;
@@ -119,8 +117,8 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
 
             }
 
-            zr = rr[refIteration] + dzr;
-            zi = ri[refIteration] + dzi;
+            zr = reference.real(refIteration) + dzr;
+            zi = reference.imag(refIteration) + dzi;
 
 
             pd = cd;

@@ -12,6 +12,7 @@ public interface R3ATable {
             required = fixGlitches ? 2 : 1;
             //If the "period - 1" iterations are skipped, the resulting iteration is a periodic point.
             //That is, it is very small, which can cause floating-point errors, such as z + dz = 0 (e.g. big - big = small).
+            //Therefore, Skip until a previous point of periodic point, In other words, skip "period - 2" iterations.
         }
         return required;
     }

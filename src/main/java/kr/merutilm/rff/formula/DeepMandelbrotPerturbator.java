@@ -46,8 +46,6 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
         
         dcr = dcr.add(offR);
         dci = dci.add(offI);
-        DoubleExponent[] rr = reference.refReal();
-        DoubleExponent[] ri = reference.refImag();
         
         long iteration = 0;
         int refIteration = 0;
@@ -82,8 +80,8 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
                 }
             }
             if(refIteration != maxRefIteration){
-                DoubleExponent zr1 = rr[refIteration].doubled().add(dzr);
-                DoubleExponent zi1 = ri[refIteration].doubled().add(dzi);
+                DoubleExponent zr1 = reference.real(refIteration).doubled().add(dzr);
+                DoubleExponent zi1 = reference.imag(refIteration).doubled().add(dzi);
 
                 DoubleExponent zr2 = zr1.multiply(dzr).subtract(zi1.multiply(dzi)).add(dcr);
                 DoubleExponent zi2 = zr1.multiply(dzi).add(zi1.multiply(dzr)).add(dci);
@@ -95,8 +93,8 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
                 iteration++;
             }
 
-            zr = rr[refIteration].add(dzr);
-            zi = ri[refIteration].add(dzi);
+            zr = reference.real(refIteration).add(dzr);
+            zi = reference.imag(refIteration).add(dzi);
 
             pd = cd;
             cd = DoubleExponentMath.hypotApproximate(zr, zi);

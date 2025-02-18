@@ -248,8 +248,11 @@ final class RFFRenderPanel extends JPanel {
                         ActionsExplore.getActionWhileCreatingTable(master),
                         ActionsExplore.getActionWhileFindingMinibrotZoom(master)
                 );
+                currentPerturbator = null; //try to call gc
+
                 CalculationSettings refCalc = calc.edit().setCenter(center.center()).setLogZoom(center.logZoom()).build();
                 int refPrecision = Perturbator.precision(center.logZoom());
+
                 if (refCalc.logZoom() > EXP_DEADLINE) {
                     currentPerturbator = new DeepMandelbrotPerturbator(state, currentID, refCalc, center.dcMax(), refPrecision, period, actionPerRefCalcIteration, actionPerCreatingTableIteration)
                             .reuse(state, currentID, calc, dcMax, precision);
@@ -260,6 +263,7 @@ final class RFFRenderPanel extends JPanel {
 
             }
             case DISABLED -> {
+                currentPerturbator = null; //try to call gc
                 if (logZoom > EXP_DEADLINE) {
                     currentPerturbator = new DeepMandelbrotPerturbator(state, currentID, calc, dcMax, precision, -1, actionPerRefCalcIteration, actionPerCreatingTableIteration);
                 } else {

@@ -1,5 +1,6 @@
 package kr.merutilm.rff.approx;
 
+import kr.merutilm.rff.formula.DeepMandelbrotReference;
 import kr.merutilm.rff.shader.IllegalRenderStateException;
 import kr.merutilm.rff.shader.RenderState;
 import kr.merutilm.rff.settings.R3ASettings;
@@ -17,10 +18,10 @@ public class DeepR3ATable implements R3ATable{
     private final List<List<DeepR3A>> table;
     private final R3ASettings settings;
 
-    public DeepR3ATable(RenderState state, int currentID, R3ASettings r3aSettings, DoubleExponent[] rr, DoubleExponent[] ri, int[] period, DoubleExponent dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalRenderStateException {
+    public DeepR3ATable(RenderState state, int currentID, DeepMandelbrotReference reference, R3ASettings r3aSettings, DoubleExponent dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalRenderStateException {
         double epsilon = Math.pow(10, r3aSettings.epsilonPower());
 
-        int longestPeriod = period[period.length - 1];
+        int longestPeriod = reference.period()[reference.period().length - 1];
         this.table = new ArrayList<>(Collections.nCopies(longestPeriod + 1, null));
         this.settings = r3aSettings;
 
@@ -35,9 +36,9 @@ public class DeepR3ATable implements R3ATable{
         int currentPeriod = minSkip;
 
         periodTemp[0] = currentPeriod;
-        isArtificial[0] = Arrays.binarySearch(period, currentPeriod) < 0;
+        isArtificial[0] = Arrays.binarySearch(reference.period(), currentPeriod) < 0;
 
-        for (int p : period) {
+        for (int p : reference.period()) {
 
             if(p >= minSkip && (p == longestPeriod && currentPeriod != longestPeriod || currentPeriod * maxMultiplier <= p)){
 
@@ -69,7 +70,7 @@ public class DeepR3ATable implements R3ATable{
             }
         }
 
-        period = Arrays.copyOfRange(periodTemp, 0, periodArraySize);
+        int[] period = Arrays.copyOfRange(periodTemp, 0, periodArraySize);
         isArtificial = Arrays.copyOfRange(isArtificial, 0, periodArraySize);
 
         DeepR3A[] currentStep = new DeepR3A[period.length];
@@ -83,7 +84,7 @@ public class DeepR3ATable implements R3ATable{
                 int requiredPerturbationCount = R3ATable.getRequiredPerturbationCount(r3aSettings.fixGlitches(), isArtificial, j);
 
                 if(currentStep[j] == null){
-                    currentStep[j] = DeepR3A.create(i).step(rr, ri, epsilon, dcMax); // step 1
+                    currentStep[j] = DeepR3A.create(i).step(reference, epsilon, dcMax); // step 1
                 }else if(currentStep[j].skip() + requiredPerturbationCount == period[j]){
 
                     for(int k = j; k >= 0; k--){ //Stop all lower level iteration
@@ -107,7 +108,7 @@ public class DeepR3ATable implements R3ATable{
                     if(j < currentStep.length - 1 && currentStep[j].start() == currentStep[j + 1].start()){
                         currentStep[j] = currentStep[j + 1];
                     }else{
-                        currentStep[j] = currentStep[j].step(rr, ri, epsilon, dcMax);
+                        currentStep[j] = currentStep[j].step(reference, epsilon, dcMax);
                     }
                 }
             }

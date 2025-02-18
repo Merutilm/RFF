@@ -12,6 +12,8 @@ public interface MandelbrotReference extends Reference{
      * Gets last valid reference just before exiting. 
      */
     LWBigComplex lastReference();
+
+
     /**
      * Gets FPGBn for center-locating.
      */

@@ -1,5 +1,6 @@
 package kr.merutilm.rff.approx;
 
+import kr.merutilm.rff.formula.LightMandelbrotReference;
 import kr.merutilm.rff.util.AdvancedMath;
 
 public record LightR3A(double anr, double ani, double bnr, double bni, int start, int skip, double radius) implements R3A{
@@ -8,11 +9,11 @@ public record LightR3A(double anr, double ani, double bnr, double bni, int start
         return new LightR3A(1, 0, 0, 0, start, 0, Double.MAX_VALUE);
     }
 
-    public LightR3A step(double[] rr, double[] ri, double epsilon, double dcMax) {
+    public LightR3A step(LightMandelbrotReference reference, double epsilon, double dcMax) {
 
         int iter = start + skip; //n+k
-        double z2r = 2 * rr[iter];
-        double z2i = 2 * ri[iter];
+        double z2r = 2 * reference.real(iter);
+        double z2i = 2 * reference.imag(iter);
         double anrStep = anr * z2r - ani * z2i;
         double aniStep = anr * z2i + ani * z2r;
         double bnrStep = bnr * z2r - bni * z2i + 1;

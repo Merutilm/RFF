@@ -1,5 +1,6 @@
 package kr.merutilm.rff.approx;
 
+import kr.merutilm.rff.formula.DeepMandelbrotReference;
 import kr.merutilm.rff.struct.DoubleExponent;
 import kr.merutilm.rff.util.DoubleExponentMath;
 
@@ -8,11 +9,11 @@ public record DeepR3A(DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr
         return new DeepR3A(DoubleExponent.ONE, DoubleExponent.ZERO, DoubleExponent.ZERO, DoubleExponent.ZERO, start, 0, DoubleExponent.POSITIVE_INFINITY);
     }
 
-    public DeepR3A step(DoubleExponent[] rr, DoubleExponent[] ri, double epsilon, DoubleExponent dcMax) {
+    public DeepR3A step(DeepMandelbrotReference reference, double epsilon, DoubleExponent dcMax) {
 
         int iter = start + skip; //n+k
-        DoubleExponent z2r = rr[iter].doubled();
-        DoubleExponent z2i = ri[iter].doubled();
+        DoubleExponent z2r = reference.real(iter).doubled();
+        DoubleExponent z2i = reference.imag(iter).doubled();
         DoubleExponent anrStep = anr.multiply(z2r).subtract(ani.multiply(z2i));
         DoubleExponent aniStep = anr.multiply(z2i).add(ani.multiply(z2r));
         DoubleExponent bnrStep = bnr.multiply(z2r).subtract(bni.multiply(z2i)).add(DoubleExponent.ONE);

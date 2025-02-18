@@ -167,9 +167,16 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
 
     }
 
+    public DoubleExponent real(int iteration){
+        return refReal[iteration]; //TODO : apply compressors
+    }
 
-    public DeepR3ATable generateR3A(RenderState state, int renderID, R3ASettings blaSettings, DoubleExponent dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalRenderStateException {
-        return new DeepR3ATable(state, renderID, blaSettings, refReal, refImag, period, dcMax, actionPerCreatingTableIteration);
+    public DoubleExponent imag(int iteration){
+        return refImag[iteration];
+    }
+
+    public DeepR3ATable generateR3A(RenderState state, int renderID, R3ASettings r3aSettings, DoubleExponent dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalRenderStateException {
+        return new DeepR3ATable(state, renderID, this, r3aSettings, dcMax, actionPerCreatingTableIteration);
     }
 
     @Override

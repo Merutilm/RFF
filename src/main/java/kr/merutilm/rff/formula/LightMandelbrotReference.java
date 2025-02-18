@@ -45,6 +45,7 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
         int[] periodArray = new int[1];
         int periodArrayLength = 0;
         double minZRadius = Double.MAX_VALUE;
+        int reuseIndex = 0;
 
         while (zr * zr + zi * zi < bailout * bailout && iteration < maxIteration) {
 
@@ -54,9 +55,19 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
             pzr = zr;
             pzi = zi;
             z = formula.apply(z, center, precision);
+            period = iteration;
 
             zr = z.re().doubleValue();
             zi = z.im().doubleValue();
+
+            if (iteration >= 1 && zr == rr[reuseIndex + 1] && zi == ri[reuseIndex + 1]) {
+                reuseIndex++;
+            } else if (reuseIndex != 0) {
+                ReferenceCompressor compressor = new ReferenceCompressor(reuseIndex, iteration - reuseIndex + 1);
+                System.out.println(compressor.actualIteration() + "->" + (iteration) + "=" + 1 + "->" + compressor.length());
+                //TODO : If it is enough to large, set all reference in the range to 0 and save the index
+                reuseIndex = 0;
+            }
 
             double prevZRadius2 = pzr * pzr + pzi * pzi;
 
@@ -80,13 +91,13 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
             }
 
             if ((iteration >= 1 && fpgRadius > fpgLimit) || iteration == maxIteration - 1 || initialPeriod == iteration) {
-                period = iteration;
 
                 if (periodArrayLength == periodArray.length) {
                     periodArray = ArrayFunction.exp2xArr(periodArray);
                 }
                 periodArray[periodArrayLength] = iteration;
                 periodArrayLength++;
+
                 break;
             }
 
@@ -168,8 +179,16 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
         return new LightMandelbrotReference(formula, center, rr, ri, periodArray, lastRef, fpgBn);
     }
 
-    public LightR3ATable generateR3A(RenderState state, int renderID, R3ASettings blaSettings, double dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalRenderStateException {
-        return new LightR3ATable(state, renderID, blaSettings, refReal, refImag, period, dcMax, actionPerCreatingTableIteration);
+    public double real(int iteration){
+        return refReal[iteration]; //TODO : apply compressors
+    }
+
+    public double imag(int iteration){
+        return refImag[iteration];
+    }
+
+    public LightR3ATable generateR3A(RenderState state, int renderID, R3ASettings r3aSettings, double dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalRenderStateException {
+        return new LightR3ATable(state, renderID, this, r3aSettings, dcMax, actionPerCreatingTableIteration);
     }
 
     @Override
