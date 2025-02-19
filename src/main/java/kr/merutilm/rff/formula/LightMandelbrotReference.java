@@ -1,9 +1,10 @@
 package kr.merutilm.rff.formula;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
-import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
 
 import kr.merutilm.rff.shader.IllegalRenderStateException;
@@ -15,7 +16,7 @@ import kr.merutilm.rff.settings.R3ASettings;
 import kr.merutilm.rff.struct.LWBigComplex;
 
 public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, double[] refReal, double[] refImag,
-                                       int[] period, LWBigComplex lastReference,
+                                       int[] period, ReferenceCompressor[] compressors, int[] indexToIterationIncrement, LWBigComplex lastReference,
                                        LWBigComplex fpgBn) implements MandelbrotReference {
 
     public static LightMandelbrotReference generate(RenderState state, int renderID, LWBigComplex center, int precision, long maxIteration, double bailout, int initialPeriod, double dcMax, boolean strictFPGBn, IntConsumer actionPerRefCalcIteration) throws IllegalRenderStateException {
@@ -47,6 +48,10 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
         double minZRadius = Double.MAX_VALUE;
         int reuseIndex = 0;
 
+        List<ReferenceCompressor> referenceCompressors = new ArrayList<>();
+        int[] indexToIterationIncrement = new int[1];
+        int iterationIncrement = 0;
+
         while (zr * zr + zi * zi < bailout * bailout && iteration < maxIteration) {
 
             state.tryBreak(renderID);
@@ -63,8 +68,12 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
             if (iteration >= 1 && zr == rr[reuseIndex + 1] && zi == ri[reuseIndex + 1]) {
                 reuseIndex++;
             } else if (reuseIndex != 0) {
-                ReferenceCompressor compressor = new ReferenceCompressor(reuseIndex, iteration - reuseIndex + 1);
-                System.out.println(compressor.actualIteration() + "->" + (iteration) + "=" + 1 + "->" + compressor.length());
+                ReferenceCompressor compressor = new ReferenceCompressor(1, reuseIndex, iteration - reuseIndex + 1, iteration);
+                System.out.println(compressor.startIteration() + "->" + compressor.endIteration() + "=" + 1 + "->" + compressor.length());
+
+                iterationIncrement += compressor.length(); //TODO : get the increment of iteration
+                referenceCompressors.add(compressor);
+
                 //TODO : If it is enough to large, set all reference in the range to 0 and save the index
                 reuseIndex = 0;
             }
@@ -176,15 +185,26 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
         ri = Arrays.copyOfRange(ri, 0, period + 1);
         periodArray = periodArrayLength == 0 ? new int[]{period} : Arrays.copyOfRange(periodArray, 0, periodArrayLength);
 
-        return new LightMandelbrotReference(formula, center, rr, ri, periodArray, lastRef, fpgBn);
+        return new LightMandelbrotReference(formula, center, rr, ri, periodArray, referenceCompressors.toArray(ReferenceCompressor[]::new), indexToIterationIncrement, lastRef, fpgBn);
     }
 
     public double real(int iteration){
-        return refReal[iteration]; //TODO : apply compressors
+        return refReal[iterationToIndex(iteration)];
     }
 
     public double imag(int iteration){
-        return refImag[iteration];
+        return refImag[iterationToIndex(iteration)];
+    }
+
+    private int iterationToIndex(int iteration){
+//        for (ReferenceCompressor compressor : compressors){
+//            if(compressor.startIteration() <= iteration && iteration <= compressor.endIteration()) {
+//                iteration -= compressor.startIteration() - compressor.startReferenceIndex();
+//            }
+//        }
+
+        //TODO : apply compressors
+        return iteration;
     }
 
     public LightR3ATable generateR3A(RenderState state, int renderID, R3ASettings r3aSettings, double dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalRenderStateException {
@@ -198,12 +218,18 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof LightMandelbrotReference r &&
-               Arrays.equals(refReal, r.refReal) &&
-               Arrays.equals(refImag, r.refImag) &&
-               Arrays.equals(period, r.period) &&
-               Objects.equals(lastReference, r.lastReference) &&
-               Objects.equals(fpgBn, r.fpgBn);
+        return o instanceof LightMandelbrotReference (Formula f, LWBigComplex c, double[] rr, double[] ri,
+                                                      int[] p, ReferenceCompressor[] comp, int[] iti, LWBigComplex l,
+                                                      LWBigComplex bn) &&
+               Objects.equals(formula, f) &&
+               Objects.equals(refCenter, c) &&
+               Arrays.equals(refReal, rr) &&
+               Arrays.equals(refImag, ri) &&
+               Arrays.equals(period, p) &&
+               Arrays.equals(compressors, comp) &&
+               Arrays.equals(indexToIterationIncrement, iti) &&
+               Objects.equals(lastReference, l) &&
+               Objects.equals(fpgBn, bn);
     }
 
     @Override
@@ -214,6 +240,7 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
                STR_REFERENCE_REAL + Arrays.toString(refReal) +
                STR_REFERENCE_IMAG + Arrays.toString(refImag) +
                STR_PERIOD + Arrays.toString(period) +
+               STR_COMPRESSORS + Arrays.toString(compressors) +
                STR_LAST_REF + lastReference +
                STR_FPG_BN + fpgBn + "\n]";
     }

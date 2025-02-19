@@ -58,6 +58,7 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
             pzr = zr;
             pzi = zi;
             z = formula.apply(z, center, precision);
+            period = iteration;
 
             zr = DoubleExponent.valueOf(z.re());
             zi = DoubleExponent.valueOf(z.im());
@@ -84,7 +85,6 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
             }
 
             if ((iteration >= 1 && fpgRadius.isLargerThan(fpgLimit)) || iteration == maxIteration - 1 || initialPeriod == iteration) {
-                period = iteration;
 
                 if (periodArrayLength == periodArray.length) {
                     periodArray = ArrayFunction.exp2xArr(periodArray);
