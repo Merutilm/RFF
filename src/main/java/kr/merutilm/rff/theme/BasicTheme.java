@@ -7,14 +7,11 @@ import kr.merutilm.rff.struct.LWBigComplex;
 public interface BasicTheme extends Theme {
 
     double INIT_MULTIPLIER = 1;
-    long INIT_ITERATION = 300;
-    double INIT_LOG_ZOOM = 2;
-    double INIT_BAILOUT = 2;
     BasicThemes DEFAULT_THEME = BasicThemes.RANDOMIZED_RAINBOW;
     DecimalizeIterationMethod INIT_DECIMAL_ITERATION = DecimalizeIterationMethod.LOG_LOG;
     boolean INIT_AUTO_ITERATION = true;
     ReuseReferenceMethod INIT_REUSE_REFERENCE = ReuseReferenceMethod.DISABLED;
-    R3ASettings INIT_BLA = new R3ASettings(
+    R3ASettings INIT_R3A = new R3ASettings(
             16,
             4,
             -3.0,
@@ -23,7 +20,13 @@ public interface BasicTheme extends Theme {
     );
     String INIT_RE = "-0.85";
     String INIT_IM = "0";
+    double INIT_LOG_ZOOM = 2;
+
     LWBigComplex INIT_C = LWBigComplex.valueOf(INIT_RE, INIT_IM, -(int)INIT_LOG_ZOOM - 10);
+
+    long INIT_ITERATION = 300;
+    double INIT_BAILOUT = 2;
+    int INIT_COMPRESS_CRITERIA = -1;
 
     CalculationSettings DEFAULT_CALC = new CalculationSettings(
             INIT_LOG_ZOOM,
@@ -33,7 +36,8 @@ public interface BasicTheme extends Theme {
             INIT_C,
             INIT_AUTO_ITERATION,
             INIT_REUSE_REFERENCE,
-            INIT_BLA
+            INIT_R3A,
+            INIT_COMPRESS_CRITERIA
     );
 
     VideoSettings DEFAULT_VID = new VideoSettings(

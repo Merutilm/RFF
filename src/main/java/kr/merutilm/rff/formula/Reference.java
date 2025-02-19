@@ -26,4 +26,6 @@ public interface Reference {
     default int longestPeriod(){
         return period()[period().length - 1];
     }
+
+
 }

@@ -1,6 +1,7 @@
 package kr.merutilm.rff.settings;
 
 import java.util.function.DoubleUnaryOperator;
+import java.util.function.IntUnaryOperator;
 import java.util.function.LongUnaryOperator;
 import java.util.function.UnaryOperator;
 
@@ -17,7 +18,8 @@ public record CalculationSettings(
         LWBigComplex center,
         boolean autoIteration,
         ReuseReferenceMethod reuseReference,
-        R3ASettings r3aSettings
+        R3ASettings r3aSettings,
+        int compressCriteria
 ) implements Struct<CalculationSettings> {
 
     public static final double ZOOM_VALUE = 0.235;
@@ -34,7 +36,8 @@ public record CalculationSettings(
                 .setCenter(center)
                 .setAutoIteration(autoIteration)
                 .setReuseReference(reuseReference)
-                .setR3ASettings(r3aSettings);
+                .setR3ASettings(r3aSettings)
+                .setCompressCriteria(compressCriteria);
     }
 
     public static final class Builder implements StructBuilder<CalculationSettings> {
@@ -47,6 +50,7 @@ public record CalculationSettings(
         private boolean autoIteration;
         private ReuseReferenceMethod reuseReference;
         private R3ASettings r3aSettings;
+        private int compressCriteria;
 
         public Builder setLogZoom(double logZoom) {
             this.logZoom = logZoom;
@@ -88,6 +92,11 @@ public record CalculationSettings(
             return this;
         }
 
+        public Builder setCompressCriteria(int compressCriteria) {
+            this.compressCriteria = compressCriteria;
+            return this;
+        }
+
         public Builder setLogZoom(DoubleUnaryOperator changes) {
             this.logZoom = changes.applyAsDouble(logZoom);
             return this;
@@ -100,6 +109,11 @@ public record CalculationSettings(
 
         public Builder setR3ASettings(UnaryOperator<R3ASettings> changes) {
             this.r3aSettings = changes.apply(r3aSettings);
+            return this;
+        }
+
+        public Builder setCompressCriteria(IntUnaryOperator changes) {
+            this.compressCriteria = changes.applyAsInt(compressCriteria);
             return this;
         }
 
@@ -134,7 +148,7 @@ public record CalculationSettings(
 
         @Override
         public CalculationSettings build() {
-            return new CalculationSettings(logZoom, maxIteration, bailout, decimalIterationSettings, center, autoIteration, reuseReference, r3aSettings);
+            return new CalculationSettings(logZoom, maxIteration, bailout, decimalIterationSettings, center, autoIteration, reuseReference, r3aSettings, compressCriteria);
         }
     }
 
