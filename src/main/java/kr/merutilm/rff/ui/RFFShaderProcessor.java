@@ -35,8 +35,7 @@ final class RFFShaderProcessor {
     }
 
     public static BufferedImage createImage(RenderState state, int currentID, RFFMap map, Settings settings, boolean compressed) throws IllegalRenderStateException, InterruptedException{
-        ProcessVisualizer na = ProcessVisualizer.na();
-        return createImageWithVisualizer(state, currentID, map, settings, compressed, new ProcessVisualizer[]{na, na, na});
+        return createImageWithVisualizer(state, currentID, map, settings, compressed, new ProcessVisualizer[]{null, null, null});
     }
     public static BufferedImage createImageWithVisualizer(RenderState state, int currentID, RFFMap map, Settings settings, boolean compressed, ProcessVisualizer[] visualizers) throws IllegalRenderStateException, InterruptedException{
     

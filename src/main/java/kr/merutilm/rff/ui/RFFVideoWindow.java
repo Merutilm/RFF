@@ -257,7 +257,7 @@ final class RFFVideoWindow extends JFrame{
             DoubleMatrix result = new DoubleMatrix((int) (w * multiplier), (int) (h * multiplier));
 
             DoubleArrayDispatcher dispatcher = new DoubleArrayDispatcher(state, currentID, result);
-            dispatcher.createRenderer((x, y, xRes, yRes, rx, ry, i, v, t) -> {
+            dispatcher.createRenderer((_, _, _, _, rx, ry, _, _, _) -> {
 
                 double dx = w * (rx - 0.5);
                 double dy = h * (ry - 0.5);
@@ -300,7 +300,7 @@ final class RFFVideoWindow extends JFrame{
             DoubleMatrix result = new DoubleMatrix((int)(w * multiplier), (int)(h * multiplier));
             
             DoubleArrayDispatcher dispatcher = new DoubleArrayDispatcher(state, currentID, result);
-            dispatcher.createRenderer((x, y, xRes, yRes, rx, ry, i, v, t) -> {
+            dispatcher.createRenderer((_, _, _, _, rx, ry, _, _, _) -> {
                 
                 double dx = w * (rx - 0.5);
                 double dy = h * (ry - 0.5);

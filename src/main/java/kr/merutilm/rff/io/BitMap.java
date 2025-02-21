@@ -225,7 +225,7 @@ public class BitMap extends IntMatrix {
         
         BitMapDispatcher dispatcher = new BitMapDispatcher(state, id, imaginedCanvas);
        
-        dispatcher.createRenderer((x, y, xr, yr, rx, ry, i, c, t) -> {
+        dispatcher.createRenderer((x, y, _, _, _, _, _, c, _) -> {
             if(c != null){
                 return c;
             }

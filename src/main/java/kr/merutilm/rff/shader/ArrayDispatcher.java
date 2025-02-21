@@ -1,10 +1,10 @@
 package kr.merutilm.rff.shader;
 
 import kr.merutilm.rff.struct.Matrix;
-import kr.merutilm.rff.util.TaskManager;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,25 +30,36 @@ public abstract class ArrayDispatcher<M extends Matrix, R extends ArrayRenderer>
 
     public synchronized void process(ProcessVisualizer visualizer, long intervalMS) {
         AtomicBoolean processing = new AtomicBoolean(true);
-        Thread t = TaskManager.runTask(() -> {
-            try {
-                while (processing.get()) {
-                    Thread.sleep(intervalMS);
-                    tryBreak();
-                    visualizer.run((double) renderedAmount.get() / matrix.getLength() / renderers.size());
+        
+        Timer t = new Timer();
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    if (processing.get() && visualizer != null) {
+                        tryBreak();
+                        visualizer.run((double) renderedAmount.get() / matrix.getLength() / renderers.size());
+                    }else{
+                        cancel();
+                    }
+                } catch (IllegalRenderStateException | InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    cancel();
                 }
-
-            } catch (IllegalRenderStateException | InterruptedException e) {
-                Thread.currentThread().interrupt();
             }
-        });
+        }, intervalMS, intervalMS);
+
+        
         try {
+            
             dispatch();
             processing.set(false);
-            t.interrupt();
-            t.join();
+            t.cancel();
+        
             tryBreak();
-            visualizer.run(1);
+            if (visualizer != null) {
+                visualizer.run(1);
+            }
         } catch (IllegalRenderStateException | InterruptedException e) {
             processing.set(false);
             Thread.currentThread().interrupt();

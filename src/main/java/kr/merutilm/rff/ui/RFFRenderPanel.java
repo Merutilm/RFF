@@ -30,7 +30,6 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
-import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
 
 final class RFFRenderPanel extends JPanel {

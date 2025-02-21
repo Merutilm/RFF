@@ -54,7 +54,7 @@ final class MUITextField<T> extends JPanel {
                 
             }
         });
-        textField.addActionListener($ -> {
+        textField.addActionListener(_ -> {
             if (!validCondition) {
                 textField.setForeground(MUIConstants.ERROR_TEXT_COLOR);
                 invokeError(invalidConditionMessage);

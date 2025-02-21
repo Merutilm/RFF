@@ -135,7 +135,7 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
             ri[index] = zi;
         }
 
-//        boolean useSwirlGuessing = false; // TODO : create parameters
+//        boolean useSwirlGuessing = false; 
 //        if(useSwirlGuessing){
 //            int swirlPeriod = 1;
 //            double swirlDzrTemp = 0;

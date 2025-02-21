@@ -463,7 +463,7 @@ public record HexColor(int r, int g, int b, int a) implements Struct<HexColor> {
     }
 
     public enum ColorBlendMode {
-        NORMAL((a, b) -> b),
+        NORMAL((_, b) -> b),
         MULTIPLY((a, b) -> a * b),
         LINEAR_DODGE((a, b) -> Math.min(1, a + b)),
         DIFFERENCE((a, b) -> Math.abs(a - b)),
