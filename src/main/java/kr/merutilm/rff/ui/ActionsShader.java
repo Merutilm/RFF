@@ -7,8 +7,8 @@ import java.util.function.UnaryOperator;
 
 import javax.swing.KeyStroke;
 
-import kr.merutilm.rff.io.IOUtilities;
 import kr.merutilm.rff.settings.*;
+import kr.merutilm.rff.util.IOUtilities;
 
 
 enum ActionsShader implements Actions {

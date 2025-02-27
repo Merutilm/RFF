@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import kr.merutilm.rff.struct.DoubleMatrix;
+import kr.merutilm.rff.util.IOUtilities;
 import kr.merutilm.rff.settings.Settings;
 
 public record RFFMap(double zoom, int period, long maxIteration, DoubleMatrix iterations) {

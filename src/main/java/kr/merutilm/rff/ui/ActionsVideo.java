@@ -12,10 +12,10 @@ import java.util.function.UnaryOperator;
 
 import javax.swing.KeyStroke;
 
-import kr.merutilm.rff.shader.IllegalRenderStateException;
+import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.selectable.Ease;
 import kr.merutilm.rff.util.ConsoleUtils;
-import kr.merutilm.rff.io.IOUtilities;
+import kr.merutilm.rff.util.IOUtilities;
 import kr.merutilm.rff.settings.AnimationSettings;
 import kr.merutilm.rff.settings.CalculationSettings;
 import kr.merutilm.rff.settings.DataSettings;
@@ -102,7 +102,7 @@ enum ActionsVideo implements Actions {
 
                 } catch (IOException e) {
                     ConsoleUtils.logError(e);
-                } catch (IllegalRenderStateException e) {
+                } catch (IllegalParallelRenderStateException e) {
                     RFFLoggers.logCancelledMessage(name, id);
                 }
             });

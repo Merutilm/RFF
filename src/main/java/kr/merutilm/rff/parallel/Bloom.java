@@ -1,4 +1,4 @@
-package kr.merutilm.rff.shader;
+package kr.merutilm.rff.parallel;
 
 import java.util.Arrays;
 
@@ -7,7 +7,7 @@ import kr.merutilm.rff.struct.HexColor;
 import kr.merutilm.rff.util.AdvancedMath;
 import kr.merutilm.rff.settings.BloomSettings;
 
-public class Bloom implements BitMapRenderer {
+public class Bloom implements ParallelBitMapRenderer {
 
 
     private final BitMap blurredAvailableBitMap;

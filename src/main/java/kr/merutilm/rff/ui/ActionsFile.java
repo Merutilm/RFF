@@ -7,8 +7,8 @@ import java.util.function.BiConsumer;
 
 import javax.swing.KeyStroke;
 
-import kr.merutilm.rff.io.IOUtilities;
 import kr.merutilm.rff.io.RFFMap;
+import kr.merutilm.rff.util.IOUtilities;
 
 enum ActionsFile implements Actions {
 

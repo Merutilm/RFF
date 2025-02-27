@@ -1,8 +1,8 @@
 package kr.merutilm.rff.approx;
 
 import kr.merutilm.rff.formula.DeepMandelbrotReference;
-import kr.merutilm.rff.shader.IllegalRenderStateException;
-import kr.merutilm.rff.shader.RenderState;
+import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
+import kr.merutilm.rff.parallel.ParallelRenderState;
 import kr.merutilm.rff.settings.R3ASettings;
 import kr.merutilm.rff.struct.DoubleExponent;
 import kr.merutilm.rff.util.ArrayFunction;
@@ -18,7 +18,7 @@ public class DeepR3ATable implements R3ATable{
     private final List<List<DeepR3A>> table;
     private final R3ASettings settings;
 
-    public DeepR3ATable(RenderState state, int currentID, DeepMandelbrotReference reference, R3ASettings r3aSettings, DoubleExponent dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalRenderStateException {
+    public DeepR3ATable(ParallelRenderState state, int currentID, DeepMandelbrotReference reference, R3ASettings r3aSettings, DoubleExponent dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
         double epsilon = Math.pow(10, r3aSettings.epsilonPower());
 
         int longestPeriod = reference.period()[reference.period().length - 1];

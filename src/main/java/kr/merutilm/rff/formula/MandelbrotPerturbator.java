@@ -1,8 +1,8 @@
 package kr.merutilm.rff.formula;
 
 
-import kr.merutilm.rff.shader.IllegalRenderStateException;
-import kr.merutilm.rff.shader.RenderState;
+import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
+import kr.merutilm.rff.parallel.ParallelRenderState;
 import kr.merutilm.rff.settings.CalculationSettings;
 import kr.merutilm.rff.struct.DoubleExponent;
 
@@ -17,13 +17,13 @@ public abstract class MandelbrotPerturbator extends Perturbator {
      * @param calc The calculation settings of scene.
      * @param strictFPGBn Use arbitrary-precision operation to get more accurate and strict center when calculating FPGBn. 
      */
-    protected MandelbrotPerturbator(RenderState state, int currentID, CalculationSettings calc, boolean strictFPGBn) {
+    protected MandelbrotPerturbator(ParallelRenderState state, int currentID, CalculationSettings calc, boolean strictFPGBn) {
         super(state, currentID, new Mandelbrot(), calc);
         this.strictFPGBn = strictFPGBn;
     }
     
     @Override
-    public abstract MandelbrotPerturbator reuse(RenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision) throws IllegalRenderStateException;
+    public abstract MandelbrotPerturbator reuse(ParallelRenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision) throws IllegalParallelRenderStateException;
     
     @Override
     public abstract MandelbrotReference getReference();

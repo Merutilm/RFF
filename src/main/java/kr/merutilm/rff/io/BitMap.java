@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import kr.merutilm.rff.shader.IllegalRenderStateException;
-import kr.merutilm.rff.shader.RenderState;
-import kr.merutilm.rff.shader.BitMapDispatcher;
+import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
+import kr.merutilm.rff.parallel.ParallelBitMapDispatcher;
+import kr.merutilm.rff.parallel.ParallelRenderState;
 import kr.merutilm.rff.struct.HexColor;
 import kr.merutilm.rff.struct.IntMatrix;
 import kr.merutilm.rff.struct.Point2D;
@@ -204,11 +204,11 @@ public class BitMap extends IntMatrix {
      /**
      * 이미지에서 픽셀 값이 0인 부분의 색을 추론합니다
      */
-    public BitMap imagine() throws IllegalRenderStateException, InterruptedException{
+    public BitMap imagine() throws IllegalParallelRenderStateException, InterruptedException{
         
         BitMap imaginedCanvas = cloneCanvas();
         int[] data = imaginedCanvas.getCanvas();
-        RenderState state = new RenderState();
+        ParallelRenderState state = new ParallelRenderState();
         int id = state.currentID();
         List<Point2D> nonnullPixels = new ArrayList<>();
 
@@ -223,7 +223,7 @@ public class BitMap extends IntMatrix {
             return this;
         }
         
-        BitMapDispatcher dispatcher = new BitMapDispatcher(state, id, imaginedCanvas);
+        ParallelBitMapDispatcher dispatcher = new ParallelBitMapDispatcher(state, id, imaginedCanvas);
        
         dispatcher.createRenderer((x, y, _, _, _, _, _, c, _) -> {
             if(c != null){

@@ -1,8 +1,5 @@
 package kr.merutilm.rff.settings;
 
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.IntUnaryOperator;
-import java.util.function.LongUnaryOperator;
 import java.util.function.UnaryOperator;
 
 import kr.merutilm.rff.struct.Struct;
@@ -19,7 +16,8 @@ public record CalculationSettings(
         boolean autoIteration,
         ReuseReferenceMethod reuseReference,
         R3ASettings r3aSettings,
-        int compressCriteria
+        int compressCriteria,
+        int compressionThresholdPower
 ) implements Struct<CalculationSettings> {
 
     public static final double ZOOM_VALUE = 0.235;
@@ -37,7 +35,8 @@ public record CalculationSettings(
                 .setAutoIteration(autoIteration)
                 .setReuseReference(reuseReference)
                 .setR3ASettings(r3aSettings)
-                .setCompressCriteria(compressCriteria);
+                .setCompressCriteria(compressCriteria)
+                .setCompressionThresholdPower(compressionThresholdPower);
     }
 
     public static final class Builder implements StructBuilder<CalculationSettings> {
@@ -51,6 +50,7 @@ public record CalculationSettings(
         private ReuseReferenceMethod reuseReference;
         private R3ASettings r3aSettings;
         private int compressCriteria;
+        private int compressionThresholdPower;
 
         public Builder setLogZoom(double logZoom) {
             this.logZoom = logZoom;
@@ -96,24 +96,14 @@ public record CalculationSettings(
             this.compressCriteria = compressCriteria;
             return this;
         }
-
-        public Builder setLogZoom(DoubleUnaryOperator changes) {
-            this.logZoom = changes.applyAsDouble(logZoom);
-            return this;
-        }
-
-        public Builder setMaxIteration(LongUnaryOperator changes) {
-            this.maxIteration = changes.applyAsLong(maxIteration);
+        
+        public Builder setCompressionThresholdPower(int compressionThresholdPower) {
+            this.compressionThresholdPower = compressionThresholdPower;
             return this;
         }
 
         public Builder setR3ASettings(UnaryOperator<R3ASettings> changes) {
             this.r3aSettings = changes.apply(r3aSettings);
-            return this;
-        }
-
-        public Builder setCompressCriteria(IntUnaryOperator changes) {
-            this.compressCriteria = changes.applyAsInt(compressCriteria);
             return this;
         }
 
@@ -148,7 +138,7 @@ public record CalculationSettings(
 
         @Override
         public CalculationSettings build() {
-            return new CalculationSettings(logZoom, maxIteration, bailout, decimalIterationSettings, center, autoIteration, reuseReference, r3aSettings, compressCriteria);
+            return new CalculationSettings(logZoom, maxIteration, bailout, decimalIterationSettings, center, autoIteration, reuseReference, r3aSettings, compressCriteria, compressionThresholdPower);
         }
     }
 

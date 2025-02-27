@@ -2,7 +2,6 @@ package kr.merutilm.rff.ui;
 
 
 import kr.merutilm.rff.functions.BooleanConsumer;
-import kr.merutilm.rff.selectable.BooleanValue;
 import kr.merutilm.rff.selectable.Selectable;
 
 import java.awt.GridLayout;
@@ -34,7 +33,25 @@ final class MUISettingElementsPanel extends JPanel{
     }
     
     public void createBoolInput(String name, String description, boolean defaultValue, BooleanConsumer enterFunction){
-        createSelectInput(name, description, BooleanValue.typeOf(defaultValue), BooleanValue.values(), e -> enterFunction.accept(e.bool()), false);
+        enum Bools implements Selectable {
+            TRUE(true),
+            FALSE(false);
+        
+            private final boolean name;
+        
+            public boolean bool() {
+                return name;
+            }
+            @Override
+            public String toString() {
+                return String.valueOf(name);
+            }
+        
+            Bools(boolean name) {
+                this.name = name;
+            }
+        }
+        createSelectInput(name, description, defaultValue ? Bools.TRUE : Bools.FALSE, Bools.values(), e -> enterFunction.accept(e.bool()), false);
     }
 
 

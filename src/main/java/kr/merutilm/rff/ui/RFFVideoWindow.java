@@ -28,16 +28,15 @@ import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.Java2DFrameConverter;
 
-import kr.merutilm.rff.shader.IllegalRenderStateException;
 import kr.merutilm.rff.functions.FunctionEase;
-import kr.merutilm.rff.shader.DoubleArrayDispatcher;
-import kr.merutilm.rff.shader.RenderState;
 import kr.merutilm.rff.struct.DoubleMatrix;
 import kr.merutilm.rff.util.AdvancedMath;
 import kr.merutilm.rff.util.ConsoleUtils;
-import kr.merutilm.rff.util.TaskManager;
-import kr.merutilm.rff.io.IOUtilities;
+import kr.merutilm.rff.util.IOUtilities;
 import kr.merutilm.rff.io.RFFMap;
+import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
+import kr.merutilm.rff.parallel.ParallelDoubleArrayDispatcher;
+import kr.merutilm.rff.parallel.ParallelRenderState;
 import kr.merutilm.rff.settings.Settings;
 import kr.merutilm.rff.settings.AnimationSettings;
 import kr.merutilm.rff.settings.DataSettings;
@@ -57,7 +56,7 @@ final class RFFVideoWindow extends JFrame{
         setPreferredSize(new Dimension(imageWidth, imageHeight + MUIConstants.UI_HEIGHT));
         setLayout(new BorderLayout());
 
-        RenderState state = new RenderState();
+        ParallelRenderState state = new ParallelRenderState();
 
         this.panel = new JPanel(){
             @Override
@@ -116,8 +115,7 @@ final class RFFVideoWindow extends JFrame{
         ExportSettings exportSettings = settings.videoSettings().exportSettings();
         double fps = exportSettings.fps();
         double frameInterval = animationSettings.mps() / fps;
-        
-        RenderState state = new RenderState();
+        ParallelRenderState state = new ParallelRenderState();
         int currentID = state.currentID();
         RFFMap targetMap = RFFMap.readByID(dir, 1);
         if(targetMap == null){
@@ -133,7 +131,7 @@ final class RFFVideoWindow extends JFrame{
         imgWidth = (int)(targetMatrix.getWidth() * multiplier);            
         imgHeight = (int)(targetMatrix.getHeight() * multiplier);
         
-        TaskManager.runTask(() -> {
+        Thread.ofVirtual().start(() -> {
         
             try(
                 FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(out, imgWidth, imgHeight);
@@ -204,13 +202,12 @@ final class RFFVideoWindow extends JFrame{
 
             }catch(IOException e){
                 ConsoleUtils.logError(e);
-            }catch(IllegalRenderStateException e){
+            }catch(IllegalParallelRenderStateException e){
                 //noop
             }catch(InterruptedException e){
                 Thread.currentThread().interrupt();
             }
-        });
-        
+        }).start();
     }
 
     private static Settings modifyToVideoSettings(RFFMap frame, Settings settings, double currentSec) {
@@ -232,7 +229,7 @@ final class RFFVideoWindow extends JFrame{
     }
 
 
-    private static RFFMap getFrame(RenderState state, int currentID, File dir, double frame, DataSettings vds, double multiplier) throws IllegalRenderStateException, InterruptedException{
+    private static RFFMap getFrame(ParallelRenderState state, int currentID, File dir, double frame, DataSettings vds, double multiplier) throws IllegalParallelRenderStateException, InterruptedException{
         
         if (frame < 1) {
 
@@ -256,7 +253,7 @@ final class RFFVideoWindow extends JFrame{
             
             DoubleMatrix result = new DoubleMatrix((int) (w * multiplier), (int) (h * multiplier));
 
-            DoubleArrayDispatcher dispatcher = new DoubleArrayDispatcher(state, currentID, result);
+            ParallelDoubleArrayDispatcher dispatcher = new ParallelDoubleArrayDispatcher(state, currentID, result);
             dispatcher.createRenderer((_, _, _, _, rx, ry, _, _, _) -> {
 
                 double dx = w * (rx - 0.5);
@@ -299,7 +296,7 @@ final class RFFVideoWindow extends JFrame{
             
             DoubleMatrix result = new DoubleMatrix((int)(w * multiplier), (int)(h * multiplier));
             
-            DoubleArrayDispatcher dispatcher = new DoubleArrayDispatcher(state, currentID, result);
+            ParallelDoubleArrayDispatcher dispatcher = new ParallelDoubleArrayDispatcher(state, currentID, result);
             dispatcher.createRenderer((_, _, _, _, rx, ry, _, _, _) -> {
                 
                 double dx = w * (rx - 0.5);

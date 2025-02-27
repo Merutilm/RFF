@@ -6,11 +6,11 @@ import java.util.function.BiConsumer;
 import java.util.function.DoubleConsumer;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
-import kr.merutilm.rff.shader.IllegalRenderStateException;
-import kr.merutilm.rff.util.TaskManager;
 import kr.merutilm.rff.formula.MandelbrotPerturbator;
 import kr.merutilm.rff.locater.MandelbrotLocator;
+import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.struct.LWBigComplex;
 import kr.merutilm.rff.theme.BasicTheme;
 import kr.merutilm.rff.util.TextFormatter;
@@ -27,7 +27,7 @@ enum ActionsExplore implements Actions {
                     RFFStatusPanel panel = master.getWindow().getStatusPanel();
                     render.reloadAndPaint(id, false);
                     panel.setProcess("Done");
-                } catch (IllegalRenderStateException | InterruptedException e) {
+                } catch (IllegalParallelRenderStateException | InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
             });
@@ -74,7 +74,7 @@ enum ActionsExplore implements Actions {
                                 .build()).build());
                         render.compute(id);
                     }
-                }catch (IllegalRenderStateException e) {
+                }catch (IllegalParallelRenderStateException e) {
                     sendCenterNotFoundMessage();
                     RFFLoggers.logCancelledMessage(name, id);
                 }
@@ -108,7 +108,7 @@ enum ActionsExplore implements Actions {
                             .build()).build());
                     render.compute(id);
 
-                }catch (IllegalRenderStateException e) {
+                }catch (IllegalParallelRenderStateException e) {
                     sendCenterNotFoundMessage();
                     RFFLoggers.logCancelledMessage(name, id);
                 }
@@ -153,7 +153,7 @@ enum ActionsExplore implements Actions {
     }
 
     private static void sendCenterNotFoundMessage() {
-        TaskManager.runTask(() -> JOptionPane.showMessageDialog(null, "Cannot find center. Zoom in a little and try again.", "Error", JOptionPane.ERROR_MESSAGE));
+        SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Cannot find center. Zoom in a little and try again.", "Error", JOptionPane.ERROR_MESSAGE));
     }
 
     public static BiConsumer<Integer, Double> getActionWhileCreatingTable(RFF master){
@@ -186,7 +186,7 @@ enum ActionsExplore implements Actions {
 
     public static DoubleConsumer getActionWhileFindingMinibrotZoom(RFF master){
         RFFStatusPanel panel = master.getWindow().getStatusPanel();
-        return d -> TaskManager.runTask(() -> panel.setProcess("Finding Zoom... 10^-" + String.format("%.2f", d)));
+        return d -> SwingUtilities.invokeLater(() -> panel.setProcess("Finding Zoom... 10^-" + String.format("%.2f", d)));
     }
 
     public static int periodPanelRefreshInterval(RFF master){

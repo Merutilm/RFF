@@ -10,7 +10,7 @@ import java.util.*;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 
-import kr.merutilm.rff.io.IOUtilities;
+import kr.merutilm.rff.util.IOUtilities;
 
 final class RFFRenderWindow extends JFrame {
 

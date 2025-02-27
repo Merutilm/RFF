@@ -10,9 +10,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import kr.merutilm.rff.settings.CalculationSettings;
-import kr.merutilm.rff.shader.IllegalRenderStateException;
-import kr.merutilm.rff.shader.RenderState;
 import kr.merutilm.rff.approx.DeepR3ATable;
+import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
+import kr.merutilm.rff.parallel.ParallelRenderState;
 import kr.merutilm.rff.settings.R3ASettings;
 import kr.merutilm.rff.struct.DoubleExponent;
 import kr.merutilm.rff.struct.LWBigComplex;
@@ -24,7 +24,7 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
                                       LWBigComplex fpgBn) implements MandelbrotReference {
 
 
-    public static DeepMandelbrotReference generate(RenderState state, int renderID, CalculationSettings calc, int precision, int initialPeriod, DoubleExponent dcMax, boolean strictFPGBn, IntConsumer actionPerRefCalcIteration) throws IllegalRenderStateException {
+    public static DeepMandelbrotReference generate(ParallelRenderState state, int renderID, CalculationSettings calc, int precision, int initialPeriod, DoubleExponent dcMax, boolean strictFPGBn, IntConsumer actionPerRefCalcIteration) throws IllegalParallelRenderStateException {
         state.tryBreak(renderID);
         Formula formula = new Mandelbrot();
 
@@ -55,14 +55,14 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
         double bailout = calc.bailout();
         long maxIteration = calc.maxIteration();
         int compressCriteria = calc.compressCriteria();
+        int compressionThresholdPower = calc.compressionThresholdPower();
+        double compressionThreshold = compressionThresholdPower <= 0 ? 0 : Math.pow(10, -compressionThresholdPower);
 
 
 
         while (DoubleExponentMath.hypot2(zr, zi).isSmallerThan(bailout * bailout) && iteration < maxIteration) {
 
             state.tryBreak(renderID);
-
-            period = iteration;
 
             DoubleExponent radius2 = DoubleExponentMath.hypot2(zr, zi);
             DoubleExponent fpgLimit = radius2.divide(dcMax);
@@ -106,34 +106,37 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
             zr = DoubleExponent.valueOf(z.re());
             zi = DoubleExponent.valueOf(z.im());
 
-            if(compressCriteria >= 0) {
+            if(compressCriteria >= 0 && iteration >= 1) {
+                int refIndex = ReferenceCompressor.iterationToReferenceIndex(referenceCompressors, reuseIndex + 1);
 
-                if (iteration >= 1 &&
-                    zr.equals(rr[ReferenceCompressor.iterationToReferenceIndex(referenceCompressors, reuseIndex + 1)]) &&
-                    zi.equals(ri[ReferenceCompressor.iterationToReferenceIndex(referenceCompressors, reuseIndex + 1)])
+                if (!zr.divide(rr[refIndex]).subtract(DoubleExponent.ONE).abs().isLargerThan(compressionThreshold) &&
+                    !zi.divide(ri[refIndex]).subtract(DoubleExponent.ONE).abs().isLargerThan(compressionThreshold)
                 ) {
                     reuseIndex++;
                 } else if (reuseIndex != 0) {
-                    if (reuseIndex > compressCriteria) { // reference compression criteria
+                    if (reuseIndex > compressCriteria) { 
 
                         ReferenceCompressor compressor = new ReferenceCompressor(1, reuseIndex, iteration - reuseIndex + 1, iteration);
                         compressed += compressor.length(); //get the increment of iteration
                         referenceCompressors.add(compressor);
                     }
-                    //If it is enough to large, set all reference in the range to 0 and save the index
                     reuseIndex = 0;
                 }
             }
-            iteration++;
-            int index = iteration - compressed;
+            
+            period = ++iteration;
 
-            if (index == rr.length) {
-                rr = ArrayFunction.exp2xArr(rr, DoubleExponent[]::new);
-                ri = ArrayFunction.exp2xArr(ri, DoubleExponent[]::new);
+            if(compressCriteria < 0 || reuseIndex <= compressCriteria){
+                int index = iteration - compressed;
+
+                if (index == rr.length) {
+                    rr = ArrayFunction.exp2xArr(rr, DoubleExponent[]::new);
+                    ri = ArrayFunction.exp2xArr(ri, DoubleExponent[]::new);
+                }
+    
+                rr[index] = zr;
+                ri[index] = zi;
             }
-
-            rr[index] = zr;
-            ri[index] = zi;
         }
 
 
@@ -144,9 +147,6 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
         rr = Arrays.copyOfRange(rr, 0, period - compressed + 1);
         ri = Arrays.copyOfRange(ri, 0, period - compressed + 1);
         periodArray = periodArrayLength == 0 ? new int[]{period} : Arrays.copyOfRange(periodArray, 0, periodArrayLength);
-        if(compressed > 0) {
-            Logger.getGlobal().log(Level.INFO, "Period : {0}, Compressed : {1}, Length : {2}", new Object[]{period, compressed - 1, rr.length});
-        }
 
         return new DeepMandelbrotReference(formula, center, rr, ri, periodArray, referenceCompressors, z, fpgBn);
 
@@ -160,8 +160,13 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
         return refImag[ReferenceCompressor.iterationToReferenceIndex(compressors, iteration)];
     }
 
-    public DeepR3ATable generateR3A(RenderState state, int renderID, R3ASettings r3aSettings, DoubleExponent dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalRenderStateException {
+    public DeepR3ATable generateR3A(ParallelRenderState state, int renderID, R3ASettings r3aSettings, DoubleExponent dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
         return new DeepR3ATable(state, renderID, this, r3aSettings, dcMax, actionPerCreatingTableIteration);
+    }
+
+    @Override
+    public int length() {
+        return refReal.length;
     }
 
     @Override

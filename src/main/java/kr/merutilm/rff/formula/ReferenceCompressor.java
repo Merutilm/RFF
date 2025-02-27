@@ -4,7 +4,8 @@ import java.util.List;
 
 public record ReferenceCompressor(int startReferenceIndex, int length, int startIteration, int endIteration) {
 
-    private static int iterationToCompressedIteration(List<ReferenceCompressor> compressors, int iteration) {
+
+    public static int iterationToReferenceIndex(List<ReferenceCompressor> compressors, int iteration) {
 
         // Since large value are compressed to small, and it compresses again.
 
@@ -22,18 +23,14 @@ public record ReferenceCompressor(int startReferenceIndex, int length, int start
         // 1400 -> 1400 - 1000 + 1 = 401
 
         // Use the REVERSED FOR statement because it must be used recursively.
-        
+        int compressedIteration = iteration;
+
         for (int i = compressors.size() - 1; i >= 0; i--) {
             ReferenceCompressor compressor = compressors.get(i);
-            if (compressor.startIteration() <= iteration && iteration <= compressor.endIteration()) {
-                iteration -= compressor.startIteration() - compressor.startReferenceIndex();
+            if (compressor.startIteration() <= compressedIteration && compressedIteration <= compressor.endIteration()) {
+                compressedIteration -= compressor.startIteration() - compressor.startReferenceIndex();
             }
         }
-
-        return iteration;
-    }
-
-    private static int compressedIterationToReferenceIndex(List<ReferenceCompressor> compressors, int compressedIteration) {
 
         // "Compressed" iteration is not a target of compressions.
         // The space created by compression is filled by pushing indices to front. This is the definition of this method.
@@ -69,10 +66,4 @@ public record ReferenceCompressor(int startReferenceIndex, int length, int start
 
         return index;
     }
-
-    public static int iterationToReferenceIndex(List<ReferenceCompressor> compressors, int iteration) {
-        int compressedIteration = iterationToCompressedIteration(compressors, iteration);
-        return compressedIterationToReferenceIndex(compressors, compressedIteration);
-    }
-
 }

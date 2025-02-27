@@ -1,11 +1,11 @@
-package kr.merutilm.rff.shader;
+package kr.merutilm.rff.parallel;
 
 
 import kr.merutilm.rff.io.BitMap;
 import kr.merutilm.rff.struct.HexColor;
 import kr.merutilm.rff.settings.FogSettings;
 
-public class Fog implements BitMapRenderer {
+public class Fog implements ParallelBitMapRenderer {
 
     private final BitMap blurredBitMap;
     private final double fitResolutionMultiplier;

@@ -23,6 +23,11 @@ public interface Reference {
      */
     int[] period();
 
+    /**
+     * The Length of reference orbit.
+     */
+    int length();
+
     default int longestPeriod(){
         return period()[period().length - 1];
     }

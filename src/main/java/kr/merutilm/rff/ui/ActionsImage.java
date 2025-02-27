@@ -11,9 +11,9 @@ import java.util.function.UnaryOperator;
 import javax.swing.KeyStroke;
 
 import kr.merutilm.rff.io.BitMapImage;
-import kr.merutilm.rff.io.IOUtilities;
 import kr.merutilm.rff.settings.ImageSettings;
 import kr.merutilm.rff.theme.BasicThemes;
+import kr.merutilm.rff.util.IOUtilities;
 
 enum ActionsImage implements Actions {
     THEME("Set Theme", "Set theme.", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {

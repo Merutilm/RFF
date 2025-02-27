@@ -1,9 +1,8 @@
 package kr.merutilm.rff.ui;
 
-import javax.swing.*;
+import org.lwjgl.opengl.awt.AWTGLCanvas;
+import org.lwjgl.opengl.awt.GLData;
 
-import kr.merutilm.rff.io.BitMapImage;
-import kr.merutilm.rff.struct.DoubleMatrix;
 import kr.merutilm.rff.formula.DeepMandelbrotPerturbator;
 import kr.merutilm.rff.formula.LightMandelbrotPerturbator;
 import kr.merutilm.rff.formula.MandelbrotPerturbator;
@@ -18,12 +17,16 @@ import kr.merutilm.rff.settings.CalculationSettings;
 import kr.merutilm.rff.settings.ImageSettings;
 import kr.merutilm.rff.settings.Settings;
 import kr.merutilm.rff.struct.DoubleExponent;
+import kr.merutilm.rff.struct.DoubleMatrix;
+import kr.merutilm.rff.theme.BasicTheme;
 import kr.merutilm.rff.util.DoubleExponentMath;
 import kr.merutilm.rff.util.TextFormatter;
 
-import static kr.merutilm.rff.theme.BasicTheme.INIT_ITERATION;
+import static org.lwjgl.glfw.GLFW.glfwInit;
+import static org.lwjgl.glfw.GLFW.glfwPollEvents;
+import static org.lwjgl.opengl.GL.*;
+import static org.lwjgl.opengl.GL45.*;
 
-import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -32,21 +35,24 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.IntConsumer;
 
-final class RFFRenderPanel extends JPanel {
+import javax.swing.SwingUtilities;
+
+public class GLRenderPanel extends AWTGLCanvas {
     private final transient ParallelRenderState state = new ParallelRenderState();
 
+    private transient GLRenderer renderer;
     private transient BufferedImage currentImage;
     private transient RFFMap currentMap;
     private transient Perturbator currentPerturbator;
     private final transient RFF master;
     private static final double EXP_DEADLINE = 290;
     private static final String FINISHING_TEXT = "Finishing... ";
-
     private int period = 1;
 
-    public RFFRenderPanel(RFF master) {
+    
+    public GLRenderPanel(RFF master){
+        super(new GLData());
         this.master = master;
-        setBackground(Color.BLACK);
         addListeners();
     }
 
@@ -140,6 +146,7 @@ final class RFFRenderPanel extends JPanel {
 
     }
 
+    
 
     private int getImgWidth() {
         ImageSettings img = master.getSettings().imageSettings();
@@ -179,30 +186,22 @@ final class RFFRenderPanel extends JPanel {
 
 
     public synchronized void recompute() {
-
+        int id = state.currentID();
         try {
-            state.createThread(id -> {
-                try {
-                    compute(id);
-                } catch (IllegalParallelRenderStateException e) {
-                    RFFLoggers.logCancelledMessage("Recompute", id);
-                }
-            });
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            compute(id);
+        } catch (IllegalParallelRenderStateException e) {
+            RFFLoggers.logCancelledMessage("Recompute", id);
         }
-
     }
 
 
-    //this method can be thread-safe only when called via recompute()
     public void compute(int currentID) throws IllegalParallelRenderStateException {
 
         int w = getImgWidth();
         int h = getImgHeight();
 
         if (master.getSettings().calculationSettings().autoIteration()) {
-            master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit().setMaxIteration(Math.max(INIT_ITERATION, period * 50L)).build()).build());
+            master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit().setMaxIteration(Math.max(BasicTheme.INIT_ITERATION, period * 50L)).build()).build());
         }
 
         Settings settings = master.getSettings();
@@ -271,7 +270,8 @@ final class RFFRenderPanel extends JPanel {
             }
         }
 
-
+        render();
+        
         generator.createRenderer((x, y, _, _, _, _, _, _, _) -> {
             DoubleExponent[] dc = offsetConversion(x, y);
             return currentPerturbator.iterate(dc[0], dc[1]);
@@ -283,7 +283,7 @@ final class RFFRenderPanel extends JPanel {
 
         panel.setReferenceText(period, length - 1);
         panel.setProcess("Preparing...");
-
+        
         generator.process(p -> {
             boolean processing = p < 1;
 
@@ -303,6 +303,10 @@ final class RFFRenderPanel extends JPanel {
 
     }
 
+    public ParallelRenderState getState() {
+        return state;
+    }
+
     public Perturbator getCurrentPerturbator() {
         return currentPerturbator;
     }
@@ -314,11 +318,6 @@ final class RFFRenderPanel extends JPanel {
     public RFFMap getCurrentMap() {
         return currentMap;
     }
-
-    public ParallelRenderState getState() {
-        return state;
-    }
-
 
     private ParallelRenderProcessVisualizer gvf(int fracA) {
         RFFStatusPanel panel = master.getWindow().getStatusPanel();
@@ -348,11 +347,22 @@ final class RFFRenderPanel extends JPanel {
 
 
     @Override
-    public void paint(Graphics g) {
-        super.paint(g);
-        Graphics2D g2 = (Graphics2D) g;
-        BitMapImage.highGraphics(g2);
-        g2.drawImage(currentImage, 0, 0, getWidth(), getHeight(), null);
+    public void initGL() {
+        System.out.println("OpenGL version: " + effective.majorVersion + "." + effective.minorVersion + " (Profile: "
+                + effective.profile + ")");
+        createCapabilities();
+        glfwInit();
+        // renderer = new GLLightMandelbrotShader(this);
+        glClearColor(0.3f, 0.4f, 0.5f, 1);
+
     }
 
+    @Override
+    public void paintGL() {
+        glfwPollEvents();
+        glClear(GL_COLOR_BUFFER_BIT);
+        renderer.update();
+        swapBuffers();
+
+    }
 }

@@ -27,6 +27,7 @@ public interface BasicTheme extends Theme {
     long INIT_ITERATION = 300;
     double INIT_BAILOUT = 2;
     int INIT_COMPRESS_CRITERIA = -1;
+    int INIT_COMPRESS_THREASHOLD_POWER = -1;
 
     CalculationSettings DEFAULT_CALC = new CalculationSettings(
             INIT_LOG_ZOOM,
@@ -37,7 +38,8 @@ public interface BasicTheme extends Theme {
             INIT_AUTO_ITERATION,
             INIT_REUSE_REFERENCE,
             INIT_R3A,
-            INIT_COMPRESS_CRITERIA
+            INIT_COMPRESS_CRITERIA,
+            INIT_COMPRESS_THREASHOLD_POWER
     );
 
     VideoSettings DEFAULT_VID = new VideoSettings(

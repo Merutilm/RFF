@@ -1,7 +1,7 @@
 package kr.merutilm.rff.formula;
 
-import kr.merutilm.rff.shader.IllegalRenderStateException;
-import kr.merutilm.rff.shader.RenderState;
+import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
+import kr.merutilm.rff.parallel.ParallelRenderState;
 import kr.merutilm.rff.settings.CalculationSettings;
 import kr.merutilm.rff.struct.DoubleExponent;
 import kr.merutilm.rff.struct.LWBigComplex;
@@ -10,7 +10,7 @@ import kr.merutilm.rff.struct.LWBigComplex;
 public abstract class Perturbator {
     private static final int PRECISION_ADDITION = 18;
     private static final double LN2 = Math.log(2);
-    protected final RenderState state;
+    protected final ParallelRenderState state;
     protected final Formula formula;
     protected final int currentID;
     protected final double bailout;
@@ -19,7 +19,7 @@ public abstract class Perturbator {
     protected final double logZoom;
     protected final CalculationSettings calc;
 
-    protected Perturbator(RenderState state, int currentID, Formula formula, CalculationSettings calc) {
+    protected Perturbator(ParallelRenderState state, int currentID, Formula formula, CalculationSettings calc) {
         this.state = state;
         this.currentID = currentID;
         this.formula = formula;
@@ -90,9 +90,9 @@ public abstract class Perturbator {
 
     public abstract Reference getReference();
 
-    public abstract Perturbator reuse(RenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision) throws IllegalRenderStateException;
+    public abstract Perturbator reuse(ParallelRenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision) throws IllegalParallelRenderStateException;
 
-    public abstract double iterate(DoubleExponent dcr, DoubleExponent dci) throws IllegalRenderStateException;
+    public abstract double iterate(DoubleExponent dcr, DoubleExponent dci) throws IllegalParallelRenderStateException;
 
 
 }

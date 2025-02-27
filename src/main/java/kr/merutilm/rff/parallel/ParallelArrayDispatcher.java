@@ -1,4 +1,4 @@
-package kr.merutilm.rff.shader;
+package kr.merutilm.rff.parallel;
 
 import kr.merutilm.rff.struct.Matrix;
 import java.util.ArrayList;
@@ -8,9 +8,9 @@ import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public abstract class ArrayDispatcher<M extends Matrix, R extends ArrayRenderer> {
+public abstract class ParallelArrayDispatcher<M extends Matrix, R extends ParallelArrayRenderer> {
 
-    protected final RenderState renderState;
+    protected final ParallelRenderState renderState;
     protected final int renderID;
     protected final double initTime;
     protected boolean rendered = false;
@@ -19,7 +19,7 @@ public abstract class ArrayDispatcher<M extends Matrix, R extends ArrayRenderer>
     protected final M matrix;
     protected M original;
 
-    protected ArrayDispatcher(RenderState renderState, int renderID, M matrix) {
+    protected ParallelArrayDispatcher(ParallelRenderState renderState, int renderID, M matrix) {
         this.renderState = renderState;
         this.renderID = renderID;
         this.matrix = matrix;
@@ -28,7 +28,7 @@ public abstract class ArrayDispatcher<M extends Matrix, R extends ArrayRenderer>
 
     public abstract void dispatch() throws InterruptedException;
 
-    public synchronized void process(ProcessVisualizer visualizer, long intervalMS) {
+    public synchronized void process(ParallelRenderProcessVisualizer visualizer, long intervalMS) {
         AtomicBoolean processing = new AtomicBoolean(true);
         
         Timer t = new Timer();
@@ -42,7 +42,7 @@ public abstract class ArrayDispatcher<M extends Matrix, R extends ArrayRenderer>
                     }else{
                         cancel();
                     }
-                } catch (IllegalRenderStateException | InterruptedException e) {
+                } catch (IllegalParallelRenderStateException | InterruptedException e) {
                     Thread.currentThread().interrupt();
                     cancel();
                 }
@@ -60,7 +60,7 @@ public abstract class ArrayDispatcher<M extends Matrix, R extends ArrayRenderer>
             if (visualizer != null) {
                 visualizer.run(1);
             }
-        } catch (IllegalRenderStateException | InterruptedException e) {
+        } catch (IllegalParallelRenderStateException | InterruptedException e) {
             processing.set(false);
             Thread.currentThread().interrupt();
         }
@@ -68,12 +68,12 @@ public abstract class ArrayDispatcher<M extends Matrix, R extends ArrayRenderer>
     }
 
 
-    public final void tryBreak() throws IllegalRenderStateException {
+    public final void tryBreak() throws IllegalParallelRenderStateException {
         renderState.tryBreak(renderID);
     }
 
 
-    public void createRenderer(R renderer) throws IllegalRenderStateException{
+    public void createRenderer(R renderer) throws IllegalParallelRenderStateException{
         this.renderers.add(renderer);
         tryBreak();
     }

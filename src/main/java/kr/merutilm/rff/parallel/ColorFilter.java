@@ -1,10 +1,10 @@
-package kr.merutilm.rff.shader;
+package kr.merutilm.rff.parallel;
 
 import kr.merutilm.rff.struct.HexColor;
 import kr.merutilm.rff.util.AdvancedMath;
 import kr.merutilm.rff.settings.ColorFilterSettings;
 
-public class ColorFilter implements BitMapRenderer {
+public class ColorFilter implements ParallelBitMapRenderer {
 
     private final double gamma;
     private final double exposure;

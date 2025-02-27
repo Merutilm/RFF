@@ -4,8 +4,8 @@ import java.util.*;
 import java.util.function.BiConsumer;
 
 import kr.merutilm.rff.formula.LightMandelbrotReference;
-import kr.merutilm.rff.shader.IllegalRenderStateException;
-import kr.merutilm.rff.shader.RenderState;
+import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
+import kr.merutilm.rff.parallel.ParallelRenderState;
 import kr.merutilm.rff.util.ArrayFunction;
 import kr.merutilm.rff.settings.R3ASettings;
 public class LightR3ATable implements R3ATable{
@@ -13,7 +13,7 @@ public class LightR3ATable implements R3ATable{
     private final List<List<LightR3A>> table;
     private final R3ASettings settings;
 
-    public LightR3ATable(RenderState state, int currentID, LightMandelbrotReference reference, R3ASettings r3aSettings, double dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalRenderStateException {
+    public LightR3ATable(ParallelRenderState state, int currentID, LightMandelbrotReference reference, R3ASettings r3aSettings, double dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
         double epsilon = Math.pow(10, r3aSettings.epsilonPower());
 
         int longestPeriod = reference.period()[reference.period().length - 1];

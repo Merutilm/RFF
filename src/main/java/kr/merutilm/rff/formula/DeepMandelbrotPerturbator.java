@@ -5,10 +5,10 @@ import java.util.function.IntConsumer;
 
 import javax.annotation.Nonnull;
 
-import kr.merutilm.rff.shader.IllegalRenderStateException;
-import kr.merutilm.rff.shader.RenderState;
 import kr.merutilm.rff.approx.DeepR3A;
 import kr.merutilm.rff.approx.DeepR3ATable;
+import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
+import kr.merutilm.rff.parallel.ParallelRenderState;
 import kr.merutilm.rff.settings.CalculationSettings;
 import kr.merutilm.rff.struct.DoubleExponent;
 import kr.merutilm.rff.struct.LWBigComplex;
@@ -22,14 +22,14 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
     private final DoubleExponent offR;
     private final DoubleExponent offI;
 
-    public DeepMandelbrotPerturbator(RenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalRenderStateException{
+    public DeepMandelbrotPerturbator(ParallelRenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException{
         this(state, currentID, calc, dcMax, precision, period, actionPerRefCalcIteration, actionPerCreatingTableIteration, false);
     }
-    public DeepMandelbrotPerturbator(RenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, BiConsumer<Integer, Double> actionPerCreatingTableIteration, boolean arbitraryPrecisionFPGBn) throws IllegalRenderStateException {
+    public DeepMandelbrotPerturbator(ParallelRenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, BiConsumer<Integer, Double> actionPerCreatingTableIteration, boolean arbitraryPrecisionFPGBn) throws IllegalParallelRenderStateException {
         this(state, currentID, calc, dcMax, precision, period, actionPerRefCalcIteration, actionPerCreatingTableIteration, arbitraryPrecisionFPGBn, null, null, DoubleExponent.ZERO, DoubleExponent.ZERO);
     }
 
-    public DeepMandelbrotPerturbator(RenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, BiConsumer<Integer, Double> actionPerCreatingTableIteration, boolean arbitraryPrecisionFPGBn, DeepMandelbrotReference reusedReference, DeepR3ATable reusedTable, @Nonnull DoubleExponent offR, @Nonnull DoubleExponent offI) throws IllegalRenderStateException{
+    public DeepMandelbrotPerturbator(ParallelRenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, BiConsumer<Integer, Double> actionPerCreatingTableIteration, boolean arbitraryPrecisionFPGBn, DeepMandelbrotReference reusedReference, DeepR3ATable reusedTable, @Nonnull DoubleExponent offR, @Nonnull DoubleExponent offI) throws IllegalParallelRenderStateException{
         super(state, currentID, calc, arbitraryPrecisionFPGBn);
         this.dcMax = dcMax;
         this.offR = offR;
@@ -41,7 +41,7 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
     // it returns the double value of iteration
     // Performs the corresponding action on all pixels
     @Override
-    public double iterate(DoubleExponent dcr, DoubleExponent dci) throws IllegalRenderStateException {
+    public double iterate(DoubleExponent dcr, DoubleExponent dci) throws IllegalParallelRenderStateException {
         
         dcr = dcr.add(offR);
         dci = dci.add(offI);
@@ -124,7 +124,7 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
     }
 
     @Override
-    public DeepMandelbrotPerturbator reuse(RenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision) throws IllegalRenderStateException{
+    public DeepMandelbrotPerturbator reuse(ParallelRenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision) throws IllegalParallelRenderStateException{
         LWBigComplex centerOffset = calc.center().subtract(reference.refCenter(), precision);
         DoubleExponent offR = DoubleExponent.valueOf(centerOffset.re());
         DoubleExponent offI = DoubleExponent.valueOf(centerOffset.im());

@@ -1,6 +1,11 @@
 Libraries We used for this project and its licenses:
 
--------------------------------------------------
+----------------
+
+- LWJGL3
+- https://github.com/LWJGL/lwjgl3
+
+----------------------------------------------------------------------------------
 
 - JavaCV 1.5.11
 - https://github.com/bytedeco/javacv

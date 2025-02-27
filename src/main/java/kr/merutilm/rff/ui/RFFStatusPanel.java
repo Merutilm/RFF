@@ -53,9 +53,10 @@ final class RFFStatusPanel extends JPanel {
         zoom.getNameLabel().setText(SPACE + "Zoom : " + text);
     }
 
-    public void setPeriodText(int period) {
-        String text = NumberFormat.getNumberInstance(Locale.US).format(period);
-        this.period.getNameLabel().setText(SPACE + "Period : " + text);
+    public void setReferenceText(int period, int length) {
+        String tPeriod = NumberFormat.getNumberInstance(Locale.US).format(period);
+        String tLength = NumberFormat.getNumberInstance(Locale.US).format(length);
+        this.period.getNameLabel().setText(SPACE + "Period : " + tPeriod + " (" + tLength + ")");
     }
 
     public void initTime() {

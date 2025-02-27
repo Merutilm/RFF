@@ -83,7 +83,9 @@ enum ActionsFractal implements Actions {
         panel.createTextInput("Reference Compress Criteria", "When compressing references, sets the minimum amount of references to compress at one time. <br> Reference compression slows down the calculation but frees up memory space. <br> To disable, write -1.", calc.compressCriteria(), Integer::parseInt, e ->
                 applier.accept(f -> f.setCompressCriteria(e))
         );
-
+        panel.createTextInput("Reference Compress Threshold", "When compressing references, sets the negative exponents of ten of minimum error to be considered equal. <br> Reference compression slows down the calculation but frees up memory space. <br> To disable, write -1.", calc.compressionThresholdPower(), Integer::parseInt, e ->
+        applier.accept(f -> f.setCompressionThresholdPower(e))
+);
         window.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {

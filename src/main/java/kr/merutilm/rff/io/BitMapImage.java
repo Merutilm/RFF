@@ -3,10 +3,10 @@ package kr.merutilm.rff.io;
 import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
 
-import kr.merutilm.rff.shader.IllegalRenderStateException;
-import kr.merutilm.rff.shader.RenderState;
-import kr.merutilm.rff.shader.BitMapDispatcher;
-import kr.merutilm.rff.shader.BitMapRenderer;
+import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
+import kr.merutilm.rff.parallel.ParallelBitMapDispatcher;
+import kr.merutilm.rff.parallel.ParallelBitMapRenderer;
+import kr.merutilm.rff.parallel.ParallelRenderState;
 import kr.merutilm.rff.struct.HexColor;
 
 import java.awt.*;
@@ -88,10 +88,10 @@ public class BitMapImage {
         }
         return bitMap;
     }
-    public BitMapDispatcher createShader(BitMapRenderer... renderers) throws IllegalRenderStateException{
-        RenderState state = new RenderState();
-        BitMapDispatcher dispatcher = new BitMapDispatcher(state, state.currentID(), getBitMap());
-        for (BitMapRenderer renderer : renderers) {
+    public ParallelBitMapDispatcher createShader(ParallelBitMapRenderer... renderers) throws IllegalParallelRenderStateException{
+        ParallelRenderState state = new ParallelRenderState();
+        ParallelBitMapDispatcher dispatcher = new ParallelBitMapDispatcher(state, state.currentID(), getBitMap());
+        for (ParallelBitMapRenderer renderer : renderers) {
             dispatcher.createRenderer(renderer);
         }
         return dispatcher;

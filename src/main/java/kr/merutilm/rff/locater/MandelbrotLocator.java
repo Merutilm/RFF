@@ -4,12 +4,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.DoubleConsumer;
 
-import kr.merutilm.rff.shader.IllegalRenderStateException;
-import kr.merutilm.rff.shader.RenderState;
 import kr.merutilm.rff.formula.DeepMandelbrotPerturbator;
 import kr.merutilm.rff.formula.MandelbrotPerturbator;
 import kr.merutilm.rff.formula.MandelbrotReference;
 import kr.merutilm.rff.formula.Perturbator;
+import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
+import kr.merutilm.rff.parallel.ParallelRenderState;
 import kr.merutilm.rff.settings.CalculationSettings;
 import kr.merutilm.rff.struct.DoubleExponent;
 import kr.merutilm.rff.struct.LWBigComplex;
@@ -41,7 +41,7 @@ public record MandelbrotLocator(LWBigComplex center, DoubleExponent dcMax, doubl
     }
     
 
-    private static DeepMandelbrotPerturbator findAccurateCenterPerturbator(RenderState state, int currentID, MandelbrotPerturbator scene, BiConsumer<Integer, Integer> actionWhileFindingMinibrotCenter, BiConsumer<Integer, Double> actionWhileCreatingTable) throws IllegalRenderStateException{
+    private static DeepMandelbrotPerturbator findAccurateCenterPerturbator(ParallelRenderState state, int currentID, MandelbrotPerturbator scene, BiConsumer<Integer, Integer> actionWhileFindingMinibrotCenter, BiConsumer<Integer, Double> actionWhileCreatingTable) throws IllegalParallelRenderStateException{
         
         // multiply zoom by 2 and find center offset.
         // set the center to center + centerOffset.
@@ -72,7 +72,7 @@ public record MandelbrotLocator(LWBigComplex center, DoubleExponent dcMax, doubl
         return doubledZoomScene;
     }
     
-    public static MandelbrotLocator locateMinibrot(RenderState state, int currentID, MandelbrotPerturbator scene, BiConsumer<Integer, Integer> actionWhileFindingMinibrotCenter, BiConsumer<Integer, Double> actionWhileCreatingTable, DoubleConsumer actionWhileFindingMinibrotZoom) throws IllegalRenderStateException {
+    public static MandelbrotLocator locateMinibrot(ParallelRenderState state, int currentID, MandelbrotPerturbator scene, BiConsumer<Integer, Integer> actionWhileFindingMinibrotCenter, BiConsumer<Integer, Double> actionWhileCreatingTable, DoubleConsumer actionWhileFindingMinibrotZoom) throws IllegalParallelRenderStateException {
 
         // code flowing
         // e.g. zoom * 2 -> zoom * 1.5 -> zoom * 1.75.....
@@ -117,7 +117,7 @@ public record MandelbrotLocator(LWBigComplex center, DoubleExponent dcMax, doubl
     private static boolean checkMaxIterationOnly(MandelbrotPerturbator scene, DoubleExponent resultDcMax, long maxIteration){
         try {
             return (long) scene.iterate(resultDcMax, DoubleExponent.ZERO) == maxIteration;
-        } catch (IllegalRenderStateException e) {
+        } catch (IllegalParallelRenderStateException e) {
             return false;
             //noop
         }

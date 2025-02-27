@@ -1,4 +1,4 @@
-package kr.merutilm.rff.shader;
+package kr.merutilm.rff.parallel;
 
 import static java.lang.Math.*;
 
@@ -7,7 +7,7 @@ import kr.merutilm.rff.struct.HexColor;
 import kr.merutilm.rff.util.AdvancedMath;
 import kr.merutilm.rff.settings.SlopeSettings;
 
-public class Slope implements BitMapRenderer {
+public class Slope implements ParallelBitMapRenderer {
 
     private final DoubleMatrix altitudes;
     private final double reflectionRatio;

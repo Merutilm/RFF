@@ -6,8 +6,8 @@ import java.io.IOException;
 
 import kr.merutilm.rff.struct.Struct;
 import kr.merutilm.rff.struct.StructBuilder;
+import kr.merutilm.rff.util.IOUtilities;
 import kr.merutilm.rff.io.IOBinaryParser;
-import kr.merutilm.rff.io.IOUtilities;
 
 public record DataSettings(double defaultZoomIncrement) implements Struct<DataSettings>{
     @Override

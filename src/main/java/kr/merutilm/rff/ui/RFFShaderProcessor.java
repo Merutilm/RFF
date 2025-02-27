@@ -4,23 +4,23 @@ package kr.merutilm.rff.ui;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
-import kr.merutilm.rff.shader.IllegalRenderStateException;
 import kr.merutilm.rff.io.BitMap;
-import kr.merutilm.rff.shader.ProcessVisualizer;
-import kr.merutilm.rff.shader.RenderState;
-import kr.merutilm.rff.shader.BitMapDispatcher;
 import kr.merutilm.rff.struct.DoubleMatrix;
 import kr.merutilm.rff.struct.HexColor;
 import kr.merutilm.rff.io.RFFMap;
+import kr.merutilm.rff.parallel.Bloom;
+import kr.merutilm.rff.parallel.ColorFilter;
+import kr.merutilm.rff.parallel.Fog;
+import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
+import kr.merutilm.rff.parallel.ParallelBitMapDispatcher;
+import kr.merutilm.rff.parallel.ParallelRenderProcessVisualizer;
+import kr.merutilm.rff.parallel.ParallelRenderState;
+import kr.merutilm.rff.parallel.Slope;
 import kr.merutilm.rff.settings.ColorSettings;
 import kr.merutilm.rff.settings.ImageSettings;
 import kr.merutilm.rff.settings.Settings;
 import kr.merutilm.rff.settings.ShaderSettings;
 import kr.merutilm.rff.settings.StripeSettings;
-import kr.merutilm.rff.shader.Bloom;
-import kr.merutilm.rff.shader.ColorFilter;
-import kr.merutilm.rff.shader.Fog;
-import kr.merutilm.rff.shader.Slope;
 
 final class RFFShaderProcessor {
     private RFFShaderProcessor(){
@@ -34,10 +34,10 @@ final class RFFShaderProcessor {
         Arrays.fill(iterations.getCanvas(), NOT_RENDERED);
     }
 
-    public static BufferedImage createImage(RenderState state, int currentID, RFFMap map, Settings settings, boolean compressed) throws IllegalRenderStateException, InterruptedException{
-        return createImageWithVisualizer(state, currentID, map, settings, compressed, new ProcessVisualizer[]{null, null, null});
+    public static BufferedImage createImage(ParallelRenderState state, int currentID, RFFMap map, Settings settings, boolean compressed) throws IllegalParallelRenderStateException, InterruptedException{
+        return createImageWithVisualizer(state, currentID, map, settings, compressed, new ParallelRenderProcessVisualizer[]{null, null, null});
     }
-    public static BufferedImage createImageWithVisualizer(RenderState state, int currentID, RFFMap map, Settings settings, boolean compressed, ProcessVisualizer[] visualizers) throws IllegalRenderStateException, InterruptedException{
+    public static BufferedImage createImageWithVisualizer(ParallelRenderState state, int currentID, RFFMap map, Settings settings, boolean compressed, ParallelRenderProcessVisualizer[] visualizers) throws IllegalParallelRenderStateException, InterruptedException{
     
         DoubleMatrix iterations = map.iterations();
         settings = map.modifyToMapSettings(settings);
@@ -89,10 +89,10 @@ final class RFFShaderProcessor {
         return Math.max(1, (int) ((int) img.resolutionMultiplier() / COMPRESSION_CRITERIA));
     }
 
-    private static void basicShaders(RenderState state, int currentID, BitMap bitMap, DoubleMatrix iterations, Settings settings, boolean compressed, ProcessVisualizer... visualizers) throws IllegalRenderStateException, InterruptedException {
+    private static void basicShaders(ParallelRenderState state, int currentID, BitMap bitMap, DoubleMatrix iterations, Settings settings, boolean compressed, ParallelRenderProcessVisualizer... visualizers) throws IllegalParallelRenderStateException, InterruptedException {
         ImageSettings img = settings.imageSettings();
         ShaderSettings shd = settings.shaderSettings();
-        BitMapDispatcher pp1 = new BitMapDispatcher(state, currentID, bitMap);
+        ParallelBitMapDispatcher pp1 = new ParallelBitMapDispatcher(state, currentID, bitMap);
         int fitResolutionMultiplier = iterations.getWidth() / bitMap.getWidth();
 
         pp1.createRenderer((x, y, _, _, _, _, _, _, _) -> {
@@ -111,7 +111,7 @@ final class RFFShaderProcessor {
         }
     }
 
-    private static void postProcessing(RenderState state, int currentID, BitMap bitMap, DoubleMatrix iterations, Settings settings, boolean compressed, ProcessVisualizer... visualizers) throws IllegalRenderStateException, InterruptedException {
+    private static void postProcessing(ParallelRenderState state, int currentID, BitMap bitMap, DoubleMatrix iterations, Settings settings, boolean compressed, ParallelRenderProcessVisualizer... visualizers) throws IllegalParallelRenderStateException, InterruptedException {
 
         ImageSettings img = settings.imageSettings();
         ShaderSettings shd = settings.shaderSettings();
@@ -122,7 +122,7 @@ final class RFFShaderProcessor {
             basicShaders(state, currentID, compressedBitMap, iterations, settings, true);
         }
 
-        BitMapDispatcher pp2 = new BitMapDispatcher(state, currentID, bitMap);
+        ParallelBitMapDispatcher pp2 = new ParallelBitMapDispatcher(state, currentID, bitMap);
         pp2.createRenderer(new Fog(bitMap, compressedBitMap, shd.fogSettings()));
 
 
@@ -132,7 +132,7 @@ final class RFFShaderProcessor {
             pp2.process(visualizers[1], 400);
         }
 
-        BitMapDispatcher pp3 = new BitMapDispatcher(state, currentID, bitMap);
+        ParallelBitMapDispatcher pp3 = new ParallelBitMapDispatcher(state, currentID, bitMap);
 
         pp3.createRenderer(new Bloom(bitMap, compressedBitMap, shd.bloomSettings()));
         pp3.createRenderer((x, y, _, _, _, _, _, c, _) -> {

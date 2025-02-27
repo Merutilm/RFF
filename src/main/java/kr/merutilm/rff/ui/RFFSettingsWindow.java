@@ -8,7 +8,7 @@ import java.util.function.BiConsumer;
 
 import javax.swing.JFrame;
 
-import kr.merutilm.rff.io.IOUtilities;
+import kr.merutilm.rff.util.IOUtilities;
 
 final class RFFSettingsWindow extends JFrame{
     public static final int WIDTH = 400;

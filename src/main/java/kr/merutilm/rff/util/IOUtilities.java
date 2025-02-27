@@ -1,7 +1,9 @@
-package kr.merutilm.rff.io;
+package kr.merutilm.rff.util;
 
 import java.awt.*;
 import java.io.File;
+import java.net.URL;
+
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
@@ -139,8 +141,13 @@ public final class IOUtilities {
     }
 
     public static Image getApplicationIcon() {
-        return Toolkit.getDefaultToolkit().getImage(IOUtilities.class.getResource("/icon.png"));
+        return Toolkit.getDefaultToolkit().getImage(getResource("/icon.png"));
     }
+
+    public static URL getResource(String file) {
+        return IOUtilities.class.getResource(file);
+    }
+
 
     public static File getOriginalResource() {
         return new File("src/test/documents");
