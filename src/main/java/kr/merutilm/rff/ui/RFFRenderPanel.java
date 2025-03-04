@@ -274,6 +274,10 @@ final class RFFRenderPanel extends JPanel {
 
         generator.createRenderer((x, y, _, _, _, _, _, _, _) -> {
             DoubleExponent[] dc = offsetConversion(x, y);
+            //time mode
+            //long t = System.nanoTime();
+            //double iteration = currentPerturbator.iterate(dc[0], dc[1]);
+            //return (System.nanoTime() - t) / 10.0 + iteration / 1.0E20;
             return currentPerturbator.iterate(dc[0], dc[1]);
         });
 
@@ -287,7 +291,7 @@ final class RFFRenderPanel extends JPanel {
         generator.process(p -> {
             boolean processing = p < 1;
 
-            if (RFFShaderProcessor.getCompressDivisor(settings.imageSettings()) > 1 || processing) {
+            if (RFFShaderProcessor.getImageCompressDivisor(settings.imageSettings()) > 1 || processing) {
                 reloadAndPaint(currentID, true);
             }
 
@@ -323,7 +327,7 @@ final class RFFRenderPanel extends JPanel {
     private ParallelRenderProcessVisualizer gvf(int fracA) {
         RFFStatusPanel panel = master.getWindow().getStatusPanel();
         return a -> panel.setProcess(FINISHING_TEXT + TextFormatter.processText(a)
-                                     + TextFormatter.frac(fracA, 3, TextFormatter.Parentheses.SQUARE));
+                                     + TextFormatter.frac(fracA, 2, TextFormatter.Parentheses.SQUARE));
     }
 
     /**
@@ -332,11 +336,10 @@ final class RFFRenderPanel extends JPanel {
     public void reloadAndPaint(int currentID, boolean compressed) throws IllegalParallelRenderStateException, InterruptedException {
         ParallelRenderProcessVisualizer[] pv = new ParallelRenderProcessVisualizer[]{
                 gvf(1),
-                gvf(2),
-                gvf(3)
+                gvf(2)
         };
 
-        currentImage = RFFShaderProcessor.createImageWithVisualizer(state, currentID, currentMap, master.getSettings(), compressed, pv);
+        currentImage = RFFShaderProcessor.createImage(state, currentID, currentMap, master.getSettings(), compressed, pv);
 
         repaint();
 

@@ -26,7 +26,7 @@ public class ThemeAzure implements BasicTheme{
             HexColor c = new HexColor((int)r, (int)g, (int)b, 255);
             p.add(c);
         }
-        p.setIterationInterval(100);
+        p.setIterationInterval(300);
         p.setOffsetRatio(0.7);
         
         return p.build();
@@ -34,12 +34,12 @@ public class ThemeAzure implements BasicTheme{
 
     @Override
     public SlopeSettings slopeSettings() {
-        return new SlopeSettings(300, 0.4, 1, 60, 135);      
+        return new SlopeSettings(200, 0.4, 1, 60, 135);      
     }
 
     @Override
     public StripeSettings stripeSettings() {
-        return new StripeSettings(true, 10, 50, 1, 0);
+        return new StripeSettings(true, 4, 40, 0.4, 0);
     }
 
     @Override

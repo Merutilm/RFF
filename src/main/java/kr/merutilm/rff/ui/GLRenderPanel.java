@@ -287,7 +287,7 @@ public class GLRenderPanel extends AWTGLCanvas {
         generator.process(p -> {
             boolean processing = p < 1;
 
-            if (RFFShaderProcessor.getCompressDivisor(settings.imageSettings()) > 1 || processing) {
+            if (RFFShaderProcessor.getImageCompressDivisor(settings.imageSettings()) > 1 || processing) {
                 reloadAndPaint(currentID, true);
             }
 
@@ -322,7 +322,7 @@ public class GLRenderPanel extends AWTGLCanvas {
     private ParallelRenderProcessVisualizer gvf(int fracA) {
         RFFStatusPanel panel = master.getWindow().getStatusPanel();
         return a -> panel.setProcess(FINISHING_TEXT + TextFormatter.processText(a)
-                                     + TextFormatter.frac(fracA, 3, TextFormatter.Parentheses.SQUARE));
+                                     + TextFormatter.frac(fracA, 2, TextFormatter.Parentheses.SQUARE));
     }
 
     /**
@@ -331,11 +331,10 @@ public class GLRenderPanel extends AWTGLCanvas {
     public void reloadAndPaint(int currentID, boolean compressed) throws IllegalParallelRenderStateException, InterruptedException {
         ParallelRenderProcessVisualizer[] pv = new ParallelRenderProcessVisualizer[]{
                 gvf(1),
-                gvf(2),
-                gvf(3)
+                gvf(2)
         };
 
-        currentImage = RFFShaderProcessor.createImageWithVisualizer(state, currentID, currentMap, master.getSettings(), compressed, pv);
+        currentImage = RFFShaderProcessor.createImage(state, currentID, currentMap, master.getSettings(), compressed, pv);
 
         repaint();
 

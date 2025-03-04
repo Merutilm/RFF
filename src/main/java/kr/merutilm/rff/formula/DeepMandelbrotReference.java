@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.IntConsumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import kr.merutilm.rff.settings.CalculationSettings;
 import kr.merutilm.rff.approx.DeepR3ATable;
@@ -107,7 +105,7 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
             zi = DoubleExponent.valueOf(z.im());
 
             if(compressCriteria >= 0 && iteration >= 1) {
-                int refIndex = ReferenceCompressor.iterationToReferenceIndex(referenceCompressors, reuseIndex + 1);
+                int refIndex = ReferenceCompressor.compress(referenceCompressors, reuseIndex + 1);
 
                 if (!zr.divide(rr[refIndex]).subtract(DoubleExponent.ONE).abs().isLargerThan(compressionThreshold) &&
                     !zi.divide(ri[refIndex]).subtract(DoubleExponent.ONE).abs().isLargerThan(compressionThreshold)
@@ -153,11 +151,11 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
     }
 
     public DoubleExponent real(int iteration) {
-        return refReal[ReferenceCompressor.iterationToReferenceIndex(compressors, iteration)];
+        return refReal[ReferenceCompressor.compress(compressors, iteration)];
     }
 
     public DoubleExponent imag(int iteration) {
-        return refImag[ReferenceCompressor.iterationToReferenceIndex(compressors, iteration)];
+        return refImag[ReferenceCompressor.compress(compressors, iteration)];
     }
 
     public DeepR3ATable generateR3A(ParallelRenderState state, int renderID, R3ASettings r3aSettings, DoubleExponent dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {

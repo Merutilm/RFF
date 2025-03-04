@@ -7,7 +7,7 @@ import kr.merutilm.rff.struct.LWBigComplex;
 public interface BasicTheme extends Theme {
 
     double INIT_MULTIPLIER = 1;
-    BasicThemes DEFAULT_THEME = BasicThemes.RANDOMIZED_RAINBOW;
+    BasicThemes DEFAULT_THEME = BasicThemes.LONG_RAINBOW_SHADED;
     DecimalizeIterationMethod INIT_DECIMAL_ITERATION = DecimalizeIterationMethod.LOG_LOG;
     boolean INIT_AUTO_ITERATION = true;
     ReuseReferenceMethod INIT_REUSE_REFERENCE = ReuseReferenceMethod.DISABLED;

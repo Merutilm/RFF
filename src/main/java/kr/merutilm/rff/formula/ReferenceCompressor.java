@@ -3,9 +3,46 @@ package kr.merutilm.rff.formula;
 import java.util.List;
 
 public record ReferenceCompressor(int startReferenceIndex, int length, int startIteration, int endIteration) {
+    
+    
+    public static int compressorsIndex(List<ReferenceCompressor> compressors, int iteration){
+        return binarySearch(compressors, iteration, 0, (compressors.size() + 1) / 2, compressors.size());
+    }
 
+    private static int binarySearch(List<ReferenceCompressor> compressors, int iteration, int index, int indexGap, int lastIndexGap){
+        if(index < 0 || index >= compressors.size()){
+            return -1;
+        }
 
-    public static int iterationToReferenceIndex(List<ReferenceCompressor> compressors, int iteration) {
+        ReferenceCompressor current = compressors.get(index);
+        boolean requiredSmallerIndex = current.startIteration() > iteration;
+        boolean requiredLargerIndex = current.endIteration() < iteration;
+
+        if(indexGap == lastIndexGap && (requiredLargerIndex || requiredSmallerIndex)){
+            return -1;
+        }
+
+        if(requiredSmallerIndex){
+            return binarySearch(compressors, iteration, index - indexGap, (indexGap + 1) / 2, indexGap);
+        }
+        if(requiredLargerIndex){
+            return binarySearch(compressors, iteration, index + indexGap, (indexGap + 1) / 2, indexGap);
+        }
+        
+        return index;
+    }
+
+    /**
+     * Get the index of reference using compressors and given iteration.
+     * @param compressors the list of compressors
+     * @param iteration the iteration you want
+     * @return
+     */
+    public static int compress(List<ReferenceCompressor> compressors, int iteration) {
+
+        if(compressors.isEmpty() || iteration < compressors.get(0).startIteration()){
+            return iteration;
+        }
 
         // Since large value are compressed to small, and it compresses again.
 
@@ -25,10 +62,13 @@ public record ReferenceCompressor(int startReferenceIndex, int length, int start
         // Use the REVERSED FOR statement because it must be used recursively.
         int compressedIteration = iteration;
 
+
         for (int i = compressors.size() - 1; i >= 0; i--) {
             ReferenceCompressor compressor = compressors.get(i);
             if (compressor.startIteration() <= compressedIteration && compressedIteration <= compressor.endIteration()) {
                 compressedIteration -= compressor.startIteration() - compressor.startReferenceIndex();
+            }else if (compressedIteration > compressor.endIteration()){
+                break;
             }
         }
 
@@ -44,11 +84,8 @@ public record ReferenceCompressor(int startReferenceIndex, int length, int start
         // 1 2 3 ... 25 26 27 28 ... 36 37 38 39 40 41 42 43 - index
         // 1 2 3 ... 25 40 41 42 ... 50 66 67 68 69 70 71 72 - actual iteration
         //
-        // Approach : Check if the iteration is included in compressors
-        //
-        // test input : 60 (expected : 10)
-        // second compressor : 51 -> 65 = 1 -> 15,
-        // therefore, this iteration is 60 - 51 + 1 = 10.
+        // Approach : Subtract the length of compressors. It is already compressed iteration, DO NOT consider that includes compressors' iteration
+
 
         int index = compressedIteration;
 

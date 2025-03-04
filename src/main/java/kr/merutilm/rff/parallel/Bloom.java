@@ -17,7 +17,7 @@ public class Bloom implements ParallelBitMapRenderer {
     private final double softness;
     private final double fitResolutionMultiplier;
 
-    public Bloom(BitMap bitMap, BitMap compressedBitMap, BloomSettings settings) {
+    public Bloom(BitMap bitMap, BitMap gaussBitMap, BloomSettings settings) {
 
 
         this.threshold = settings.threshold();
@@ -25,17 +25,17 @@ public class Bloom implements ParallelBitMapRenderer {
         this.intensity = settings.intensity();
         this.softness = settings.softness();
         if (isValid()) {
-            BitMap blurredAvailableBitMap = compressedBitMap.createAnother(Arrays.stream(compressedBitMap.getCanvas())
+            BitMap blurredAvailableBitMap = gaussBitMap.createAnother(Arrays.stream(gaussBitMap.getCanvas())
                     .map(e -> HexColor.grayScaleValue(e) < threshold * 256 ? (255 << 24) : e)
                     .toArray());
 
-            blurredAvailableBitMap.gaussianBlur((int) (radius * compressedBitMap.getWidth()));
+            blurredAvailableBitMap.gaussianBlur((int) (radius * gaussBitMap.getWidth()));
 
             this.blurredAvailableBitMap = blurredAvailableBitMap;
         }else{
             this.blurredAvailableBitMap = null;
         }
-        this.fitResolutionMultiplier = (double) compressedBitMap.getWidth() / bitMap.getWidth();
+        this.fitResolutionMultiplier = (double) gaussBitMap.getWidth() / bitMap.getWidth();
 
     }
 

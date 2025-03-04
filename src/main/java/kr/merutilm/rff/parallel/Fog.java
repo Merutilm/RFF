@@ -12,19 +12,19 @@ public class Fog implements ParallelBitMapRenderer {
     private final double radius;
     private final double opacity;
 
-    public Fog(BitMap bitMap, BitMap compressedBitMap, FogSettings settings){
+    public Fog(BitMap bitMap, BitMap gaussBitMap, FogSettings settings){
         this.opacity = settings.opacity();
         this.radius = settings.radius();
 
         if(isValid()){
-            BitMap blurredBitMap = compressedBitMap.cloneCanvas();
-            blurredBitMap.gaussianBlur((int)(radius * compressedBitMap.getWidth()));
+            BitMap blurredBitMap = gaussBitMap.cloneCanvas();
+            blurredBitMap.gaussianBlur((int)(radius * gaussBitMap.getWidth()));
             this.blurredBitMap = blurredBitMap;
         }else{
             this.blurredBitMap = null;
         }
 
-        this.fitResolutionMultiplier = (double) compressedBitMap.getWidth() / bitMap.getWidth();
+        this.fitResolutionMultiplier = (double) gaussBitMap.getWidth() / bitMap.getWidth();
 
         
     }

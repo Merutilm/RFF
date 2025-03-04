@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 
 import kr.merutilm.rff.formula.LightMandelbrotReference;
+import kr.merutilm.rff.formula.ReferenceCompressor;
 import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.parallel.ParallelRenderState;
 import kr.merutilm.rff.util.ArrayFunction;
@@ -23,6 +24,7 @@ public class LightR3ATable implements R3ATable{
 
         int minSkip = r3aSettings.minSkipReference();
         int maxMultiplier = r3aSettings.maxMultiplierBetweenLevel();
+        List<ReferenceCompressor> compressors = reference.compressors();
 
         int[] periodTemp = new int[1];
         boolean[] isArtificial = new boolean[1];
@@ -158,38 +160,34 @@ public class LightR3ATable implements R3ATable{
 
     public LightR3A lookup(int iteration, double dzr, double dzi) {
 
-         List<LightR3A> table = this.table.get(iteration);
-
-         if (table == null) {
-             return null;
-         }
-
-         LightR3A r3a = table.getFirst();
-
-         if(!r3a.isValid(dzr, dzi)){
-             return null;
-         }
-
-         return switch (settings.r3aSelectionMethod()) {
-             case LOWEST -> {
-                 for (LightR3A test : table) {
-                     if (test.isValid(dzr, dzi)) {
-                         r3a = test;
-                     }else break;
-                 }
-                 yield r3a;
-             }
-             case HIGHEST -> {
-
-                 for (int j = table.size() - 1; j >= 0; j--) {
-                     LightR3A test = table.get(j);
-                     if (test.isValid(dzr, dzi)) {
-                         yield test;
-                     }
-                 }
-                 yield r3a;
-             }
-         };
+        List<LightR3A> table = this.table.get(iteration);
+        if (table == null) {
+            return null;
+        }
+        LightR3A r3a = table.getFirst();
+        if(!r3a.isValid(dzr, dzi)){
+            return null;
+        }
+        
+        return switch (settings.r3aSelectionMethod()) {
+            case LOWEST -> {
+                for (LightR3A test : table) {
+                    if (test.isValid(dzr, dzi)) {
+                        r3a = test;
+                    }else break;
+                }
+                yield r3a;
+            }
+            case HIGHEST -> {
+                for (int j = table.size() - 1; j >= 0; j--) {
+                    LightR3A test = table.get(j);
+                    if (test.isValid(dzr, dzi)) {
+                        yield test;
+                    }
+                }
+                yield r3a;
+            }
+        };
 
     }
 

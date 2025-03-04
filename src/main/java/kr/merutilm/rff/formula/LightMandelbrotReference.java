@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.IntConsumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import kr.merutilm.rff.settings.CalculationSettings;
 import kr.merutilm.rff.util.AdvancedMath;
@@ -106,7 +104,7 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
             zi = z.im().doubleValue();
 
             if(compressCriteria >= 0 && iteration >= 1) {
-                int refIndex = ReferenceCompressor.iterationToReferenceIndex(referenceCompressors, reuseIndex + 1);
+                int refIndex = ReferenceCompressor.compress(referenceCompressors, reuseIndex + 1);
 
                 if (AdvancedMath.abs(zr / rr[refIndex] - 1) <= compressionThreshold  &&
                     AdvancedMath.abs(zi / ri[refIndex] - 1) <= compressionThreshold
@@ -151,10 +149,10 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
 //            double swirlDetectionThreshold = 2;
 //
 //            z = LWBigComplex.zero(precision);
-//            iteration = 0;
+//            long swirlIteration = 0;
 //            double prevSwirlDz2 = 0;
 //
-//            while (zr * zr + zi * zi < bailout * bailout && iteration < maxIteration) {
+//            while (zr * zr + zi * zi < bailout * bailout && swirlIteration < maxIteration) {
 //
 //                state.tryBreak(renderID);
 //
@@ -166,7 +164,7 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
 //                zi = z.im().doubleValue();
 //
 //
-//                if(iteration % swirlPeriod == 0){
+//                if(swirlIteration % swirlPeriod == 0){
 //                    swirlDzr = pzr - swirlDzrTemp;
 //                    swirlDzi = pzi - swirlDziTemp;
 //                    swirlDzrTemp = pzr;
@@ -180,10 +178,10 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
 //                }
 //
 //                actionPerRefCalcIteration.accept(iteration);
-//                iteration++;
+//                swirlIteration++;
 //            }
 //
-//            System.out.println(iteration - 1);
+//            System.out.println(swirlIteration - 1);
 //        }
 
 
@@ -200,11 +198,11 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
     }
 
     public double real(int iteration) {
-        return refReal[ReferenceCompressor.iterationToReferenceIndex(compressors, iteration)];
+        return refReal[ReferenceCompressor.compress(compressors, iteration)];
     }
 
     public double imag(int iteration) {
-        return refImag[ReferenceCompressor.iterationToReferenceIndex(compressors, iteration)];
+        return refImag[ReferenceCompressor.compress(compressors, iteration)];
     }
 
     public LightR3ATable generateR3A(ParallelRenderState state, int renderID, R3ASettings r3aSettings, double dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {

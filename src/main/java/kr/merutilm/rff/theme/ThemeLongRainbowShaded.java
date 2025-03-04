@@ -6,7 +6,7 @@ import kr.merutilm.rff.settings.FogSettings;
 import kr.merutilm.rff.settings.SlopeSettings;
 import kr.merutilm.rff.settings.StripeSettings;
 
-public class ThemeShadedLongRainbow implements LongRainbowTheme {
+public class ThemeLongRainbowShaded implements LongRainbowTheme {
 
     @Override
     public String getName(){

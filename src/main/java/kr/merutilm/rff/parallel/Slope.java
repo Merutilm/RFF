@@ -15,18 +15,18 @@ public class Slope implements ParallelBitMapRenderer {
     private final double zenith;
     private final double azimuth;
     private final double depth;
-    private final double resolutionMultiplier;
-    private final int ad;
+    private final double resMul;
+    private final int mcto;
 
-    public Slope(DoubleMatrix altitudes, SlopeSettings slopeSettings, double resolutionMultiplier, int altitudesDivisor) {
-        this.altitudes = altitudes;
+    public Slope(DoubleMatrix altitudes, SlopeSettings slopeSettings, double resolutionMultiplier, int multiplierCompressedToOriginal) {
+        this.altitudes = altitudes; // it is original canvas. very BIG.
         this.reflectionRatio = slopeSettings.reflectionRatio();
         this.opacity = slopeSettings.opacity();
         this.azimuth = slopeSettings.azimuth();
         this.zenith = slopeSettings.zenith();
         this.depth = slopeSettings.depth();
-        this.resolutionMultiplier = resolutionMultiplier;
-        this.ad = altitudesDivisor;
+        this.resMul = resolutionMultiplier;
+        this.mcto = multiplierCompressedToOriginal;
     }
 
     @Override
@@ -38,20 +38,21 @@ public class Slope implements ParallelBitMapRenderer {
                 double aRad = toRadians(azimuth);
                 double zRad = toRadians(zenith);
 
-                int xd = x * ad;
-                int yd = y * ad;
+                int xd = x * mcto; //big image pixel coordinate from small image.
+                int yd = y * mcto;
 
-                double ld = altitudes.pipette(xd - ad, yd + ad);
-                double d = altitudes.pipette(xd, yd + ad);
-                double rd = altitudes.pipette(xd + ad, yd + ad); 
-                double l = altitudes.pipette(xd - ad, yd);
-                double r = altitudes.pipette(xd + ad, yd);
-                double lu = altitudes.pipette(xd - ad, yd - ad);
-                double u = altitudes.pipette(xd, yd - ad);
-                double ru = altitudes.pipette(xd + ad, yd - ad);
+                double ld = altitudes.pipette(xd - mcto, yd + mcto);
+                double d = altitudes.pipette(xd, yd + mcto);
+                double rd = altitudes.pipette(xd + mcto, yd + mcto); 
+                double l = altitudes.pipette(xd - mcto, yd);
+                double r = altitudes.pipette(xd + mcto, yd);
+                double lu = altitudes.pipette(xd - mcto, yd - mcto);
+                double u = altitudes.pipette(xd, yd - mcto);
+                double ru = altitudes.pipette(xd + mcto, yd - mcto);
 
-                double dzDx = ((rd + 2 * r + ru) - (ld + 2 * l + lu)) * depth * resolutionMultiplier / ad;
-                double dzDy = ((lu + 2 * u + ru) - (ld + 2 * d + rd)) * depth * resolutionMultiplier / ad;
+                //As resolution increases, the relative altitude decreases, so multiply by the resMul.
+                double dzDx = ((rd + 2 * r + ru) - (ld + 2 * l + lu)) * depth * resMul / mcto;
+                double dzDy = ((lu + 2 * u + ru) - (ld + 2 * d + rd)) * depth * resMul / mcto;
                 double slope = atan(toRadians(hypot(dzDx, dzDy)));
                 double aspect = atan2(dzDy, -dzDx);
                 double shade = Math.max(reflectionRatio, cos(zRad) * cos(slope) + sin(zRad) * sin(slope) * cos(aRad + aspect)); 
