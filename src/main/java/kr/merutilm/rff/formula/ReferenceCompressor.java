@@ -4,13 +4,28 @@ import java.util.List;
 
 public record ReferenceCompressor(int startReferenceIndex, int length, int startIteration, int endIteration) {
     
-    
-    public static int compressorsIndex(List<ReferenceCompressor> compressors, int iteration){
+    public static boolean isFullyCompressed(List<ReferenceCompressor> compressors, int startIteration, int endIteration){
+        int i1 = containedIterationIndex(compressors, startIteration);
+        int i2 = containedIterationIndex(compressors, endIteration);
+        return i1 == i2 && i1 != -1;
+    }
+
+    public static ReferenceCompressor containedIterationCompressor(List<ReferenceCompressor> compressors, int iteration){
+        int index = containedIterationIndex(compressors, iteration);
+        if(index == -1){
+            return null;
+        }
+        return compressors.get(index);
+    }
+
+    public static int containedIterationIndex(List<ReferenceCompressor> compressors, int iteration){
         return binarySearch(compressors, iteration, 0, (compressors.size() + 1) / 2, compressors.size());
     }
 
+    
+
     private static int binarySearch(List<ReferenceCompressor> compressors, int iteration, int index, int indexGap, int lastIndexGap){
-        if(index < 0 || index >= compressors.size()){
+        if(index < 0 || index >= compressors.size() || compressors.get(0).startIteration() > iteration){
             return -1;
         }
 
