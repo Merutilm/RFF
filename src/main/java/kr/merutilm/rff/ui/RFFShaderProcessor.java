@@ -34,20 +34,20 @@ final class RFFShaderProcessor {
         Arrays.fill(iterations.getCanvas(), NOT_RENDERED);
     }
 
-    public static BufferedImage createImage(ParallelRenderState state, int currentID, RFFMap map, Settings settings, boolean compressed) throws IllegalParallelRenderStateException, InterruptedException{
-        return createImage(state, currentID, map, settings, compressed, new ParallelRenderProcessVisualizer[]{null, null});
+    public static BufferedImage createImage(ParallelRenderState state, int currentID, RFFMap map, Settings settings, boolean immediately) throws IllegalParallelRenderStateException, InterruptedException{
+        return createImage(state, currentID, map, settings, immediately, new ParallelRenderProcessVisualizer[]{null, null});
     }
-    public static BufferedImage createImage(ParallelRenderState state, int currentID, RFFMap map, Settings settings, boolean compressed, ParallelRenderProcessVisualizer[] visualizers) throws IllegalParallelRenderStateException, InterruptedException{
+    public static BufferedImage createImage(ParallelRenderState state, int currentID, RFFMap map, Settings settings, boolean immediately, ParallelRenderProcessVisualizer[] visualizers) throws IllegalParallelRenderStateException, InterruptedException{
     
         DoubleMatrix iterations = map.iterations();
         settings = map.modifyToMapSettings(settings);
         int compressDivisor = getImageCompressDivisor(settings.imageSettings());
-        int currentDivisor = compressed ? compressDivisor : 1;
+        int currentDivisor = immediately ? compressDivisor : 1;
         //compressDivisor : divisor to make compressed image
         //currentDivisor : current divisor to create image 
 
         BitMap bitMap = new BitMap(iterations.getWidth() / currentDivisor, iterations.getHeight() / currentDivisor);
-        shade(state, currentID, bitMap, iterations, settings, visualizers);
+        shade(state, currentID, bitMap, iterations, settings, immediately, visualizers);
 
         return bitMap.getImage();
     }
@@ -89,7 +89,7 @@ final class RFFShaderProcessor {
         return Math.max(1, (int) ((int) img.resolutionMultiplier() / COMPRESSION_CRITERIA));
     }
 
-    private static void shade(ParallelRenderState state, int currentID, BitMap bitMap, DoubleMatrix iterations, Settings settings, ParallelRenderProcessVisualizer... visualizers) throws IllegalParallelRenderStateException, InterruptedException {
+    private static void shade(ParallelRenderState state, int currentID, BitMap bitMap, DoubleMatrix iterations, Settings settings, boolean immediately, ParallelRenderProcessVisualizer... visualizers) throws IllegalParallelRenderStateException, InterruptedException {
         
         ImageSettings img = settings.imageSettings();
         ShaderSettings shd = settings.shaderSettings();
@@ -107,7 +107,7 @@ final class RFFShaderProcessor {
         pp1.createRenderer(new ColorFilter(shd.colorFilterSettings()));
 
 
-        if (multiplierCurrentToOriginal > 1) {
+        if (immediately) {
             pp1.dispatch();
         } else {
             pp1.process(visualizers[0], 400);
@@ -142,7 +142,7 @@ final class RFFShaderProcessor {
             return HexColor.average(a1, a2, a3, a4, c);
         });
 
-        if (multiplierCurrentToOriginal > 1) {
+        if (immediately) {
             pp2.dispatch();
         } else {
             pp2.process(visualizers[1], 400);

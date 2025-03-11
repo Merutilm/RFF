@@ -17,6 +17,7 @@ import kr.merutilm.rff.settings.R3ASettings;
 import kr.merutilm.rff.settings.DecimalizeIterationMethod;
 import kr.merutilm.rff.settings.R3ASelectionMethod;
 import kr.merutilm.rff.settings.ReuseReferenceMethod;
+import kr.merutilm.rff.settings.R3ACompressionMethod;
 
 enum ActionsFractal implements Actions {
     R3A("R3A", "<b> Recursive Reference Rebasing Approximation. </b> <br> Determine all of the period based on reference orbit, skips the period of iteration at once. <br>  The render speed will be significantly faster when using it recursively.", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
@@ -38,8 +39,8 @@ enum ActionsFractal implements Actions {
         panel.createSelectInput("Selection Method", "Set the selection method of R3A.", r3a.r3aSelectionMethod(), R3ASelectionMethod.values(), e ->
                 applier.accept(f -> f.setR3ASelectionMethod(e)), false
         );
-        panel.createBoolInput("Fix Glitches", "Set the skipping method. <br> If true, skip count decreases once, and glitches are solved. <br> If false, The rendering will be faster, but the image may have glitches.", r3a.fixGlitches(), e ->
-                applier.accept(f -> f.setFixGlitches(e))
+        panel.createSelectInput("Compression Method", "Set the compession method of R3A.", r3a.r3aCompressionMethod(), R3ACompressionMethod.values(), e ->
+                applier.accept(f -> f.setR3ACompressionMethod(e)), false
         );
     }), null),
 

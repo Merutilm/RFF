@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-public class DeepR3ATable implements R3ATable{
+public class DeepR3ATable extends R3ATable{
 
     private final List<List<DeepR3A>> table;
     private final R3ASettings settings;
@@ -81,7 +81,7 @@ public class DeepR3ATable implements R3ATable{
             actionPerCreatingTableIteration.accept(i, (double) i / longestPeriod);
 
             for (int j = period.length - 1; j >= 0; j--) {
-                int requiredPerturbationCount = R3ATable.getRequiredPerturbationCount(r3aSettings.fixGlitches(), isArtificial, j);
+                int requiredPerturbationCount = R3ATable.getRequiredPerturbationCount(isArtificial, j);
 
                 if(currentStep[j] == null){
                     currentStep[j] = DeepR3A.create(i).step(reference, epsilon, dcMax); // step 1

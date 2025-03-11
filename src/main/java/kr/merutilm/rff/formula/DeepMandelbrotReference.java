@@ -18,7 +18,7 @@ import kr.merutilm.rff.util.ArrayFunction;
 import kr.merutilm.rff.util.DoubleExponentMath;
 
 public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, DoubleExponent[] refReal,
-                                      DoubleExponent[] refImag, int[] period, List<ReferenceCompressor> compressors, LWBigComplex lastReference,
+                                      DoubleExponent[] refImag, int[] period, List<ArrayCompressor> refCompressors, LWBigComplex lastReference,
                                       LWBigComplex fpgBn) implements MandelbrotReference {
 
 
@@ -48,7 +48,7 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
         DoubleExponent minZRadius = DoubleExponent.POSITIVE_INFINITY;
         int reuseIndex = 0;
 
-        List<ReferenceCompressor> referenceCompressors = new ArrayList<>();
+        List<ArrayCompressor> referenceCompressors = new ArrayList<>();
         int compressed = 0;
         double bailout = calc.bailout();
         long maxIteration = calc.maxIteration();
@@ -105,7 +105,7 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
             zi = DoubleExponent.valueOf(z.im());
 
             if(compressCriteria >= 0 && iteration >= 1) {
-                int refIndex = ReferenceCompressor.compress(referenceCompressors, reuseIndex + 1);
+                int refIndex = ArrayCompressor.compress(referenceCompressors, reuseIndex + 1);
 
                 if (!zr.divide(rr[refIndex]).subtract(DoubleExponent.ONE).abs().isLargerThan(compressionThreshold) &&
                     !zi.divide(ri[refIndex]).subtract(DoubleExponent.ONE).abs().isLargerThan(compressionThreshold)
@@ -114,7 +114,7 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
                 } else if (reuseIndex != 0) {
                     if (reuseIndex > compressCriteria) { 
 
-                        ReferenceCompressor compressor = new ReferenceCompressor(1, reuseIndex, iteration - reuseIndex + 1, iteration);
+                        ArrayCompressor compressor = new ArrayCompressor(1, iteration - reuseIndex + 1, iteration);
                         compressed += compressor.length(); //get the increment of iteration
                         referenceCompressors.add(compressor);
                     }
@@ -151,11 +151,11 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
     }
 
     public DoubleExponent real(int iteration) {
-        return refReal[ReferenceCompressor.compress(compressors, iteration)];
+        return refReal[ArrayCompressor.compress(refCompressors, iteration)];
     }
 
     public DoubleExponent imag(int iteration) {
-        return refImag[ReferenceCompressor.compress(compressors, iteration)];
+        return refImag[ArrayCompressor.compress(refCompressors, iteration)];
     }
 
     public DeepR3ATable generateR3A(ParallelRenderState state, int renderID, R3ASettings r3aSettings, DoubleExponent dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
@@ -176,7 +176,7 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
     public boolean equals(Object o) {
         return o instanceof DeepMandelbrotReference(
                 Formula f, LWBigComplex c, DoubleExponent[] rr, DoubleExponent[] ri,
-                int[] p, List<ReferenceCompressor> comp, LWBigComplex l,
+                int[] p, List<ArrayCompressor> comp, LWBigComplex l,
                 LWBigComplex bn
         ) &&
                Objects.equals(formula, f) &&
@@ -184,7 +184,7 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
                Arrays.equals(refReal, rr) &&
                Arrays.equals(refImag, ri) &&
                Arrays.equals(period, p) &&
-               Objects.equals(compressors, comp) &&
+               Objects.equals(refCompressors, comp) &&
                Objects.equals(lastReference, l) &&
                Objects.equals(fpgBn, bn);
     }
@@ -197,7 +197,7 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
                STR_REFERENCE_REAL + Arrays.toString(refReal) +
                STR_REFERENCE_IMAG + Arrays.toString(refImag) +
                STR_PERIOD + Arrays.toString(period) +
-               STR_COMPRESSORS + compressors +
+               STR_COMPRESSORS + refCompressors +
                STR_LAST_REF + lastReference +
                STR_FPG_BN + fpgBn + "\n]";
     }

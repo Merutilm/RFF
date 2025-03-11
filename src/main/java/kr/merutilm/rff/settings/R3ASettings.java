@@ -1,9 +1,5 @@
 package kr.merutilm.rff.settings;
 
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.IntUnaryOperator;
-import java.util.function.UnaryOperator;
-
 import kr.merutilm.rff.struct.Struct;
 import kr.merutilm.rff.struct.StructBuilder;
 
@@ -11,7 +7,7 @@ public record R3ASettings(int minSkipReference,
                           int maxMultiplierBetweenLevel,
                           double epsilonPower,
                           R3ASelectionMethod r3aSelectionMethod,
-                          boolean fixGlitches) implements Struct<R3ASettings> {
+                          R3ACompressionMethod r3aCompressionMethod) implements Struct<R3ASettings> {
 
     @Override
     public Builder edit() {
@@ -20,7 +16,7 @@ public record R3ASettings(int minSkipReference,
                 .setMaxMultiplierBetweenLevel(maxMultiplierBetweenLevel)
                 .setEpsilonPower(epsilonPower)
                 .setR3ASelectionMethod(r3aSelectionMethod)
-                .setFixGlitches(fixGlitches);
+                .setR3ACompressionMethod(r3aCompressionMethod);
     }
 
 
@@ -29,7 +25,7 @@ public record R3ASettings(int minSkipReference,
         private int maxMultiplierBetweenLevel;
         private double epsilonPower;
         private R3ASelectionMethod r3aSelectionMethod;
-        private boolean fixGlitches;
+        private R3ACompressionMethod r3aCompressionMethod;
 
         public Builder setMinSkipReference(int minSkipReference) {
             this.minSkipReference = minSkipReference;
@@ -51,39 +47,14 @@ public record R3ASettings(int minSkipReference,
             return this;
         }
 
-        public Builder setFixGlitches(boolean fixGlitches) {
-            this.fixGlitches = fixGlitches;
-            return this;
-        }
-
-        public Builder setMinSkipReference(IntUnaryOperator changes) {
-            this.minSkipReference = changes.applyAsInt(minSkipReference);
-            return this;
-        }
-
-        public Builder setMaxMultiplierBetweenLevel(IntUnaryOperator changes) {
-            this.maxMultiplierBetweenLevel = changes.applyAsInt(maxMultiplierBetweenLevel);
-            return this;
-        }
-
-        public Builder setEpsilonPower(DoubleUnaryOperator changes) {
-            this.epsilonPower = changes.applyAsDouble(epsilonPower);
-            return this;
-        }
-
-        public Builder setR3ASelectionMethod(UnaryOperator<R3ASelectionMethod> changes) {
-            this.r3aSelectionMethod = changes.apply(r3aSelectionMethod);
-            return this;
-        }
-
-        public Builder setFixGlitches(UnaryOperator<Boolean> changes) {
-            this.fixGlitches = changes.apply(fixGlitches);
+        public Builder setR3ACompressionMethod(R3ACompressionMethod r3aCompressionMethod) {
+            this.r3aCompressionMethod = r3aCompressionMethod;
             return this;
         }
 
         @Override
         public R3ASettings build() {
-            return new R3ASettings(minSkipReference, maxMultiplierBetweenLevel, epsilonPower, r3aSelectionMethod, fixGlitches);
+            return new R3ASettings(minSkipReference, maxMultiplierBetweenLevel, epsilonPower, r3aSelectionMethod, r3aCompressionMethod);
         }
     }
 }
