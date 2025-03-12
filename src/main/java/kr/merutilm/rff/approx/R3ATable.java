@@ -68,17 +68,18 @@ public class R3ATable {
         
 
         List<ArrayCompressor> r3aCompressors = new ArrayList<>();
-        
+
         for (ArrayCompressor refCompressor : refCompressors) {
             
             int start = refCompressor.start();
             int length = refCompressor.length();
             int index = Arrays.binarySearch(tablePeriod, length + 1);
+            //if the reference compressor is same as period
             if(index >= 0){
                 int tableIndex = iterationToTableIndex(tablePeriod, tablePeriodElements, Collections.emptyList(), start);
                 int periodElements = tablePeriodElements[index];
                 
-                r3aCompressors.add(new ArrayCompressor(0, tableIndex, tableIndex + periodElements - 1));
+                r3aCompressors.add(new ArrayCompressor(1, tableIndex + 1, tableIndex + periodElements - 1));
             }
         }
         return r3aCompressors;

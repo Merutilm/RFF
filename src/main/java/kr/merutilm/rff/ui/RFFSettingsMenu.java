@@ -8,32 +8,32 @@ import javax.swing.JMenuItem;
 
 enum RFFSettingsMenu {
     FILE(master -> {
-        JMenu menu = new JMenu("File");
+        JMenu menu = Actions.createJMenu("File");
         addAll(master, menu, ActionsFile.values());
         return menu;
     }),
     FRACTAL(master -> {
-        JMenu menu = new JMenu("Fractal");
+        JMenu menu = Actions.createJMenu("Fractal");
         addAll(master, menu, ActionsFractal.values());
         return menu;
     }),
     IMAGE(master -> {
-        JMenu menu = new JMenu("Image");
+        JMenu menu = Actions.createJMenu("Image");
         addAll(master, menu, ActionsImage.values());
         return menu;
     }),
     SHADER(master -> {
-        JMenu menu = new JMenu("Shader");
+        JMenu menu = Actions.createJMenu("Shader");
         addAll(master, menu, ActionsShader.values());
         return menu;
     }),
     VIDEO(master -> {
-        JMenu menu = new JMenu("Video");
+        JMenu menu = Actions.createJMenu("Video");
         addAll(master, menu, ActionsVideo.values());
         return menu;
     }),
     EXPLORE(master -> {
-        JMenu menu = new JMenu("Explore");
+        JMenu menu = Actions.createJMenu("Explore");
         addAll(master, menu, ActionsExplore.values());
         return menu;
     }),
@@ -43,13 +43,8 @@ enum RFFSettingsMenu {
 
     public static <T extends Actions> void addAll(RFF master, JMenu menu, T[] items){
         Arrays.stream(items).forEach(e -> {
-            JMenuItem item = new JMenuItem(e.toString());
-            item.addActionListener(_ -> e.accept(master));
-            item.setToolTipText("<html>"+ e.description() + "</html>");
-            item.setAccelerator(e.keyStroke());
-            menu.add(item);
-            menu.setFont(MUIConstants.DEFAULT_FONT);
-            item.setFont(MUIConstants.DEFAULT_FONT);
+            JMenuItem item = e.initializer().init(master, e.toString(), e.description(), e.keyStroke());
+            Actions.addItem(menu, item);
         });
     }
 

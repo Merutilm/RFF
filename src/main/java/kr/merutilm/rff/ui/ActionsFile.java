@@ -3,7 +3,6 @@ package kr.merutilm.rff.ui;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.util.function.BiConsumer;
 
 import javax.swing.KeyStroke;
 
@@ -12,7 +11,9 @@ import kr.merutilm.rff.util.IOUtilities;
 
 enum ActionsFile implements Actions {
 
-    OPEN_MAP("Open Map", "Open RFF Map file(" + IOUtilities.Extension.MAP + ")", (master, name) -> {
+    OPEN_MAP("Open Map", "Open RFF Map file(" + IOUtilities.Extension.MAP + ")", KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.CTRL_DOWN_MASK), 
+    (master, name, description, accelerator) ->
+    Actions.createItem(name, description, accelerator, () -> {
         RFFRenderPanel renderer = master.getWindow().getRenderer();
         File file = IOUtilities.selectFile(name, IOUtilities.Extension.MAP.toString(), "RFF Map");
         if (file == null) {
@@ -20,30 +21,34 @@ enum ActionsFile implements Actions {
         }
         RFFMap map = RFFMap.read(file);
         renderer.setCurrentMap(map);
-        ActionsExplore.REFRESH_COLOR.accept(master);
+        ActionsExplore.refreshColorRunnable(master).run();
 
-    }, KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.ALT_DOWN_MASK)),
+    })),
     ;
 
     private final String name;
-    private final BiConsumer<RFF, String> action;
-    private final KeyStroke keyStroke;
     private final String description;
+    private final KeyStroke accelerator;
+    private final Initializer initializer;
 
     @Override
     public KeyStroke keyStroke() {
-        return keyStroke;
+        return accelerator;
     }
 
     public String description() {
         return description;
     }
 
-    ActionsFile(String name, String description, BiConsumer<RFF, String> generator, KeyStroke keyStroke) {
+    public Initializer initializer() {
+        return initializer;
+    }
+
+    ActionsFile(String name, String description, KeyStroke accelerator, Initializer initializer) {
         this.name = name;
         this.description = description;
-        this.action = generator;
-        this.keyStroke = keyStroke;
+        this.accelerator = accelerator;
+        this.initializer = initializer;
     }
 
     @Override
@@ -51,8 +56,4 @@ enum ActionsFile implements Actions {
         return name;
     }
 
-    @Override
-    public void accept(RFF master) {
-        action.accept(master, name);
-    }
 }

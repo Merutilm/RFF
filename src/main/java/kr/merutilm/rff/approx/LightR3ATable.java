@@ -36,7 +36,7 @@ public class LightR3ATable extends R3ATable{
         R3ACompressionMethod compressionMethod = r3aSettings.r3aCompressionMethod();
         PeriodTemp r3aPeriod = R3ATable.PeriodTemp.generateR3APeriod(referencePeriod, r3aSettings);
         int[] tablePeriodElements = generatePeriodElements(r3aPeriod.tablePeriod());
-        List<ArrayCompressor> r3aCompressors = generateR3ACompressors(r3aPeriod.tablePeriod(), tablePeriodElements, reference.refCompressors());        
+        List<ArrayCompressor> r3aCompressors = compressionMethod == R3ACompressionMethod.STRONGEST ? generateR3ACompressors(r3aPeriod.tablePeriod(), tablePeriodElements, reference.refCompressors()) : Collections.emptyList();        
         List<List<LightR3A>> table = generateTable(state, currentID, reference, r3aSettings, r3aPeriod, r3aCompressors, tablePeriodElements, dcMax, compressionMethod, actionPerCreatingTableIteration);
         
         this.settings = r3aSettings;
@@ -101,7 +101,10 @@ public class LightR3ATable extends R3ATable{
                                 default -> -1;
                             };
                             
-                            while(table.size() <= index){
+                            while(table.size() < index){
+                                table.add(null);
+                            }
+                            if(table.size() == index){
                                 table.add(new ArrayList<>());
                             }
 
@@ -119,7 +122,7 @@ public class LightR3ATable extends R3ATable{
                 }
             }    
         }
-        return table.stream().map(Collections::unmodifiableList).toList();
+        return Collections.unmodifiableList(table);
     }
 
 
@@ -139,23 +142,23 @@ public class LightR3ATable extends R3ATable{
         }
 
         int longestPeriod = tablePeriod[tablePeriod.length - 1];
-        int maxSkip = longestPeriod;
-        int remainder = iteration;
+        int maxSkip = longestPeriod - iteration;
+        // int remainder = iteration;
 
-        for(int i = tablePeriod.length - 1; i >= 0; i--){
-            int p = tablePeriod[i];
-            remainder %= p;
-            if(remainder == 1){
-                maxSkip = tablePeriod[i];
-                break;
-            }
-        } //TODO : SOLVE BUG
+        // for(int i = tablePeriod.length - 1; i >= 0; i--){
+        //     int p = tablePeriod[i];
+        //     remainder %= p;
+        //     if(remainder == 1){
+        //         maxSkip = tablePeriod[i];
+        //         break;
+        //     }
+        // } 
         
 
         
         List<LightR3A> table = this.table.get(index);
 
-        if(table.isEmpty()){
+        if(table == null || table.isEmpty()){
             return null;
         }
         

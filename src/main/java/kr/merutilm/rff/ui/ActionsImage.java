@@ -4,7 +4,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
@@ -16,15 +15,19 @@ import kr.merutilm.rff.theme.BasicThemes;
 import kr.merutilm.rff.util.IOUtilities;
 
 enum ActionsImage implements Actions {
-    THEME("Set Theme", "Set theme.", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+    THEME("Set Theme", "Set theme.",  KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), 
+    (master, name, description, accelerator) ->
+    Actions.createItem(name, description, accelerator, () ->  new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         panel.createSelectInput(name, "Select the theme type",
             BasicThemes.tryMatch(master.getTheme()), BasicThemes.values(), e -> {
                 master.setTheme(e.getTheme());
-                ActionsExplore.REFRESH_COLOR.accept(master);
+                ActionsExplore.refreshColorRunnable(master).run();
             }, true);
             panel.setSize(panel.getWidth(), 150);
-        }), KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_DOWN_MASK)),
-    RESOLUTION("Set Resolution", "Set the resolution of rendered image. It contains \"Recompute\" operation.", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+        }))),
+    RESOLUTION("Set Resolution", "Set the resolution of rendered image. It contains \"Recompute\" operation.",  null, 
+    (master, name, description, accelerator) ->
+    Actions.createItem(name, description, accelerator, () ->  new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
 
         ImageSettings image = getImageSettings(master);
 
@@ -36,8 +39,10 @@ enum ActionsImage implements Actions {
             Actions.getRenderer(master).recompute();
         });
 
-    }), null),
-    SAVE_IMAGE("Save Image", "Export current rendered image to file", (master, name) -> {
+    }))),
+    SAVE_IMAGE("Save Image", "Export current rendered image to file",  null, 
+    (master, name, description, accelerator) ->
+    Actions.createItem(name, description, accelerator, () -> {
         File file = IOUtilities.saveFile(name, "png", "Image");
         if(file == null){
             return;
@@ -47,38 +52,37 @@ enum ActionsImage implements Actions {
         } catch (IOException e) {
             throw new IllegalStateException();
         }
-    }, KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK)),
+    })),
     ;
 
     private final String name;
-    private final BiConsumer<RFF, String> action;
-    private final KeyStroke keyStroke;
     private final String description;
+    private final KeyStroke accelerator;
+    private final Initializer initializer;
 
     @Override
     public KeyStroke keyStroke() {
-        return keyStroke;
+        return accelerator;
     }
 
     public String description() {
         return description;
     }
 
-    ActionsImage(String name, String description, BiConsumer<RFF, String> generator, KeyStroke keyStroke) {
+    public Initializer initializer() {
+        return initializer;
+    }
+
+    ActionsImage(String name, String description, KeyStroke accelerator, Initializer initializer) {
         this.name = name;
         this.description = description;
-        this.action = generator;
-        this.keyStroke = keyStroke;
+        this.accelerator = accelerator;
+        this.initializer = initializer;
     }
 
     @Override
     public String toString() {
         return name;
-    }
-
-    @Override
-    public void accept(RFF master) {
-        action.accept(master, name);
     }
 
     private static ImageSettings getImageSettings(RFF master) {

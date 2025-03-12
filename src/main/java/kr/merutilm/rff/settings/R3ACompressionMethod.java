@@ -12,7 +12,7 @@ public enum R3ACompressionMethod implements Selectable{
      */
     LITTLE_COMPRESSION("Little Compression"),
     /**
-     * Compresses most duplicate elements. It allocates the less memory, but the speed is also slow.
+     * Compresses all duplicate elements. It allocates the less memory, but the speed is also slow.
      */
     STRONGEST("Strongest");
 

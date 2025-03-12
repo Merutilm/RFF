@@ -1,5 +1,6 @@
 package kr.merutilm.rff.formula;
 
+// import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.IntConsumer;
 
@@ -34,7 +35,7 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
         this.reference = reusedTable == null ? LightMandelbrotReference.generate(state, currentID, calc, precision, period, dcMax, strictFPGBn, actionPerRefCalcIteration) : reusedReference;
         this.table = reusedTable == null ? reference.generateR3A(state, currentID, calc.r3aSettings(), dcMax, actionPerCreatingTableIteration) : reusedTable;
     }
- // AtomicInteger a = new AtomicInteger();
+    // AtomicInteger a = new AtomicInteger();
 
     // it returns the double value of iteration
     // Performs the corresponding action on all pixels
@@ -42,7 +43,7 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
     public double iterate(DoubleExponent dcr, DoubleExponent dci) throws IllegalParallelRenderStateException {
         double dcr1 = dcr.doubleValue() + offR;
         double dci1 = dci.doubleValue() + offI;
- // int i = a.incrementAndGet();
+        // int i = a.incrementAndGet();
 
         long iteration = 0;
         int refIteration = 0;
@@ -56,14 +57,20 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
 
         double cd = 0;
         double pd = cd;
-//        if (i == 1) {
-//            System.out.println("[SKIP VALUES]");
-//        }
-//        int startRef = 0;
-//        int skipCount = 0;
-//        boolean isFirst = true;
+        // if (i == 1) {
+        //     System.out.println("[SKIP VALUES]");
+        // }
+        // int startRef = 0;
+        // int skipCount = 0;
+        // boolean isFirst = true;
+        // if(dcr1 * dcr1 + dci1 * dci1 < 4e-181){
+        //     System.out.println(i);
+        // }
+        // if (dcr1 * dcr1 + dci1 * dci1 < 4e-181) {
+        //     System.out.println(1);
+        // }
         while (iteration < maxIteration) {
-
+            
             if(table != null){
                 LightR3A r3a = table.lookup(refIteration, dzr, dzi);
                 
@@ -79,23 +86,23 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
                     if (iteration >= maxIteration) {
                         return maxIteration;
                     }
-                    
-    //                if (i == 1) { //Tracking refIteration Skips
-    //                    if (isFirst) {
-    //                        startRef = refIteration;
-    //                    }
-    //
-    //                    if (!isFirst && startRef + skipCount != refIteration) {
-    //                        System.out.println("S " + startRef + ", K " + skipCount + ", E " + (startRef + skipCount));
-    //                        skipCount = 0;
-    //                        isFirst = true;
-    //                    } else {
-    //                        skipCount += r3a.skip();
-    //                        isFirst = false;
-    //                    }
-    //
-    //                }
-    
+                     
+                    // if (dcr1 * dcr1 + dci1 * dci1 < 4e-181) { //Tracking refIteration Skips
+                    //     if (isFirst) {
+                    //         startRef = refIteration;
+                    //     }
+     
+                    //     if (!isFirst && startRef + skipCount != refIteration) {
+                    //         System.out.println("S " + startRef + ", K " + skipCount + ", E " + (startRef + skipCount));
+                    //         skipCount = 0;
+                    //         isFirst = true;
+                    //     } else {
+                    //         skipCount += r3a.skip();
+                    //         isFirst = false;
+                    //     }
+     
+                    // }
+     
                     continue;
                 }
             }

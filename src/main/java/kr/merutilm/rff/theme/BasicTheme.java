@@ -6,7 +6,7 @@ import kr.merutilm.rff.struct.LWBigComplex;
 
 public interface BasicTheme extends Theme {
 
-    double INIT_MULTIPLIER = 0.4;
+    double INIT_MULTIPLIER = 1;
     BasicThemes DEFAULT_THEME = BasicThemes.LONG_RAINBOW_SHADED;
     DecimalizeIterationMethod INIT_DECIMAL_ITERATION = DecimalizeIterationMethod.LOG_LOG;
     boolean INIT_AUTO_ITERATION = true;
@@ -16,17 +16,17 @@ public interface BasicTheme extends Theme {
             4,
             -3.0,
             R3ASelectionMethod.HIGHEST,
-            R3ACompressionMethod.STRONGEST
+            R3ACompressionMethod.LITTLE_COMPRESSION
     );
-    String INIT_RE = "-1.94049753314295569426879934099924017193708945395883825527159050727270475699799188638368721363557122837537433";
-    String INIT_IM = "-0.00002167558003007276340571795702783203463377018180015617368527563874749808740635139031584401899283992486779";
-    double INIT_LOG_ZOOM = 90.4645786285399;
+    String INIT_RE = "-0.85";
+    String INIT_IM = "0";
+    double INIT_LOG_ZOOM = 2;
 
     LWBigComplex INIT_C = LWBigComplex.valueOf(INIT_RE, INIT_IM, -(int)INIT_LOG_ZOOM - 10);
 
-    long INIT_ITERATION = 3000000;
+    long INIT_ITERATION = 300;
     double INIT_BAILOUT = 2;
-    int INIT_COMPRESS_CRITERIA = 10000;
+    int INIT_COMPRESS_CRITERIA = -10000;
     int INIT_COMPRESS_THREASHOLD_POWER = 5;
 
     CalculationSettings DEFAULT_CALC = new CalculationSettings(

@@ -1,7 +1,6 @@
 package kr.merutilm.rff.ui;
 
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
@@ -13,12 +12,14 @@ import kr.merutilm.rff.util.IOUtilities;
 
 enum ActionsShader implements Actions {
 
-    PALETTE("Palette", "Shader:Palette", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+    PALETTE("Palette", "Shader:Palette", null, 
+    (master, name, description, accelerator) -> 
+    Actions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         ColorSettings color = getShaderSettings(master).colorSettings();
         
         Consumer<UnaryOperator<ColorSettings.Builder>> applier = e -> {
             master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.edit().setColorSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
-            ActionsExplore.REFRESH_COLOR.accept(master);
+            ActionsExplore.refreshColorRunnable(master).run();
         };
 
         panel.createTextInput("Color Pulse Interval", "Required iterations for the palette to cycle once", color.iterationInterval(), Double::parseDouble, e ->
@@ -30,14 +31,16 @@ enum ActionsShader implements Actions {
         panel.createSelectInput("Color Smoothing", "Color Smoothing method", color.colorSmoothing(), ColorSmoothingSettings.values(), e ->
             applier.accept(f -> f.setColorSmoothing(e)), false
         );
-    }), null),
+    }))),
 
-    STRIPE("Stripe", "Shader:Stripe", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+    STRIPE("Stripe", "Shader:Stripe", null, 
+    (master, name, description, accelerator) -> 
+    Actions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         StripeSettings color = getShaderSettings(master).stripeSettings();
         
         Consumer<UnaryOperator<StripeSettings.Builder>> applier = e -> {
             master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.edit().setStripeSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
-            ActionsExplore.REFRESH_COLOR.accept(master);
+            ActionsExplore.refreshColorRunnable(master).run();
         };
 
 
@@ -56,13 +59,15 @@ enum ActionsShader implements Actions {
         panel.createTextInput(IOUtilities.Constants.OFFSET_RATIO.toString(), "Stripe offset ratio", color.offset(), Double::parseDouble, e ->
             applier.accept(f -> f.setOffset(e))
         );
-    }), null),
-    SLOPE("Slope","Shader:Slope", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+    }))),
+    SLOPE("Slope","Shader:Slope", null, 
+    (master, name, description, accelerator) -> 
+    Actions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         SlopeSettings slope = getShaderSettings(master).slopeSettings();
         
         Consumer<UnaryOperator<SlopeSettings.Builder>> applier = e -> {
             master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.edit().setSlopeSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
-            ActionsExplore.REFRESH_COLOR.accept(master);
+            ActionsExplore.refreshColorRunnable(master).run();
         };
 
         panel.createTextInput("Depth", "Slope depth", slope.depth(), Double::parseDouble, e ->
@@ -82,14 +87,15 @@ enum ActionsShader implements Actions {
         );
 
         
-    }), null),
-    COLOR_FILTER("Color Filter","Shader:ColorFilter", (master, name) ->
-        new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+    }))),
+    COLOR_FILTER("Color Filter","Shader:ColorFilter", null, 
+        (master, name, description, accelerator) -> 
+        Actions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
             ColorFilterSettings colorFilter = getShaderSettings(master).colorFilterSettings();
         
             Consumer<UnaryOperator<ColorFilterSettings.Builder>> applier = e -> {
                 master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.edit().setColorFilterSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
-                ActionsExplore.REFRESH_COLOR.accept(master);
+                ActionsExplore.refreshColorRunnable(master).run();
             };
     
             panel.createTextInput("Gamma", "Gamma value", colorFilter.gamma(), Double::parseDouble, e ->
@@ -107,13 +113,15 @@ enum ActionsShader implements Actions {
             panel.createTextInput("Contrast", "Contrast value", colorFilter.contrast(), Double::parseDouble, e ->
                 applier.accept(f -> f.setContrast(e))
             );
-        }), null),
-    FOG("Fog", "Shader:Fog", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+        }))),
+    FOG("Fog", "Shader:Fog", null,
+    (master, name, description, accelerator) -> 
+    Actions.createItem(name, description, accelerator, () ->  new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         FogSettings fog = getShaderSettings(master).fogSettings();
         
         Consumer<UnaryOperator<FogSettings.Builder>> applier = e -> {
             master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.edit().setFogSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
-            ActionsExplore.REFRESH_COLOR.accept(master);
+            ActionsExplore.refreshColorRunnable(master).run();
         };
 
         panel.createTextInput("Radius", "Fog radius ratio in rendered image, fully blurred when the value is 1.", fog.radius(), Double::parseDouble, e ->
@@ -122,13 +130,15 @@ enum ActionsShader implements Actions {
         panel.createTextInput(IOUtilities.Constants.OPACITY.toString(), "Fog opacity", fog.opacity(), Double::parseDouble, e ->
         	applier.accept(f -> f.setOpacity(e))
         );
-    }), null),
-    BLOOM("Bloom", "Shader:Bloom", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+    }))),
+    BLOOM("Bloom", "Shader:Bloom", null, 
+    (master, name, description, accelerator) -> 
+    Actions.createItem(name, description, accelerator, () ->  new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         BloomSettings bloom = getShaderSettings(master).bloomSettings();
     
         Consumer<UnaryOperator<BloomSettings.Builder>> applier = e -> {
             master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.edit().setBloomSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
-            ActionsExplore.REFRESH_COLOR.accept(master);
+            ActionsExplore.refreshColorRunnable(master).run();
         };
 
         panel.createTextInput("Threshold", "Threshold to apply", bloom.threshold(), Double::parseDouble, e ->
@@ -143,37 +153,37 @@ enum ActionsShader implements Actions {
         panel.createTextInput("Intensity", "Bloom intensity", bloom.intensity(), Double::parseDouble, e ->
         	applier.accept(f -> f.setIntensity(e))
         );
-    }), null);
+    })));
+
 
     private final String name;
-    private final BiConsumer<RFF, String> action;
-    private final KeyStroke keyStroke;
     private final String description;
+    private final KeyStroke accelerator;
+    private final Initializer initializer;
 
     @Override
     public KeyStroke keyStroke() {
-        return keyStroke;
+        return accelerator;
     }
 
     public String description() {
         return description;
     }
 
-    ActionsShader(String name, String description, BiConsumer<RFF, String> generator, KeyStroke keyStroke) {
+    public Initializer initializer() {
+        return initializer;
+    }
+
+    ActionsShader(String name, String description, KeyStroke accelerator, Initializer initializer) {
         this.name = name;
         this.description = description;
-        this.action = generator;
-        this.keyStroke = keyStroke;
+        this.accelerator = accelerator;
+        this.initializer = initializer;
     }
 
     @Override
     public String toString() {
         return name;
-    }
-
-    @Override
-    public void accept(RFF master) {
-        action.accept(master, name);
     }
 
     private static ShaderSettings getShaderSettings(RFF master){

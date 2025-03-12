@@ -16,26 +16,16 @@ import kr.merutilm.rff.theme.BasicTheme;
 import kr.merutilm.rff.util.TextFormatter;
 
 enum ActionsExplore implements Actions {
-    RECOMPUTE("Recompute", "Recompute using current Location.", (master, _) ->
-        Actions.getRenderer(master).recompute(), 
-        KeyStroke.getKeyStroke(KeyEvent.VK_C, 0)),
-    REFRESH_COLOR("Refresh Color", "Refresh color using current Settings.", (master, _) -> {
-        RFFRenderPanel render = Actions.getRenderer(master);
-        try {
-            render.getState().createThread(id -> {
-                try {
-                    RFFStatusPanel panel = master.getWindow().getStatusPanel();
-                    render.reloadAndPaint(id, false);
-                    panel.setProcess("Done");
-                } catch (IllegalParallelRenderStateException | InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            });
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }, KeyStroke.getKeyStroke(KeyEvent.VK_R, 0)),
-    RESET("Reset", "Reset to Initial Location. It contains \"Recompute\" operation.", (master, _) -> {
+    RECOMPUTE("Recompute", "Recompute using current Location.", KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_DOWN_MASK), 
+    (master, name, description, accelerator) ->
+    Actions.createItem(name, description, accelerator, () -> Actions.getRenderer(master).recompute())
+    ),
+    REFRESH_COLOR("Refresh Color", "Refresh color using current Settings.", KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_DOWN_MASK), 
+    (master, name, description, accelerator) ->
+    Actions.createItem(name, description, accelerator, refreshColorRunnable(master))),
+    RESET("Reset", "Reset to Initial Location. It contains \"Recompute\" operation.", KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.ALT_DOWN_MASK), 
+    (master, name, description, accelerator) ->
+    Actions.createItem(name, description, accelerator, () -> {
         RFFRenderPanel render = Actions.getRenderer(master);
         try {
             render.getState().cancel();
@@ -47,15 +37,19 @@ enum ActionsExplore implements Actions {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-    }, KeyStroke.getKeyStroke(KeyEvent.VK_N, 0)),
-    CANCEL("Cancel Render", "Cancels the render. If you want to continue, Use \"Recompute\" operation.", (master, _) -> {
+    })),
+    CANCEL("Cancel Render", "Cancels the render. If you want to continue, Use \"Recompute\" operation.", KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), 
+    (master, name, description, accelerator) ->
+    Actions.createItem(name, description, accelerator, () -> {
                 try {
             Actions.getRenderer(master).getState().cancel();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-    }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0)),
-    FIND_CENTER("Find Center", "Find the Minibrot center using current period.", (master, name) -> {
+    })),
+    FIND_CENTER("Find Center", "Find the Minibrot center using current period.", KeyStroke.getKeyStroke(KeyEvent.VK_9, InputEvent.CTRL_DOWN_MASK), 
+    (master, name, description, accelerator) ->
+    Actions.createItem(name, description, accelerator, () -> {
         RFFRenderPanel render = Actions.getRenderer(master);
         if (render.getCurrentPerturbator() == null) {
             return;
@@ -85,8 +79,10 @@ enum ActionsExplore implements Actions {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-    }, KeyStroke.getKeyStroke(KeyEvent.VK_9, InputEvent.CTRL_DOWN_MASK)),
-    LOCATE_MINIBROT("Locate Minibrot", "Locate the Minibrot using current period.", (master, name) -> {
+    })),
+    LOCATE_MINIBROT("Locate Minibrot", "Locate the Minibrot using current period.", KeyStroke.getKeyStroke(KeyEvent.VK_0, InputEvent.CTRL_DOWN_MASK), 
+    (master, name, description, accelerator) ->
+    Actions.createItem(name, description, accelerator, () ->  {
         RFFRenderPanel render = Actions.getRenderer(master);
         if (render.getCurrentPerturbator() == null) {
             return;
@@ -118,38 +114,37 @@ enum ActionsExplore implements Actions {
         }
         
 
-    }, KeyStroke.getKeyStroke(KeyEvent.VK_0, InputEvent.CTRL_DOWN_MASK))
+    }))
     ;
 
     private final String name;
-    private final BiConsumer<RFF, String> action;
-    private final KeyStroke keyStroke;
     private final String description;
+    private final KeyStroke accelerator;
+    private final Initializer initializer;
 
     @Override
     public KeyStroke keyStroke() {
-        return keyStroke;
+        return accelerator;
     }
 
     public String description() {
         return description;
     }
 
-    ActionsExplore(String name, String description, BiConsumer<RFF, String> generator, KeyStroke keyStroke) {
+    public Initializer initializer() {
+        return initializer;
+    }
+
+    ActionsExplore(String name, String description, KeyStroke accelerator, Initializer initializer) {
         this.name = name;
         this.description = description;
-        this.action = generator;
-        this.keyStroke = keyStroke;
+        this.accelerator = accelerator;
+        this.initializer = initializer;
     }
 
     @Override
     public String toString() {
         return name;
-    }
-
-    @Override
-    public void accept(RFF master) {
-        action.accept(master, name);
     }
 
     private static void sendCenterNotFoundMessage() {
@@ -193,5 +188,23 @@ enum ActionsExplore implements Actions {
         return (int) (1000000 / master.getSettings().calculationSettings().logZoom());
     }
 
+    public static Runnable refreshColorRunnable(RFF master){
+        return () -> {
+            RFFRenderPanel render = Actions.getRenderer(master);
+            try {
+                render.getState().createThread(id -> {
+                    try {
+                        RFFStatusPanel panel = master.getWindow().getStatusPanel();
+                        render.reloadAndPaint(id, false);
+                        panel.setProcess("Done");
+                    } catch (IllegalParallelRenderStateException | InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                });
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        };
+    }
    
 }

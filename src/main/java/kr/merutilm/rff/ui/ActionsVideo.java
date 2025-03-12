@@ -1,15 +1,11 @@
 package kr.merutilm.rff.ui;
 
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Objects;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
-
 import javax.swing.KeyStroke;
 
 import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
@@ -23,7 +19,9 @@ import kr.merutilm.rff.settings.ExportSettings;
 import kr.merutilm.rff.settings.VideoSettings;
 
 enum ActionsVideo implements Actions {
-    DATA("Data", "Open the video data Settings. Used when generating video data files.", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+    DATA("Data", "Open the video data Settings. Used when generating video data files.", null, 
+    (master, name, description, accelerator) ->
+    Actions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         DataSettings data = getVideoSettings(master).dataSettings();
         
         Consumer<UnaryOperator<DataSettings.Builder>> applier = e -> 
@@ -32,9 +30,11 @@ enum ActionsVideo implements Actions {
         panel.createTextInput("Default Zoom Increment", "Set the log-Zoom interval between two adjacent video data.", data.defaultZoomIncrement(), Double::parseDouble, e ->
             applier.accept(f -> f.setDefaultZoomIncrement(e))
         );
-    }), null),
+    }))),
 
-    ANIMATION("Animation", "Open the video animation settings. Used when creating video.", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+    ANIMATION("Animation", "Open the video animation settings. Used when creating video.", null, 
+    (master, name, description, accelerator) -> 
+    Actions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         AnimationSettings animation = getVideoSettings(master).animationSettings();
         
         Consumer<UnaryOperator<AnimationSettings.Builder>> applier = e -> 
@@ -54,9 +54,11 @@ enum ActionsVideo implements Actions {
         panel.createTextInput("Animation Speed", "Stripe Animation Speed, The stripes' offset(iterations) per second.", animation.stripeAnimationSpeed(), Double::parseDouble, e ->
             applier.accept(f -> f.setStripeAnimationSpeed(e))
         );
-    }), null),
+    }))),
 
-    EXPORT_SETTINGS("Export Settings", "Open the video export settings. You can set the quality of the video to export.", (master, name) -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+    EXPORT_SETTINGS("Export Settings", "Open the video export settings. You can set the quality of the video to export.", null,
+    (master, name, description, accelerator) -> 
+    Actions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         ExportSettings export = getVideoSettings(master).exportSettings();
         
         Consumer<UnaryOperator<ExportSettings.Builder>> applier = e -> 
@@ -72,8 +74,10 @@ enum ActionsVideo implements Actions {
             applier.accept(f -> f.setBitrate(e))
         );
 
-    }), null),
-    GENERATE_VIDEO_DATA("Generate Video Data", "Generate the video data to directory.", (master, name) -> {
+    }))),
+    GENERATE_VIDEO_DATA("Generate Video Data", "Generate the video data to directory.", null, 
+    (master, name, description, accelerator) -> 
+    Actions.createItem(name, description, accelerator, () -> {
         File defOpen = new File(IOUtilities.getOriginalResource(), IOUtilities.DefaultDirectory.MAP_AS_VIDEO_DATA.toString());
         File dir = defOpen.isDirectory() ? defOpen : IOUtilities.selectFolder("Folder to Export Samples");
         DataSettings dataSettings = master.getSettings().videoSettings().dataSettings();
@@ -110,8 +114,10 @@ enum ActionsVideo implements Actions {
             Thread.currentThread().interrupt();
         }
 
-    }, KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK)),
-    EXPORT_ZOOMING_VIDEO("Export Zooming Video", "Export zooming video using generated video data files.", (master, name) -> {
+    })),
+    EXPORT_ZOOMING_VIDEO("Export Zooming Video", "Export zooming video using generated video data files.", null, 
+    (master, name, description, accelerator) -> 
+    Actions.createItem(name, description, accelerator, () -> {
         File defOpen = new File(IOUtilities.getOriginalResource(), IOUtilities.DefaultDirectory.MAP_AS_VIDEO_DATA.toString());
             File selected = defOpen.isDirectory() ? defOpen : IOUtilities.selectFolder("Select Sample Folder");
             if(selected == null){
@@ -122,40 +128,39 @@ enum ActionsVideo implements Actions {
                 return;
             }
             RFFVideoWindow.createVideo(master.getSettings(), selected, toSave);
-    }, KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK)),
+    })),
     ;
    
 
     private final String name;
-    private final BiConsumer<RFF, String> action;
-    private final KeyStroke keyStroke;
     private final String description;
+    private final KeyStroke accelerator;
+    private final Initializer initializer;
 
     @Override
     public KeyStroke keyStroke() {
-        return keyStroke;
+        return accelerator;
     }
 
     public String description() {
         return description;
     }
 
-    ActionsVideo(String name, String description, BiConsumer<RFF, String> generator, KeyStroke keyStroke) {
+    public Initializer initializer() {
+        return initializer;
+    }
+
+    ActionsVideo(String name, String description, KeyStroke accelerator, Initializer initializer) {
         this.name = name;
         this.description = description;
-        this.action = generator;
-        this.keyStroke = keyStroke;
+        this.accelerator = accelerator;
+        this.initializer = initializer;
     }
 
 
     @Override
     public String toString() {
         return name;
-    }
-
-    @Override
-    public void accept(RFF master) {
-        action.accept(master, name);
     }
 
     private static VideoSettings getVideoSettings(RFF master){
