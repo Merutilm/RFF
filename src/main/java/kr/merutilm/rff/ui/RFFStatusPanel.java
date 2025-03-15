@@ -22,7 +22,7 @@ final class RFFStatusPanel extends JPanel {
     private long t = 0;
 
     public RFFStatusPanel() {
-
+        
         setLayout(new GridLayout(1, 5));
         iteration = new MUILabelPanel();
         zoom = new MUILabelPanel();

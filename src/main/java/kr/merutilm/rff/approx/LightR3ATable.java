@@ -1,78 +1,84 @@
 package kr.merutilm.rff.approx;
 
-import java.util.*;
-import java.util.function.BiConsumer;
-
 import kr.merutilm.rff.formula.LightMandelbrotReference;
-import kr.merutilm.rff.formula.ArrayCompressor;
 import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.parallel.ParallelRenderState;
-import kr.merutilm.rff.settings.R3ACompressionMethod;
 import kr.merutilm.rff.settings.R3ASettings;
+
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.BiConsumer;
+
 public class LightR3ATable extends R3ATable{
 
-
     private final List<List<LightR3A>> table;
-    private final List<ArrayCompressor> r3aCompressors;
-    private final R3ASettings settings;
-    private final int[] tablePeriod;
-    private final int[] tablePeriodElements;
 
     public LightR3ATable(ParallelRenderState state, int currentID, LightMandelbrotReference reference, R3ASettings r3aSettings, double dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
-        
-        int[] referencePeriod = reference.period();
-        int longestPeriod = reference.longestPeriod();
-        int minSkip = r3aSettings.minSkipReference();
-        
-        if(longestPeriod < minSkip){
-            this.settings = r3aSettings;
-            this.tablePeriod = new int[0];
-            this.tablePeriodElements = new int[0];
-            this.table = Collections.emptyList();
-            this.r3aCompressors = Collections.emptyList();
-            return;
-        }
-
-        R3ACompressionMethod compressionMethod = r3aSettings.r3aCompressionMethod();
-        PeriodTemp r3aPeriod = R3ATable.PeriodTemp.generateR3APeriod(referencePeriod, r3aSettings);
-        int[] tablePeriodElements = generatePeriodElements(r3aPeriod.tablePeriod());
-        List<ArrayCompressor> r3aCompressors = compressionMethod == R3ACompressionMethod.STRONGEST ? generateR3ACompressors(r3aPeriod.tablePeriod(), tablePeriodElements, reference.refCompressors()) : Collections.emptyList();        
-        List<List<LightR3A>> table = generateTable(state, currentID, reference, r3aSettings, r3aPeriod, r3aCompressors, tablePeriodElements, dcMax, compressionMethod, actionPerCreatingTableIteration);
-        
-        this.settings = r3aSettings;
-        this.tablePeriod = r3aPeriod.tablePeriod();
-        this.tablePeriodElements = tablePeriodElements;
-        this.table = table;
-        this.r3aCompressors = r3aCompressors;
-        
+        super(reference, r3aSettings);
+        this.table = createTable(state, currentID, reference, dcMax, actionPerCreatingTableIteration);
     }
 
-
-
-    private static List<List<LightR3A>> generateTable(ParallelRenderState state, int currentID, LightMandelbrotReference reference, R3ASettings r3aSettings, PeriodTemp periodTemp, List<ArrayCompressor> r3aCompressors, int[] tablePeriodElements, double dcMax, R3ACompressionMethod compressionMethod, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException{
-        List<List<LightR3A>> table = new ArrayList<>();
-        int[] tablePeriod = periodTemp.tablePeriod();
+    private List<List<LightR3A>> createTable(ParallelRenderState state, int currentID, LightMandelbrotReference reference, double dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException{
+ 
+        int[] tablePeriod = r3aPeriod.tablePeriod();
+        
         int longestPeriod = tablePeriod[tablePeriod.length - 1];
         int[] periodCount = new int[tablePeriod.length];
+        
+        if(longestPeriod < settings.minSkipReference()){
+            return Collections.emptyList();
+        }
+        
+        List<List<LightR3A>> table = new ArrayList<>();
         LightR3A.Builder[] currentStep = new LightR3A.Builder[tablePeriod.length];
-        double epsilon = Math.pow(10, r3aSettings.epsilonPower());
+        double epsilon = Math.pow(10, settings.epsilonPower());
+   
 
-        for (int i = 1; i <= longestPeriod; i++) {
+        int iteration = 1;
+        
+        while (iteration <= longestPeriod) {
 
             state.tryBreak(currentID);
-            actionPerCreatingTableIteration.accept(i, (double) i / longestPeriod);
-            
+            actionPerCreatingTableIteration.accept(iteration, (double) iteration / longestPeriod);
 
+            int unCompressedTableIndex = iterationToOriginalTableIndex(r3aPeriod, iteration);
+            boolean independant = r3aCompressor == null || r3aCompressor.isIndependant(unCompressedTableIndex);
+            
+            // if(compressedTableIndex == 1 && unCompressedTableIndex != compressedTableIndex){
+            //     //If "uncompressed index" is not equal to "compressed index",
+            //     //It can be replaced the lighter R3A.
+            //     //In the other words, by merging current R3A and exising r3a, the table creating speed will be significantly faster.
+                
+            //     List<LightR3A> toMerge = table.get(0);
+                
+            //     for (int j = tablePeriod.length - 1; j >= 0; j--) {
+            //         if(periodCount[j] == 0){
+            //             //reuse existing r3a
+                        
+            //         }else{
+            //             //merge existing r3a
+
+            //         }
+            //     }
+
+                
+
+            //     System.out.println(iteration + " | " + Arrays.toString(periodCount));
+            // }
+            
             for (int j = tablePeriod.length - 1; j >= 0; j--) {
 
-                int requiredPerturbationCount = R3ATable.getRequiredPerturbationCount(periodTemp.isArtificial(), j);
+                int requiredPerturbationCount = r3aPeriod.requiredPerturbation()[j];
                 
-                if(periodCount[j] == 0){
-                    currentStep[j] = LightR3A.Builder.create(i);
+                
+                if(periodCount[j] == 0 && independant){
+                    currentStep[j] = LightR3A.Builder.create(reference, epsilon, dcMax, iteration);
                 }
 
-                if(periodCount[j] + requiredPerturbationCount < tablePeriod[j]){
-                    currentStep[j] = currentStep[j].step(reference, epsilon, dcMax);
+                if(currentStep[j] != null && periodCount[j] + requiredPerturbationCount < tablePeriod[j]){
+                    currentStep[j] = currentStep[j].step();
                 }
                 
                 
@@ -85,34 +91,15 @@ public class LightR3ATable extends R3ATable{
                         //because it is too hard to skipping to next part of the periodic point
                         LightR3A.Builder currentLevel = currentStep[k];
                         
-                        if(currentLevel == null){
-                            continue;
-                        }
-                       
-                        
-                        if(periodCount[k] == tablePeriod[k]){
+                        if(currentLevel != null && periodCount[k] == tablePeriod[k]){
                             //If the skip count is lower than its current period,
                             //it can be replaced to several lower-period RRA.
                             
-                            int index = switch(compressionMethod){
-                                case NO_COMPRESSION -> currentLevel.start();
-                                case LITTLE_COMPRESSION -> iterationToTableIndex(tablePeriod, tablePeriodElements, Collections.emptyList(), currentLevel.start());
-                                case STRONGEST -> iterationToTableIndex(tablePeriod, tablePeriodElements, r3aCompressors, currentLevel.start());
-                                default -> -1;
-                            };
-                            
-                            while(table.size() < index){
-                                table.add(null);
-                            }
-                            if(table.size() == index){
-                                table.add(new ArrayList<>());
-                            }
-
+                            int index = iterationToTableIndex(currentLevel.start());
+                            safetyMatchTable(table, index);
+           
                             List<LightR3A> r3a = table.get(index);
-                            if(k == r3a.size()){ //prevent to add duplicate elements
-                                r3a.add(currentLevel.build());
-                            }
-                            
+                            r3a.add(currentLevel.build());
                         }
 
                         currentStep[k] = null;
@@ -120,7 +107,12 @@ public class LightR3ATable extends R3ATable{
                     }
                     break;
                 }
-            }    
+            }
+
+            
+           
+
+            iteration++;
         }
         return Collections.unmodifiableList(table);
     }
@@ -131,28 +123,14 @@ public class LightR3ATable extends R3ATable{
             return null;
         }
         
-        int index = switch(settings.r3aCompressionMethod()){
-            case NO_COMPRESSION -> iteration;
-            case LITTLE_COMPRESSION -> iterationToTableIndex(tablePeriod, tablePeriodElements, Collections.emptyList(), iteration);
-            case STRONGEST -> iterationToTableIndex(tablePeriod, tablePeriodElements, r3aCompressors, iteration);
-            default -> -1;
-        };
+        int index = iterationToTableIndex(iteration);
+
         if(index == -1 || index >= table.size()){
             return null;
         }
-
+        int[] tablePeriod = r3aPeriod.tablePeriod();
         int longestPeriod = tablePeriod[tablePeriod.length - 1];
         int maxSkip = longestPeriod - iteration;
-        // int remainder = iteration;
-
-        // for(int i = tablePeriod.length - 1; i >= 0; i--){
-        //     int p = tablePeriod[i];
-        //     remainder %= p;
-        //     if(remainder == 1){
-        //         maxSkip = tablePeriod[i];
-        //         break;
-        //     }
-        // } 
         
 
         

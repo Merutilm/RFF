@@ -63,7 +63,7 @@ public abstract class Perturbator {
         }
         double ratio = (bailout - prevIterDistance) / (currIterDistance - prevIterDistance);
         
-        switch (calc.decimalIterationSettings()) {
+        switch (calc.decimalizeIterationMethod()) {
             case NONE -> {
                 ratio = 0;
             }

@@ -1,4 +1,4 @@
-package kr.merutilm.rff.theme;
+package kr.merutilm.rff.preset.shader;
 
 import kr.merutilm.rff.settings.BloomSettings;
 import kr.merutilm.rff.settings.ColorFilterSettings;
@@ -6,7 +6,7 @@ import kr.merutilm.rff.settings.FogSettings;
 import kr.merutilm.rff.settings.SlopeSettings;
 import kr.merutilm.rff.settings.StripeSettings;
 
-public class ThemeLongRainbowShaded implements LongRainbowTheme {
+public class ShaderLongRainbow implements LongRainbowTheme {
 
     @Override
     public String getName(){

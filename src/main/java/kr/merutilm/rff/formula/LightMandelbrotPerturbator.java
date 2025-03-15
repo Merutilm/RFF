@@ -47,6 +47,7 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
 
         long iteration = 0;
         int refIteration = 0;
+        int absIteration = 0;
         int maxRefIteration = reference.longestPeriod();
 
         double dzr = 0; // delta z
@@ -69,6 +70,7 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
         // if (dcr1 * dcr1 + dci1 * dci1 < 4e-181) {
         //     System.out.println(1);
         // }
+
         while (iteration < maxIteration) {
             
             if(table != null){
@@ -120,7 +122,7 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
 
                 refIteration++;
                 iteration++;
-
+                absIteration++;
             }
 
             zr = reference.real(refIteration) + dzr;
@@ -143,15 +145,17 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
             state.tryBreak(currentID);
 
         }
+        
+        if(calc.absoluteIterationMode()){
+            return absIteration;
+        }
 
         if (iteration >= maxIteration) {
             return maxIteration;
         }
 
-
         pd = Math.sqrt(pd);
         cd = Math.sqrt(cd);
-    
 
         return getDoubleValueIteration(iteration, pd, cd);
 

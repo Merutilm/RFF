@@ -48,6 +48,7 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
         
         long iteration = 0;
         int refIteration = 0;
+        int absIteration = 0;
         int maxRefIteration = reference.longestPeriod();
 
         DoubleExponent dzr = DoubleExponent.ZERO; // delta z
@@ -90,6 +91,7 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
 
                 refIteration++;
                 iteration++;
+                absIteration++;
             }
 
             zr = reference.real(refIteration).add(dzr);
@@ -111,6 +113,10 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
 
             state.tryBreak(currentID);
 
+        }
+        
+        if(calc.absoluteIterationMode()){
+            return absIteration;
         }
 
         if (iteration >= maxIteration) {

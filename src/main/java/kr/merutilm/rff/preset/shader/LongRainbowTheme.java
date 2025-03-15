@@ -1,4 +1,4 @@
-package kr.merutilm.rff.theme;
+package kr.merutilm.rff.preset.shader;
 
 import kr.merutilm.rff.settings.ColorSettings;
 import kr.merutilm.rff.struct.HexColor;

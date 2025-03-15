@@ -26,7 +26,7 @@ enum ActionsFractal implements Actions {
         R3ASettings r3a = getCalculationSettings(master).r3aSettings();
 
         Consumer<UnaryOperator<R3ASettings.Builder>> applier = e ->
-                master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 -> e2.edit().setR3ASettings(e3 -> e.apply(e3.edit()).build()).build()).build());
+                master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 -> e2.setR3ASettings(e::apply)).build());
 
         panel.createTextInput("Min Skip Reference", "Set minimum skipping reference iteration when creating a table.", r3a.minSkipReference(), Integer::parseInt, e ->
                 applier.accept(f -> f.setMinSkipReference(e))
@@ -51,7 +51,7 @@ enum ActionsFractal implements Actions {
         CalculationSettings calc = getCalculationSettings(master);
 
         Consumer<UnaryOperator<CalculationSettings.Builder>> applier = e ->
-                master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 -> e.apply(e2.edit()).build()).build());
+                master.setSettings(e1 -> e1.edit().setCalculationSettings(e::apply).build());
 
         panel.createTextInput("Max Iteration", "Set maximum iteration. It is disabled when Auto iteration is enabled.", calc.maxIteration(), Long::parseLong, e ->
                 applier.accept(f -> f.setMaxIteration(e)));
@@ -59,23 +59,27 @@ enum ActionsFractal implements Actions {
         panel.createTextInput("Bailout", "Set the bailout radius.", calc.bailout(), Double::parseDouble, e ->
                 applier.accept(f -> f.setBailout(e))
         );
-        panel.createSelectInput("Decimal Iteration", "Iteration decimalization method", calc.decimalIterationSettings(), DecimalizeIterationMethod.values(), e ->
-                applier.accept(f -> f.setDecimalIterationSettings(e)), true
+        panel.createSelectInput("Decimalize Iteration Method", "Iteration decimalization method", calc.decimalizeIterationMethod(), DecimalizeIterationMethod.values(), e ->
+                applier.accept(f -> f.setDecimalizeIterationMethod(e)), true
         );
     }))),
     AUTOMATIC_ITERATIONS("Automatic Iterations", "Set max iteration automatic.", null, 
     (master, name, description, accelerator) -> 
     Actions.createCheckBoxItem(name, description, accelerator, getCalculationSettings(master).autoIteration(), b -> 
-        master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 -> e2.edit().setAutoIteration(b).build()).build())
+        master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 -> e2.setAutoIteration(b)).build())
     )),
-
+    ABSOLUTE_ITERATION_MODE("Absolute Iteration Mode", new HTMLStringBuilder().wrapln(Tag.BOLD, "Absolute Iteration Mode").appendln("Define the iteration as while-loop count instead of the perturbation.").toString(), null, 
+    (master, name, description, accelerator) -> 
+    Actions.createCheckBoxItem(name, description, accelerator, getCalculationSettings(master).absoluteIterationMode(), b -> 
+        master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 -> e2.setAbsoluteIterationMode(b)).build())
+    )),
     REFERENCE("Reference", "Open the reference settings. You can set the Location, Zoom, and etc. here.", null, 
     (master, name, description, accelerator) ->
     Actions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (window, panel) -> {
         CalculationSettings calc = getCalculationSettings(master);
 
         Consumer<UnaryOperator<CalculationSettings.Builder>> applier = e ->
-                master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 -> e.apply(e2.edit()).build()).build());
+                master.setSettings(e1 -> e1.edit().setCalculationSettings(e::apply).build());
         AtomicReference<String> realStr = new AtomicReference<>(calc.center().re().toString());
         AtomicReference<String> imagStr = new AtomicReference<>(calc.center().im().toString());
         AtomicReference<Double> zoomStr = new AtomicReference<>(calc.logZoom());
@@ -87,11 +91,11 @@ enum ActionsFractal implements Actions {
         panel.createSelectInput("Reuse Reference", "Set the method of reference reusing.", calc.reuseReference(), ReuseReferenceMethod.values(), e ->
                 applier.accept(f -> f.setReuseReference(e)), false
         );
-        panel.createTextInput("Reference Compress Criteria", new HTMLStringBuilder().wrapln(Tag.BOLD, "Reference Compress Criteria").appendln("When compressing references, sets the minimum amount of references to compress at one time.").appendln("Reference compression slows down the calculation but frees up memory space.").append("To disable, write -1.").toString(), calc.compressCriteria(), Integer::parseInt, e ->
-                applier.accept(f -> f.setCompressCriteria(e))
+        panel.createTextInput("Reference Compress Criteria", new HTMLStringBuilder().wrapln(Tag.BOLD, "Reference Compress Criteria").appendln("When compressing references, sets the minimum amount of references to compress at one time.").appendln("Reference compression slows down the calculation but frees up memory space.").append("To disable, write -1.").toString(), calc.referenceCompressionSettings().compressCriteria(), Integer::parseInt, e ->
+                applier.accept(f -> f.setReferenceCompressionSettings(g -> g.setCompressCriteria(e)))
         );
-        panel.createTextInput("Reference Compress Threshold", new HTMLStringBuilder().wrapln(Tag.BOLD, "Reference Compress Threshold").appendln("When compressing references, sets the negative exponents of ten of minimum error to be considered equal.").appendln("Reference compression slows down the calculation but frees up memory space.").append("To disable, write -1.").toString(), calc.compressionThresholdPower(), Integer::parseInt, e ->
-        applier.accept(f -> f.setCompressionThresholdPower(e))
+        panel.createTextInput("Reference Compress Threshold", new HTMLStringBuilder().wrapln(Tag.BOLD, "Reference Compress Threshold").appendln("When compressing references, sets the negative exponents of ten of minimum error to be considered equal.").appendln("Reference compression slows down the calculation but frees up memory space.").append("To disable, write -1.").toString(), calc.referenceCompressionSettings().compressionThresholdPower(), Integer::parseInt, e ->
+        applier.accept(f -> f.setReferenceCompressionSettings(g -> g.setCompressionThresholdPower(e)))
 );
         window.addWindowListener(new WindowAdapter() {
             @Override

@@ -21,7 +21,7 @@ import kr.merutilm.rff.struct.DoubleExponent;
 import kr.merutilm.rff.util.DoubleExponentMath;
 import kr.merutilm.rff.util.TextFormatter;
 
-import static kr.merutilm.rff.theme.BasicTheme.INIT_ITERATION;
+import static kr.merutilm.rff.preset.shader.BasicTheme.INIT_ITERATION;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -64,10 +64,11 @@ final class RFFRenderPanel extends JPanel {
                             getMouseY(e)
                     );
                     double mzo = 1.0 / Math.pow(10, -CalculationSettings.ZOOM_VALUE);
+                    double logZoom = master.getSettings().calculationSettings().logZoom();
                     master.setSettings(e1 -> e1.edit().setCalculationSettings(
-                                    e2 -> e2.edit().addCenter(
-                                            offset[0].multiply(1 - mzo), offset[1].multiply(1 - mzo), Perturbator.precision(e2.logZoom())
-                                    ).zoomOut().build()
+                                    e2 -> e2.addCenter(
+                                            offset[0].multiply(1 - mzo), offset[1].multiply(1 - mzo), Perturbator.precision(logZoom)
+                                    ).zoomOut()
                             ).build()
                     );
                 }
@@ -77,10 +78,11 @@ final class RFFRenderPanel extends JPanel {
                             getMouseY(e)
                     );
                     double mzi = 1.0 / Math.pow(10, CalculationSettings.ZOOM_VALUE);
+                    double logZoom = master.getSettings().calculationSettings().logZoom();
                     master.setSettings(e1 -> e1.edit().setCalculationSettings(
-                                    e2 -> e2.edit().addCenter(
-                                            offset[0].multiply(1 - mzi), offset[1].multiply(1 - mzi), Perturbator.precision(e2.logZoom())
-                                    ).zoomIn().build()
+                                    e2 -> e2.addCenter(
+                                            offset[0].multiply(1 - mzi), offset[1].multiply(1 - mzi), Perturbator.precision(logZoom)
+                                    ).zoomIn()
                             ).build()
                     );
 
@@ -123,11 +125,12 @@ final class RFFRenderPanel extends JPanel {
                     int dx = pmx.get() - getMouseX(e);
                     int dy = pmy.get() - getMouseY(e);
                     double m = master.getSettings().imageSettings().resolutionMultiplier();
+                    double logZoom = master.getSettings().calculationSettings().logZoom();
                     master.setSettings(e1 -> e1.edit().setCalculationSettings(
-                                    e2 -> e2.edit().addCenter(
+                                    e2 -> e2.addCenter(
                                                     DoubleExponent.valueOf(dx / m).divide(getDivisor()),
-                                                    DoubleExponent.valueOf(-dy / m).divide(getDivisor()), Perturbator.precision(e2.logZoom()))
-                                            .build()
+                                                    DoubleExponent.valueOf(-dy / m).divide(getDivisor()), Perturbator.precision(logZoom))
+                                            
                             ).build()
                     );
 
@@ -202,7 +205,7 @@ final class RFFRenderPanel extends JPanel {
         int h = getImgHeight();
 
         if (master.getSettings().calculationSettings().autoIteration()) {
-            master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit().setMaxIteration(Math.max(INIT_ITERATION, period * 50L)).build()).build());
+            master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.setMaxIteration(Math.max(INIT_ITERATION, period * 50L))).build());
         }
 
         Settings settings = master.getSettings();

@@ -1,7 +1,5 @@
 package kr.merutilm.rff.settings;
 
-import java.util.function.DoubleUnaryOperator;
-
 import kr.merutilm.rff.struct.Struct;
 import kr.merutilm.rff.struct.StructBuilder;
 
@@ -26,12 +24,6 @@ public record ImageSettings(
     
         public Builder setResolutionMultiplier(double resolutionMultiplier) {
             this.resolutionMultiplier = resolutionMultiplier;
-            return this;
-        }
-
-      
-        public Builder setResolutionMultiplier(DoubleUnaryOperator changes) {
-            this.resolutionMultiplier = changes.applyAsDouble(resolutionMultiplier);
             return this;
         }
         

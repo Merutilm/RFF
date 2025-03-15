@@ -25,7 +25,7 @@ enum ActionsVideo implements Actions {
         DataSettings data = getVideoSettings(master).dataSettings();
         
         Consumer<UnaryOperator<DataSettings.Builder>> applier = e -> 
-            master.setSettings(e1 -> e1.edit().setVideoSettings(e2 -> e2.edit().setDataSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
+            master.setSettings(e1 -> e1.edit().setVideoSettings(e2 -> e2.setDataSettings(e::apply)).build());
 
         panel.createTextInput("Default Zoom Increment", "Set the log-Zoom interval between two adjacent video data.", data.defaultZoomIncrement(), Double::parseDouble, e ->
             applier.accept(f -> f.setDefaultZoomIncrement(e))
@@ -38,7 +38,7 @@ enum ActionsVideo implements Actions {
         AnimationSettings animation = getVideoSettings(master).animationSettings();
         
         Consumer<UnaryOperator<AnimationSettings.Builder>> applier = e -> 
-            master.setSettings(e1 -> e1.edit().setVideoSettings(e2 -> e2.edit().setAnimationSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
+            master.setSettings(e1 -> e1.edit().setVideoSettings(e2 -> e2.setAnimationSettings(e::apply)).build());
 
         panel.createTextInput("Over Zoom", "Zoom the final video data.", animation.overZoom(), Double::parseDouble, e ->
         	applier.accept(f -> f.setOverZoom(e))
@@ -62,7 +62,7 @@ enum ActionsVideo implements Actions {
         ExportSettings export = getVideoSettings(master).exportSettings();
         
         Consumer<UnaryOperator<ExportSettings.Builder>> applier = e -> 
-            master.setSettings(e1 -> e1.edit().setVideoSettings(e2 -> e2.edit().setExportSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
+            master.setSettings(e1 -> e1.edit().setVideoSettings(e2 -> e2.setExportSettings(e::apply)).build());
 
         panel.createTextInput("FPS", "Frame per second of the video to export", export.fps(), Double::parseDouble, e ->
             applier.accept(f -> f.setFps(e))
@@ -100,7 +100,7 @@ enum ActionsVideo implements Actions {
                         render.compute(id);
                         render.getCurrentMap().exportAsVideoData(dir);
                         master.setSettings(e -> e.edit().setCalculationSettings(
-                                e1 -> e1.edit().zoomOut(Math.log10(dataSettings.defaultZoomIncrement())).build())
+                                e1 -> e1.zoomOut(Math.log10(dataSettings.defaultZoomIncrement())))
                                 .build());
                     }
 

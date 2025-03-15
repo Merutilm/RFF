@@ -1,8 +1,8 @@
-package kr.merutilm.rff.theme;
+package kr.merutilm.rff.preset.shader;
 
 import kr.merutilm.rff.settings.*;
 
-public class ThemeLongRainbow implements LongRainbowTheme {
+public class ShaderLongRainbowClassic implements LongRainbowTheme {
 
     @Override
     public String getName(){

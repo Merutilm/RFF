@@ -17,12 +17,12 @@ public record ShaderSettings(
     @Override
     public Builder edit() {
         return new Builder()
-        .setColorSettings(colorSettings)
-        .setStripeSettings(stripeSettings)
-        .setSlopeSettings(slopeSettings)
-        .setColorFilterSettings(colorFilterSettings)
-        .setFogSettings(fogSettings)
-        .setBloomSettings(bloomSettings);
+        .setColorSettings(_ -> colorSettings.edit())
+        .setStripeSettings(_ -> stripeSettings.edit())
+        .setSlopeSettings(_ -> slopeSettings.edit())
+        .setColorFilterSettings(_ -> colorFilterSettings.edit())
+        .setFogSettings(_ -> fogSettings.edit())
+        .setBloomSettings(_ -> bloomSettings.edit());
     }
 
     public static final class Builder implements StructBuilder<ShaderSettings>{
@@ -33,65 +33,34 @@ public record ShaderSettings(
         private ColorFilterSettings colorFilterSettings;
         private BloomSettings bloomSettings;
         private FogSettings fogSettings;
-        
 
-        public Builder setColorSettings(ColorSettings colorSettings) {
-            this.colorSettings = colorSettings;
+        public Builder setColorSettings(UnaryOperator<ColorSettings.Builder> changes) {
+            this.colorSettings = changes.apply(colorSettings == null ? null : colorSettings.edit()).build();
             return this;
         }
 
-        public Builder setStripeSettings(StripeSettings stripeSettings) {
-            this.stripeSettings = stripeSettings;
+        public Builder setStripeSettings(UnaryOperator<StripeSettings.Builder> changes) {
+            this.stripeSettings = changes.apply(stripeSettings == null ? null : stripeSettings.edit()).build();
             return this;
         }
 
-        public Builder setSlopeSettings(SlopeSettings slopeSettings) {
-            this.slopeSettings = slopeSettings;
+        public Builder setSlopeSettings(UnaryOperator<SlopeSettings.Builder> changes) {
+            this.slopeSettings = changes.apply(slopeSettings == null ? null : slopeSettings.edit()).build();
             return this;
         }
     
-        public Builder setColorFilterSettings(ColorFilterSettings colorFilterSettings) {
-            this.colorFilterSettings = colorFilterSettings;
+        public Builder setColorFilterSettings(UnaryOperator<ColorFilterSettings.Builder> changes) {
+            this.colorFilterSettings = changes.apply(colorFilterSettings == null ? null : colorFilterSettings.edit()).build();
             return this;
         }
 
-        public Builder setFogSettings(FogSettings fogSettings) {
-            this.fogSettings = fogSettings;
+        public Builder setFogSettings(UnaryOperator<FogSettings.Builder> changes) {
+            this.fogSettings = changes.apply(fogSettings == null ? null : fogSettings.edit()).build();
             return this;
         }
         
-        public Builder setBloomSettings(BloomSettings bloomSettings) {
-            this.bloomSettings = bloomSettings;
-            return this;
-        }
-
-        public Builder setColorSettings(UnaryOperator<ColorSettings> changes) {
-            this.colorSettings = changes.apply(colorSettings);
-            return this;
-        }
-
-        public Builder setStripeSettings(UnaryOperator<StripeSettings> changes) {
-            this.stripeSettings = changes.apply(stripeSettings);
-            return this;
-        }
-
-        public Builder setSlopeSettings(UnaryOperator<SlopeSettings> changes) {
-            this.slopeSettings = changes.apply(slopeSettings);
-            return this;
-        }
-    
-        public Builder setColorFilterSettings(UnaryOperator<ColorFilterSettings> changes) {
-            this.colorFilterSettings = changes.apply(colorFilterSettings);
-            return this;
-        }
-
-        public Builder setFogSettings(UnaryOperator<FogSettings> changes) {
-            this.fogSettings = changes.apply(fogSettings);
-            return this;
-        }
-        
-        public Builder setBloomSettings(UnaryOperator<BloomSettings> changes) {
-            this.bloomSettings = changes.apply(bloomSettings);
+        public Builder setBloomSettings(UnaryOperator<BloomSettings.Builder> changes) {
+            this.bloomSettings = changes.apply(bloomSettings == null ? null : bloomSettings.edit()).build();
             return this;
         }
         

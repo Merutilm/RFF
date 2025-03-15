@@ -10,12 +10,12 @@ import java.util.function.UnaryOperator;
 import javax.swing.KeyStroke;
 
 import kr.merutilm.rff.io.BitMapImage;
+import kr.merutilm.rff.preset.shader.BasicThemes;
 import kr.merutilm.rff.settings.ImageSettings;
-import kr.merutilm.rff.theme.BasicThemes;
 import kr.merutilm.rff.util.IOUtilities;
 
 enum ActionsImage implements Actions {
-    THEME("Set Theme", "Set theme.",  KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), 
+    THEME("Set Theme", "Set theme.", KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_DOWN_MASK), 
     (master, name, description, accelerator) ->
     Actions.createItem(name, description, accelerator, () ->  new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         panel.createSelectInput(name, "Select the theme type",
@@ -32,7 +32,7 @@ enum ActionsImage implements Actions {
         ImageSettings image = getImageSettings(master);
 
         Consumer<UnaryOperator<ImageSettings.Builder>> applier = e -> master
-                .setSettings(e1 -> e1.edit().setImageSettings(e2 -> e.apply(e2.edit()).build()).build());
+                .setSettings(e1 -> e1.edit().setImageSettings(e::apply).build());
 
         panel.createTextInput(name, "The resolution multiplier of current window.", image.resolutionMultiplier(), Double::parseDouble, e -> {
             applier.accept(t -> t.setResolutionMultiplier(e));
@@ -40,7 +40,7 @@ enum ActionsImage implements Actions {
         });
 
     }))),
-    SAVE_IMAGE("Save Image", "Export current rendered image to file",  null, 
+    SAVE_IMAGE("Save Image", "Export current rendered image to file", KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), 
     (master, name, description, accelerator) ->
     Actions.createItem(name, description, accelerator, () -> {
         File file = IOUtilities.saveFile(name, "png", "Image");

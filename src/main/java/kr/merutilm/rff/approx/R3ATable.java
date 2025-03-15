@@ -2,90 +2,68 @@ package kr.merutilm.rff.approx;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import kr.merutilm.rff.formula.ArrayCompressor;
+import kr.merutilm.rff.formula.MandelbrotReference;
+import kr.merutilm.rff.functions.ArrayCompressor;
+import kr.merutilm.rff.functions.ArrayCompressionTool;
+import kr.merutilm.rff.settings.R3ACompressionMethod;
 import kr.merutilm.rff.settings.R3ASettings;
 import kr.merutilm.rff.util.ArrayFunction;
 
 public class R3ATable {
 
-
-    static int getRequiredPerturbationCount(boolean[] isArtificial, int index) {
-        int required;
-        if(isArtificial[index]){
-            required = 0;
-            //artificially-created period's result iteration usually not a periodic point.
-        }else{
-            required = 2;
-            //If the "period - 1" iterations are skipped, the resulting iteration is a periodic point.
-            //That is, it is very small, which can cause floating-point errors, such as z + dz = 0 (e.g. big - big = small).
-            //Therefore, Skip until a previous point of periodic point, In other words, skip "period - 2" iterations.
-        }
-        return required;
-    }
+    protected final R3ASettings settings;
+    protected final ArrayCompressor r3aCompressor;
+    protected final Period r3aPeriod;
     
-    protected static int[] generatePeriodElements(int[] tablePeriod){
+    public R3ATable(MandelbrotReference reference, R3ASettings r3aSettings){
+        int[] referencePeriod = reference.period();
+        int longestPeriod = reference.longestPeriod();
+        int minSkip = r3aSettings.minSkipReference();
         
-        
-        // index compression : [3, 11, 26, 77] // index compression : [3, 11, 26, 77]
-        // startIteration : 1  4  7 12 15 18 23 27
-        // index :          0  1  2  3  4  5  6  7
-        
-        // 3 6 9 12 15 18 21 24 -> 3 6 9 -> 1 4 7 (11/3 = 3.xxx)
-        // 11 22 33 44 55 66 -> 11, 22 -> 1 12 (26/11 = 2.xxx)
-        // 26 52 78 104 130 -> 26, 52 -> 1 27 (77/26 = 2.xxx)
-        // 
-        // the remainder of [2]/[1] can also be divided by smaller period.
-        // it can be recurive.
-        //
-        // period 11 : 11/3 =3.xxx (3 elements)                                                                              elements = 3 
-        // period 26 : 26/11=2.xxx (3*2 elements), 26%11 = 4, 4/3 = 1.xxx (1 element)                                        elements = 3*2+1=7
-        // period 77 : 77/26=2.xxx (7*2 elements), 77%26 = 25,25/11= 2.xxx (3*2 elements), 25%11=4, 4/3 = 1.xxx (1 element), elements = 7*2+3*2+1=21
-        // Stored elements to memory
-
-        int[] tablePeriodElements = new int[tablePeriod.length];
-        for (int i = 0; i < tablePeriodElements.length; i++) {
-            if(i == 0){
-                tablePeriodElements[i] = 1;
-                continue;
-            }
-            int elements = 0;
-            int remainder = tablePeriod[i];
-            for (int j = i - 1; j >= 0; j--) {
-                int groupAmount = remainder / tablePeriod[j];
-                remainder %= tablePeriod[j];
-                elements += groupAmount * tablePeriodElements[j];
-            }
-            tablePeriodElements[i] = elements;
+        if(longestPeriod < minSkip){
+            this.settings = r3aSettings;
+            this.r3aPeriod = null;
+            this.r3aCompressor = null;
+            return;
         }
-        return tablePeriodElements;
+
+        R3ACompressionMethod compressionMethod = r3aSettings.r3aCompressionMethod();
+        Period r3aPeriod = R3ATable.Period.create(referencePeriod, r3aSettings);
+        ArrayCompressor r3aCompressor = compressionMethod == R3ACompressionMethod.STRONGEST ? generateR3ACompressor(r3aPeriod, reference.refReal()) : null;        
+        
+        this.settings = r3aSettings;
+        this.r3aPeriod = r3aPeriod;
+        this.r3aCompressor = r3aCompressor;
+        
     }
 
 
-    protected static List<ArrayCompressor> generateR3ACompressors(int[] tablePeriod, int[] tablePeriodElements, List<ArrayCompressor> refCompressors){
+    private static ArrayCompressor generateR3ACompressor(Period r3aPeriod, ArrayCompressor refCompressor){
         
 
-        List<ArrayCompressor> r3aCompressors = new ArrayList<>();
+        List<ArrayCompressionTool> r3aTools = new ArrayList<>();
+        int[] tablePeriod = r3aPeriod.tablePeriod;
+        int[] tablePeriodElements = r3aPeriod.tableElements;
 
-        for (ArrayCompressor refCompressor : refCompressors) {
+        for (ArrayCompressionTool tool : refCompressor.rebasingTools()) {
             
-            int start = refCompressor.start();
-            int length = refCompressor.length();
+            int start = tool.start();
+            int length = tool.range();
             int index = Arrays.binarySearch(tablePeriod, length + 1);
             //if the reference compressor is same as period
             if(index >= 0){
-                int tableIndex = iterationToTableIndex(tablePeriod, tablePeriodElements, Collections.emptyList(), start);
+                int tableIndex = iterationToOriginalTableIndex(r3aPeriod, start);
                 int periodElements = tablePeriodElements[index];
                 
-                r3aCompressors.add(new ArrayCompressor(1, tableIndex + 1, tableIndex + periodElements - 1));
+                r3aTools.add(new ArrayCompressionTool(tableIndex + 1, tableIndex + periodElements - 1));
             }
         }
-        return r3aCompressors;
+        return new ArrayCompressor(r3aTools);
     }
 
-    protected static int iterationToUncompressedTableIndex(int[] tablePeriod, int[] tablePeriodElements, int iteration){
+    protected static int iterationToOriginalTableIndex(Period r3aPeriod, int iteration){
         //
         // get index <=> Inverse calculation of index compression
         // First approach : check the remainder == 1
@@ -114,9 +92,12 @@ public class R3ATable {
         // 
         // 
 
-        if(iteration == 0){
+        if(iteration <= 0){
             return -1;
         }
+
+        int[] tablePeriod = r3aPeriod.tablePeriod;
+        int[] tablePeriodElements = r3aPeriod.tableElements;
 
         int index = 0;
         int remainder = iteration;
@@ -135,36 +116,111 @@ public class R3ATable {
         }
         return remainder == 1 ? index : -1;
     }
+
+    protected static final <R extends R3A> void safetyMatchTable(List<List<R>> table, int index){
+        while(table.size() < index){
+            table.add(null);
+        }
+        if(table.size() == index){
+            table.add(new ArrayList<>());
+        }
+        if(index >= 0 && table.get(index) == null){
+            table.set(index, new ArrayList<>());
+        }
+    }
     
-    protected static int iterationToTableIndex(int[] tablePeriod, int[] tablePeriodElements, List<ArrayCompressor> r3aCompressors, int iteration){
-        int index = iterationToUncompressedTableIndex(tablePeriod, tablePeriodElements, iteration);
-        return index == -1 ? -1 : ArrayCompressor.compress(r3aCompressors, index);
+
+    
+    protected int iterationToTableIndex(int iteration){
+
+        return switch(settings.r3aCompressionMethod()){
+            case NO_COMPRESSION -> iteration;
+            case LITTLE_COMPRESSION -> iterationToOriginalTableIndex(r3aPeriod, iteration);
+            case STRONGEST -> {
+                int index = iterationToOriginalTableIndex(r3aPeriod, iteration);
+                yield index == -1 || r3aCompressor == null ? -1 : r3aCompressor.compress(index);
+            }
+            default -> -1;
+        };
+
     }
 
 
 
-    protected record PeriodTemp(int[] tablePeriod, boolean[] isArtificial) {
+    protected record Period(int[] tablePeriod, int[] requiredPerturbation, int[] tableElements) {
         @Override
         public final boolean equals(Object o) {
-            return o instanceof PeriodTemp(int[] t, boolean[] i) &&
+            return o instanceof Period(int[] t, int[] r, int[] te) &&
                 Arrays.equals(tablePeriod, t) &&
-                Arrays.equals(isArtificial, i);
+                Arrays.equals(requiredPerturbation, r) &&
+                Arrays.equals(tableElements, te);
         }
     
         @Override
         public final String toString() {
             return "Period : " + Arrays.toString(tablePeriod)
-                + "\nArtificial : " + Arrays.toString(isArtificial); 
+                + "\nRequired Perturbation : " + Arrays.toString(requiredPerturbation)
+                + "\nTable Elements : " + Arrays.toString(tableElements); 
         }
     
         @Override
         public final int hashCode() {
-            return Arrays.hashCode(tablePeriod) + Arrays.hashCode(isArtificial);
+            return Arrays.hashCode(tablePeriod) + Arrays.hashCode(requiredPerturbation) + Arrays.hashCode(tableElements);
         }
 
-        protected static PeriodTemp generateR3APeriod(int[] referencePeriod, R3ASettings r3aSettings){
+        private static int[] generatePeriodElements(int[] tablePeriod){
+        
+        
+            // index compression : [3, 11, 26, 77] // index compression : [3, 11, 26, 77]
+            // startIteration : 1  4  7 12 15 18 23 27
+            // index :          0  1  2  3  4  5  6  7
             
+            // 3 6 9 12 15 18 21 24 -> 3 6 9 -> 1 4 7 (11/3 = 3.xxx)
+            // 11 22 33 44 55 66 -> 11, 22 -> 1 12 (26/11 = 2.xxx)
+            // 26 52 78 104 130 -> 26, 52 -> 1 27 (77/26 = 2.xxx)
+            // 
+            // the remainder of [2]/[1] can also be divided by smaller period.
+            // it can be recurive.
+            //
+            // period 11 : 11/3 =3.xxx (3 elements)                                                                              elements = 3 
+            // period 26 : 26/11=2.xxx (3*2 elements), 26%11 = 4, 4/3 = 1.xxx (1 element)                                        elements = 3*2+1=7
+            // period 77 : 77/26=2.xxx (7*2 elements), 77%26 = 25,25/11= 2.xxx (3*2 elements), 25%11=4, 4/3 = 1.xxx (1 element), elements = 7*2+3*2+1=21
+            // Stored elements to memory
     
+            int[] tablePeriodElements = new int[tablePeriod.length];
+            for (int i = 0; i < tablePeriodElements.length; i++) {
+                if(i == 0){
+                    tablePeriodElements[i] = 1;
+                    continue;
+                }
+                int elements = 0;
+                int remainder = tablePeriod[i];
+                for (int j = i - 1; j >= 0; j--) {
+                    int groupAmount = remainder / tablePeriod[j];
+                    remainder %= tablePeriod[j];
+                    elements += groupAmount * tablePeriodElements[j];
+                }
+                tablePeriodElements[i] = elements;
+            }
+            return tablePeriodElements;
+        }
+
+        private static int getRequiredPerturbationCount(boolean isArtificialPeriod) {
+            int required;
+            if(isArtificialPeriod){
+                required = 0;
+                //artificially-created period's result iteration usually not a periodic point.
+            }else{
+                required = 2;
+                //If the "period - 1" iterations are skipped, the resulting iteration is a periodic point.
+                //That is, it is very small, which can cause floating-point errors, such as z + dz = 0 (e.g. big - big = small).
+                //Therefore, Skip until a previous point of periodic point, In other words, skip "period - 2" iterations.
+            }
+            return required;
+        }
+
+        private static Temp generateTablePeriod(int[] referencePeriod, R3ASettings r3aSettings){
+
             // example 
             // period : [3, 11, 26]
             // 
@@ -192,15 +248,15 @@ public class R3ATable {
             int minSkip = r3aSettings.minSkipReference();
             int longestPeriod = referencePeriod[referencePeriod.length - 1];
     
-            int[] refPeriodTemp = new int[1];
-            boolean[] isArtificial = new boolean[1];
+            int[] tablePeriodArrayTemp = new int[1];
+            int[] requiredPerturbationArrayTemp = new int[1];
     
             int periodArraySize = 1;
             int currentRefPeriod = minSkip;
     
     
-            refPeriodTemp[0] = currentRefPeriod;
-            isArtificial[0] = Arrays.binarySearch(referencePeriod, currentRefPeriod) < 0;
+            tablePeriodArrayTemp[0] = currentRefPeriod;
+            requiredPerturbationArrayTemp[0] = getRequiredPerturbationCount(Arrays.binarySearch(referencePeriod, currentRefPeriod) < 0);
             //first period is always minimum skip iteration when the longest period is larger than this
             //and it is artificially-created period if generated period is not an element of generated period.
     
@@ -216,12 +272,12 @@ public class R3ATable {
                     //It is artificially-created period.
     
                     while (currentRefPeriod >= minSkip && currentRefPeriod * maxMultiplier * maxMultiplier < p) {
-                        if (periodArraySize == refPeriodTemp.length) {
-                            refPeriodTemp = ArrayFunction.exp2xArr(refPeriodTemp);
-                            isArtificial = ArrayFunction.exp2xArr(isArtificial);
+                        if (periodArraySize == tablePeriodArrayTemp.length) {
+                            tablePeriodArrayTemp = ArrayFunction.exp2xArr(tablePeriodArrayTemp);
+                            requiredPerturbationArrayTemp = ArrayFunction.exp2xArr(requiredPerturbationArrayTemp);
                         }
-                        refPeriodTemp[periodArraySize] = currentRefPeriod * maxMultiplier;
-                        isArtificial[periodArraySize] = true;
+                        tablePeriodArrayTemp[periodArraySize] = currentRefPeriod * maxMultiplier;
+                        requiredPerturbationArrayTemp[periodArraySize] = getRequiredPerturbationCount(true);
     
                         periodArraySize++;
                         currentRefPeriod *= maxMultiplier;
@@ -229,23 +285,51 @@ public class R3ATable {
     
                     //Otherwise, add generated period to period array.
     
-                    if (periodArraySize == refPeriodTemp.length) {
-                        refPeriodTemp = ArrayFunction.exp2xArr(refPeriodTemp);
-                        isArtificial = ArrayFunction.exp2xArr(isArtificial);
+                    if (periodArraySize == tablePeriodArrayTemp.length) {
+                        tablePeriodArrayTemp = ArrayFunction.exp2xArr(tablePeriodArrayTemp);
+                        requiredPerturbationArrayTemp = ArrayFunction.exp2xArr(requiredPerturbationArrayTemp);
                     }
-                    refPeriodTemp[periodArraySize] = p;
+                    tablePeriodArrayTemp[periodArraySize] = p;
                     periodArraySize++;
                     currentRefPeriod = p;
     
     
                 }
             }
-    
-            return new PeriodTemp(
-                Arrays.copyOfRange(refPeriodTemp, 0, periodArraySize), 
-                Arrays.copyOfRange(isArtificial, 0, periodArraySize)
-            );
+            
+
+            int[] tablePeriod = Arrays.copyOfRange(tablePeriodArrayTemp, 0, periodArraySize);
+            int[] requiredPerturbation = Arrays.copyOfRange(requiredPerturbationArrayTemp, 0, periodArraySize);
+
+            return new Temp(tablePeriod, requiredPerturbation);
+        }
+
+        private static Period create(int[] referencePeriod, R3ASettings r3aSettings){
+            
+            Temp temp = generateTablePeriod(referencePeriod, r3aSettings);
+            int[] tablePeriod = temp.tablePeriod();
+            int[] requiredPerturbation = temp.requiredPerturbation();
+            int[] tablePeriodElements = generatePeriodElements(tablePeriod);
+
+            return new Period(tablePeriod, requiredPerturbation, tablePeriodElements);
         }
         
+        private static final record Temp(int[] tablePeriod, int[] requiredPerturbation){
+            @Override
+            public String toString(){
+                return "";
+            }
+
+            @Override 
+            public int hashCode(){
+                return -1;
+            }
+
+            @Override
+            public boolean equals(Object o){
+                return o == this;
+            }
+        }
+
     }
 }

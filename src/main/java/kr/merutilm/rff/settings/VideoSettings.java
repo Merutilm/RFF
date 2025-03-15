@@ -14,9 +14,9 @@ public record VideoSettings(
     @Override
     public Builder edit() {
         return new Builder()
-        .setDataSettings(dataSettings)
-        .setAnimationSettings(animationSettings)
-        .setExportSettings(exportSettings);
+        .setDataSettings(_ -> dataSettings.edit())
+        .setAnimationSettings(_ -> animationSettings.edit())
+        .setExportSettings(_ -> exportSettings.edit());
     }
     
     public static final class Builder implements StructBuilder<VideoSettings>{
@@ -24,33 +24,18 @@ public record VideoSettings(
         private AnimationSettings animationSettings;
         private ExportSettings exportSettings;
 
-        public Builder setDataSettings(DataSettings videoDataSettings) {
-            this.dataSettings = videoDataSettings;
+        public Builder setDataSettings(UnaryOperator<DataSettings.Builder> changes) {
+            this.dataSettings = changes.apply(dataSettings == null ? null : dataSettings.edit()).build();
             return this;
         }
 
-        public Builder setAnimationSettings(AnimationSettings videoAnimateSettings) {
-            this.animationSettings = videoAnimateSettings;
+        public Builder setAnimationSettings(UnaryOperator<AnimationSettings.Builder> changes) {
+            this.animationSettings = changes.apply(animationSettings == null ? null : animationSettings.edit()).build();
             return this;
         }
 
-        public Builder setExportSettings(ExportSettings videoExportSettings) {
-            this.exportSettings = videoExportSettings;
-            return this;
-        }
-
-        public Builder setDataSettings(UnaryOperator<DataSettings> changes) {
-            this.dataSettings = changes.apply(dataSettings);
-            return this;
-        }
-
-        public Builder setAnimationSettings(UnaryOperator<AnimationSettings> changes) {
-            this.animationSettings = changes.apply(animationSettings);
-            return this;
-        }
-
-        public Builder setExportSettings(UnaryOperator<ExportSettings> changes) {
-            this.exportSettings = changes.apply(exportSettings);
+        public Builder setExportSettings(UnaryOperator<ExportSettings.Builder> changes) {
+            this.exportSettings = changes.apply(exportSettings == null ? null : exportSettings.edit()).build();
             return this;
         }
 

@@ -11,8 +11,8 @@ import javax.swing.SwingUtilities;
 import kr.merutilm.rff.formula.MandelbrotPerturbator;
 import kr.merutilm.rff.locater.MandelbrotLocator;
 import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
+import kr.merutilm.rff.preset.shader.BasicTheme;
 import kr.merutilm.rff.struct.LWBigComplex;
-import kr.merutilm.rff.theme.BasicTheme;
 import kr.merutilm.rff.util.TextFormatter;
 
 enum ActionsExplore implements Actions {
@@ -29,10 +29,9 @@ enum ActionsExplore implements Actions {
         RFFRenderPanel render = Actions.getRenderer(master);
         try {
             render.getState().cancel();
-            master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit()
+            master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1
             .setCenter(BasicTheme.INIT_C)
-            .setLogZoom(BasicTheme.INIT_LOG_ZOOM)
-            .build()).build());
+            .setLogZoom(BasicTheme.INIT_LOG_ZOOM)).build());
             Actions.getRenderer(master).recompute();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -63,9 +62,8 @@ enum ActionsExplore implements Actions {
                     if (c == null) {
                         sendCenterNotFoundMessage();
                     } else {
-                        master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit()
-                                .setCenter(c)
-                                .build()).build());
+                        master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1
+                                .setCenter(c)).build());
                         render.compute(id);
                     }
                 }catch (IllegalParallelRenderStateException e) {
@@ -98,10 +96,9 @@ enum ActionsExplore implements Actions {
                             getActionWhileFindingMinibrotZoom(master)
                             );
 
-                    master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.edit()
+                    master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1
                             .setCenter(locator.center())
-                            .setLogZoom(locator.logZoom())
-                            .build()).build());
+                            .setLogZoom(locator.logZoom())).build());
                     render.compute(id);
 
                 }catch (IllegalParallelRenderStateException e) {

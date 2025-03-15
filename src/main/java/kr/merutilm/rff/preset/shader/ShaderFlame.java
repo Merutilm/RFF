@@ -1,4 +1,4 @@
-package kr.merutilm.rff.theme;
+package kr.merutilm.rff.preset.shader;
 
 import kr.merutilm.rff.struct.HexColor;
 import kr.merutilm.rff.settings.BloomSettings;
@@ -8,7 +8,7 @@ import kr.merutilm.rff.settings.FogSettings;
 import kr.merutilm.rff.settings.SlopeSettings;
 import kr.merutilm.rff.settings.StripeSettings;
 
-public class ThemeFlame implements BasicTheme {
+public class ShaderFlame implements BasicTheme {
 
     @Override
     public String getName() {

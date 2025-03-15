@@ -18,7 +18,7 @@ enum ActionsShader implements Actions {
         ColorSettings color = getShaderSettings(master).colorSettings();
         
         Consumer<UnaryOperator<ColorSettings.Builder>> applier = e -> {
-            master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.edit().setColorSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
+            master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.setColorSettings(e::apply)).build());
             ActionsExplore.refreshColorRunnable(master).run();
         };
 
@@ -39,7 +39,7 @@ enum ActionsShader implements Actions {
         StripeSettings color = getShaderSettings(master).stripeSettings();
         
         Consumer<UnaryOperator<StripeSettings.Builder>> applier = e -> {
-            master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.edit().setStripeSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
+            master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.setStripeSettings(e::apply)).build());
             ActionsExplore.refreshColorRunnable(master).run();
         };
 
@@ -66,7 +66,7 @@ enum ActionsShader implements Actions {
         SlopeSettings slope = getShaderSettings(master).slopeSettings();
         
         Consumer<UnaryOperator<SlopeSettings.Builder>> applier = e -> {
-            master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.edit().setSlopeSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
+            master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.setSlopeSettings(e::apply)).build());
             ActionsExplore.refreshColorRunnable(master).run();
         };
 
@@ -94,7 +94,7 @@ enum ActionsShader implements Actions {
             ColorFilterSettings colorFilter = getShaderSettings(master).colorFilterSettings();
         
             Consumer<UnaryOperator<ColorFilterSettings.Builder>> applier = e -> {
-                master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.edit().setColorFilterSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
+                master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.setColorFilterSettings(e::apply)).build());
                 ActionsExplore.refreshColorRunnable(master).run();
             };
     
@@ -120,7 +120,7 @@ enum ActionsShader implements Actions {
         FogSettings fog = getShaderSettings(master).fogSettings();
         
         Consumer<UnaryOperator<FogSettings.Builder>> applier = e -> {
-            master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.edit().setFogSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
+            master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.setFogSettings(e::apply)).build());
             ActionsExplore.refreshColorRunnable(master).run();
         };
 
@@ -137,7 +137,7 @@ enum ActionsShader implements Actions {
         BloomSettings bloom = getShaderSettings(master).bloomSettings();
     
         Consumer<UnaryOperator<BloomSettings.Builder>> applier = e -> {
-            master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.edit().setBloomSettings(e3 -> e.apply(e3.edit()).build()).build()).build());
+            master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.setBloomSettings(e::apply)).build());
             ActionsExplore.refreshColorRunnable(master).run();
         };
 

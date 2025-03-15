@@ -216,11 +216,10 @@ final class RFFVideoWindow extends JFrame{
         FunctionEase ease = animation.stripeAnimationEase().fun();
 
         return frame.modifyToMapSettings(settings).edit()
-                .setShaderSettings(e -> e.edit()
-                        .setStripeSettings(e1 -> e1.edit()
-                                .setOffset((int) Math.floor(sof) + ease.apply((sof % 1 + 1) % 1))
-                                .build())
-                        .build())
+                .setShaderSettings(e -> e
+                        .setStripeSettings(e1 -> e1
+                                .setOffset((int) Math.floor(sof) + ease.apply((sof % 1 + 1) % 1)))
+                        )
                 .build();
     }
 

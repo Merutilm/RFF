@@ -7,7 +7,6 @@ public interface Reference {
     String STR_FORMULA = "\nFormula : ";
     String STR_CENTER = "\nReference Center : ";
     String STR_PERIOD = "\nPeriod : ";
-    String STR_COMPRESSORS = "\nCompressors : ";
 
     /**
      * Gets the ignition formula.

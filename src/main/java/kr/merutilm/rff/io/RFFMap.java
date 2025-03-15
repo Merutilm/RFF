@@ -89,10 +89,8 @@ public record RFFMap(double zoom, int period, long maxIteration, DoubleMatrix it
     }
     public Settings modifyToMapSettings(Settings target){
         return target.edit().setCalculationSettings(e -> 
-            e.edit()
-            .setMaxIteration(maxIteration)
+            e.setMaxIteration(maxIteration)
             .setLogZoom(zoom)
-            .build()
         ).build();
     }
     

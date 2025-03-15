@@ -1,10 +1,10 @@
 package kr.merutilm.rff.ui;
 
+import kr.merutilm.rff.preset.shader.Shader;
+import kr.merutilm.rff.preset.shader.BasicTheme;
 import kr.merutilm.rff.settings.CalculationSettings;
 import kr.merutilm.rff.settings.ImageSettings;
 import kr.merutilm.rff.settings.Settings;
-import kr.merutilm.rff.theme.BasicTheme;
-import kr.merutilm.rff.theme.Theme;
 
 import java.util.function.UnaryOperator;
 
@@ -23,7 +23,7 @@ final class RFF {
     private static final int INIT_WIDTH = 1294;
     private static final int INIT_HEIGHT = 803;
 
-    private Theme theme = BasicTheme.DEFAULT_THEME.getTheme();
+    private Shader theme = BasicTheme.DEFAULT_THEME.getTheme();
     private Settings settings = theme.generate();
 
     public RFF() throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException{
@@ -40,11 +40,11 @@ final class RFF {
     }
     
 
-    public Theme getTheme() {
+    public Shader getTheme() {
         return theme;
     }
 
-    public void setTheme(Theme theme) {
+    public void setTheme(Shader theme) {
         this.theme = theme;
         
         if(theme instanceof BasicTheme bt){
@@ -53,10 +53,8 @@ final class RFF {
             ImageSettings img = settings.imageSettings();
             
             this.settings = s.edit()
-                .setCalculationSettings(calc)
-                .setImageSettings(e1 -> e1.edit()
-                    .setResolutionMultiplier(img.resolutionMultiplier())
-                    .build())
+                .setCalculationSettings(_ -> calc.edit())
+                .setImageSettings(e1 -> e1.setResolutionMultiplier(img.resolutionMultiplier()))
                 .build();
         }else{
             this.settings = theme.generate();
