@@ -14,6 +14,11 @@ public record LWBigComplex(LWBigDecimal re, LWBigDecimal im) {
     public static LWBigComplex valueOf(DoubleExponent re, DoubleExponent im, int precision) {
         return new LWBigComplex(re.toLWBigDecimal(precision), im.toLWBigDecimal(precision));
     }
+
+    public static LWBigComplex valueOf(String re, String im) {
+        return valueOf(re, im, -Math.max(re.length(), im.length()));
+    }
+
     public static LWBigComplex valueOf(String re, String im, int precision) {
         return new LWBigComplex(LWBigDecimal.valueOf(re, precision), LWBigDecimal.valueOf(im, precision));
     }

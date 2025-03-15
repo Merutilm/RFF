@@ -8,7 +8,7 @@ import kr.merutilm.rff.settings.FogSettings;
 import kr.merutilm.rff.settings.SlopeSettings;
 import kr.merutilm.rff.settings.StripeSettings;
 
-public class ShaderClassic2 implements BasicTheme {
+public class ShaderClassic2 implements Shader {
     
     @Override
     public String getName() {
@@ -29,17 +29,17 @@ public class ShaderClassic2 implements BasicTheme {
         p.setIterationInterval(250);
         return p.build();
     }
-    
-    @Override
-    public SlopeSettings slopeSettings() {
-        return new SlopeSettings(0, 0.5, 1, 60, 135);      
-    }
 
     @Override
     public StripeSettings stripeSettings() {
         return new StripeSettings(false, 10, 50, 1, 0);
     }
-
+    
+    @Override
+    public SlopeSettings slopeSettings() {
+        return new SlopeSettings(0, 0.5, 1, 60, 135);      
+    }
+    
     @Override
     public ColorFilterSettings colorFilterSettings() {
         return new ColorFilterSettings(1,0,0,0,0);

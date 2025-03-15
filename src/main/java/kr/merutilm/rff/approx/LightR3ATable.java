@@ -21,7 +21,11 @@ public class LightR3ATable extends R3ATable{
     }
 
     private List<List<LightR3A>> createTable(ParallelRenderState state, int currentID, LightMandelbrotReference reference, double dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException{
- 
+
+        if(r3aPeriod == null){
+            return Collections.emptyList();
+        }
+
         int[] tablePeriod = r3aPeriod.tablePeriod();
         
         int longestPeriod = tablePeriod[tablePeriod.length - 1];
@@ -119,7 +123,8 @@ public class LightR3ATable extends R3ATable{
 
 
     public LightR3A lookup(int iteration, double dzr, double dzi) {
-        if(iteration == 0){
+        
+        if(iteration == 0 || r3aPeriod == null){
             return null;
         }
         

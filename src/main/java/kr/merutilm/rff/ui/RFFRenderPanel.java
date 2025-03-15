@@ -14,6 +14,7 @@ import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.parallel.ParallelDoubleArrayDispatcher;
 import kr.merutilm.rff.parallel.ParallelRenderProcessVisualizer;
 import kr.merutilm.rff.parallel.ParallelRenderState;
+import kr.merutilm.rff.preset.Presets;
 import kr.merutilm.rff.settings.CalculationSettings;
 import kr.merutilm.rff.settings.ImageSettings;
 import kr.merutilm.rff.settings.Settings;
@@ -21,7 +22,6 @@ import kr.merutilm.rff.struct.DoubleExponent;
 import kr.merutilm.rff.util.DoubleExponentMath;
 import kr.merutilm.rff.util.TextFormatter;
 
-import static kr.merutilm.rff.preset.shader.BasicTheme.INIT_ITERATION;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -65,11 +65,11 @@ final class RFFRenderPanel extends JPanel {
                     );
                     double mzo = 1.0 / Math.pow(10, -CalculationSettings.ZOOM_VALUE);
                     double logZoom = master.getSettings().calculationSettings().logZoom();
-                    master.setSettings(e1 -> e1.edit().setCalculationSettings(
+                    master.setSettings(e1 -> e1.setCalculationSettings(
                                     e2 -> e2.addCenter(
                                             offset[0].multiply(1 - mzo), offset[1].multiply(1 - mzo), Perturbator.precision(logZoom)
                                     ).zoomOut()
-                            ).build()
+                            )
                     );
                 }
                 if (r == -1) {
@@ -79,11 +79,11 @@ final class RFFRenderPanel extends JPanel {
                     );
                     double mzi = 1.0 / Math.pow(10, CalculationSettings.ZOOM_VALUE);
                     double logZoom = master.getSettings().calculationSettings().logZoom();
-                    master.setSettings(e1 -> e1.edit().setCalculationSettings(
+                    master.setSettings(e1 -> e1.setCalculationSettings(
                                     e2 -> e2.addCenter(
                                             offset[0].multiply(1 - mzi), offset[1].multiply(1 - mzi), Perturbator.precision(logZoom)
                                     ).zoomIn()
-                            ).build()
+                            )
                     );
 
                 }
@@ -126,12 +126,12 @@ final class RFFRenderPanel extends JPanel {
                     int dy = pmy.get() - getMouseY(e);
                     double m = master.getSettings().imageSettings().resolutionMultiplier();
                     double logZoom = master.getSettings().calculationSettings().logZoom();
-                    master.setSettings(e1 -> e1.edit().setCalculationSettings(
+                    master.setSettings(e1 -> e1.setCalculationSettings(
                                     e2 -> e2.addCenter(
                                                     DoubleExponent.valueOf(dx / m).divide(getDivisor()),
                                                     DoubleExponent.valueOf(-dy / m).divide(getDivisor()), Perturbator.precision(logZoom))
                                             
-                            ).build()
+                            )
                     );
 
                     pmx.set(getMouseX(e));
@@ -198,14 +198,14 @@ final class RFFRenderPanel extends JPanel {
     }
 
 
-    //this method can be thread-safe only when called via recompute()
+    //this method can only be thread-safe when called via recompute()
     public void compute(int currentID) throws IllegalParallelRenderStateException {
 
         int w = getImgWidth();
         int h = getImgHeight();
 
         if (master.getSettings().calculationSettings().autoIteration()) {
-            master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1.setMaxIteration(Math.max(INIT_ITERATION, period * 50L))).build());
+            master.setSettings(e -> e.setCalculationSettings(e1 -> e1.setMaxIteration(Math.max(Presets.INIT_LOCATION.maxIteration(), period * 50L))));
         }
 
         Settings settings = master.getSettings();
@@ -295,13 +295,13 @@ final class RFFRenderPanel extends JPanel {
             boolean processing = p < 1;
 
             if (RFFShaderProcessor.getImageCompressDivisor(settings.imageSettings()) > 1 || processing) {
-                reloadAndPaint(currentID, true);
+                refreshColor(currentID, true);
             }
 
             if (processing) {
                 panel.setProcess("Calculating... " + TextFormatter.processText(p));
             } else {
-                reloadAndPaint(currentID, false);
+                refreshColor(currentID, false);
                 panel.setProcess("Done");
             }
             panel.refreshTime();
@@ -333,10 +333,25 @@ final class RFFRenderPanel extends JPanel {
                                      + TextFormatter.frac(fracA, 2, TextFormatter.Parentheses.SQUARE));
     }
 
+    public void refreshColor(){
+            try {
+                state.createThread(id -> {
+                    try {
+                        RFFStatusPanel panel = master.getWindow().getStatusPanel();
+                        refreshColor(id, false);
+                        panel.setProcess("Done");
+                    } catch (IllegalParallelRenderStateException | InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                });
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+    }
     /**
      * It is not thread-safe. Invoke via safe method.
      */
-    public void reloadAndPaint(int currentID, boolean compressed) throws IllegalParallelRenderStateException, InterruptedException {
+    private void refreshColor(int currentID, boolean compressed) throws IllegalParallelRenderStateException, InterruptedException {
         ParallelRenderProcessVisualizer[] pv = new ParallelRenderProcessVisualizer[]{
                 gvf(1),
                 gvf(2)

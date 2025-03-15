@@ -14,9 +14,9 @@ public record VideoSettings(
     @Override
     public Builder edit() {
         return new Builder()
-        .setDataSettings(_ -> dataSettings.edit())
-        .setAnimationSettings(_ -> animationSettings.edit())
-        .setExportSettings(_ -> exportSettings.edit());
+        .setDataSettings(dataSettings)
+        .setAnimationSettings(animationSettings)
+        .setExportSettings(exportSettings);
     }
     
     public static final class Builder implements StructBuilder<VideoSettings>{
@@ -24,13 +24,28 @@ public record VideoSettings(
         private AnimationSettings animationSettings;
         private ExportSettings exportSettings;
 
+        public Builder setDataSettings(DataSettings dataSettings){
+            this.dataSettings = dataSettings;
+            return this;
+        }
+
         public Builder setDataSettings(UnaryOperator<DataSettings.Builder> changes) {
             this.dataSettings = changes.apply(dataSettings == null ? null : dataSettings.edit()).build();
             return this;
         }
 
+        public Builder setAnimationSettings(AnimationSettings animationSettings){
+            this.animationSettings = animationSettings;
+            return this;
+        }
+
         public Builder setAnimationSettings(UnaryOperator<AnimationSettings.Builder> changes) {
             this.animationSettings = changes.apply(animationSettings == null ? null : animationSettings.edit()).build();
+            return this;
+        }
+
+        public Builder setExportSettings(ExportSettings exportSettings){
+            this.exportSettings = exportSettings;
             return this;
         }
 

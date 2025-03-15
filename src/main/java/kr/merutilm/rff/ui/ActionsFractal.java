@@ -26,7 +26,7 @@ enum ActionsFractal implements Actions {
         R3ASettings r3a = getCalculationSettings(master).r3aSettings();
 
         Consumer<UnaryOperator<R3ASettings.Builder>> applier = e ->
-                master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 -> e2.setR3ASettings(e::apply)).build());
+                master.setSettings(e1 -> e1.setCalculationSettings(e2 -> e2.setR3ASettings(e::apply)));
 
         panel.createTextInput("Min Skip Reference", "Set minimum skipping reference iteration when creating a table.", r3a.minSkipReference(), Integer::parseInt, e ->
                 applier.accept(f -> f.setMinSkipReference(e))
@@ -51,7 +51,7 @@ enum ActionsFractal implements Actions {
         CalculationSettings calc = getCalculationSettings(master);
 
         Consumer<UnaryOperator<CalculationSettings.Builder>> applier = e ->
-                master.setSettings(e1 -> e1.edit().setCalculationSettings(e::apply).build());
+                master.setSettings(e1 -> e1.setCalculationSettings(e::apply));
 
         panel.createTextInput("Max Iteration", "Set maximum iteration. It is disabled when Auto iteration is enabled.", calc.maxIteration(), Long::parseLong, e ->
                 applier.accept(f -> f.setMaxIteration(e)));
@@ -66,12 +66,12 @@ enum ActionsFractal implements Actions {
     AUTOMATIC_ITERATIONS("Automatic Iterations", "Set max iteration automatic.", null, 
     (master, name, description, accelerator) -> 
     Actions.createCheckBoxItem(name, description, accelerator, getCalculationSettings(master).autoIteration(), b -> 
-        master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 -> e2.setAutoIteration(b)).build())
+        master.setSettings(e1 -> e1.setCalculationSettings(e2 -> e2.setAutoIteration(b)))
     )),
     ABSOLUTE_ITERATION_MODE("Absolute Iteration Mode", new HTMLStringBuilder().wrapln(Tag.BOLD, "Absolute Iteration Mode").appendln("Define the iteration as while-loop count instead of the perturbation.").toString(), null, 
     (master, name, description, accelerator) -> 
     Actions.createCheckBoxItem(name, description, accelerator, getCalculationSettings(master).absoluteIterationMode(), b -> 
-        master.setSettings(e1 -> e1.edit().setCalculationSettings(e2 -> e2.setAbsoluteIterationMode(b)).build())
+        master.setSettings(e1 -> e1.setCalculationSettings(e2 -> e2.setAbsoluteIterationMode(b)))
     )),
     REFERENCE("Reference", "Open the reference settings. You can set the Location, Zoom, and etc. here.", null, 
     (master, name, description, accelerator) ->
@@ -79,7 +79,7 @@ enum ActionsFractal implements Actions {
         CalculationSettings calc = getCalculationSettings(master);
 
         Consumer<UnaryOperator<CalculationSettings.Builder>> applier = e ->
-                master.setSettings(e1 -> e1.edit().setCalculationSettings(e::apply).build());
+                master.setSettings(e1 -> e1.setCalculationSettings(e::apply));
         AtomicReference<String> realStr = new AtomicReference<>(calc.center().re().toString());
         AtomicReference<String> imagStr = new AtomicReference<>(calc.center().im().toString());
         AtomicReference<Double> zoomStr = new AtomicReference<>(calc.logZoom());

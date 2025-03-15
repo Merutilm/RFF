@@ -6,20 +6,21 @@ import kr.merutilm.rff.settings.FogSettings;
 import kr.merutilm.rff.settings.SlopeSettings;
 import kr.merutilm.rff.settings.StripeSettings;
 
-public class ShaderLongRainbow implements LongRainbowTheme {
+public class ShaderLongRainbow implements LongRainbowShader {
 
     @Override
     public String getName(){
         return "Shaded Long Rainbow";
     }
-    @Override
-    public SlopeSettings slopeSettings() {
-        return new SlopeSettings(300, 0.5, 1, 60, 135);
-    }
 
     @Override
     public StripeSettings stripeSettings() {
         return new StripeSettings(true, 10, 50, 1, 0);
+    }
+    
+    @Override
+    public SlopeSettings slopeSettings() {
+        return new SlopeSettings(300, 0.5, 1, 60, 135);
     }
 
     @Override

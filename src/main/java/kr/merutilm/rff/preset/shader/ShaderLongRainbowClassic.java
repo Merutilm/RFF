@@ -2,7 +2,7 @@ package kr.merutilm.rff.preset.shader;
 
 import kr.merutilm.rff.settings.*;
 
-public class ShaderLongRainbowClassic implements LongRainbowTheme {
+public class ShaderLongRainbowClassic implements LongRainbowShader {
 
     @Override
     public String getName(){
@@ -10,13 +10,13 @@ public class ShaderLongRainbowClassic implements LongRainbowTheme {
     }
 
     @Override
-    public SlopeSettings slopeSettings() {
-        return new SlopeSettings(0, 0.5, 1, 60, 135);
+    public StripeSettings stripeSettings() {
+        return new StripeSettings(false, 10, 50, 1, 0);
     }
 
     @Override
-    public StripeSettings stripeSettings() {
-        return new StripeSettings(false, 10, 50, 1, 0);
+    public SlopeSettings slopeSettings() {
+        return new SlopeSettings(0, 0.5, 1, 60, 135);
     }
 
     @Override

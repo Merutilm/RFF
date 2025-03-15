@@ -32,8 +32,8 @@ public record CalculationSettings(
                 .setMaxIteration(maxIteration)
                 .setBailout(bailout)
                 .setDecimalizeIterationMethod(decimalizeIterationMethod)
-                .setR3ASettings(_ -> r3aSettings.edit())
-                .setReferenceCompressionSettings(_ -> referenceCompressionSettings.edit())
+                .setR3ASettings(r3aSettings)
+                .setReferenceCompressionSettings(referenceCompressionSettings)
                 .setReuseReference(reuseReference)
                 .setAutoIteration(autoIteration)
                 .setAbsoluteIterationMode(absoluteIterationMode);
@@ -77,8 +77,18 @@ public record CalculationSettings(
             return this;
         }
 
+        public Builder setR3ASettings(R3ASettings r3aSettings){
+            this.r3aSettings = r3aSettings;
+            return this;
+        }
+
         public Builder setR3ASettings(UnaryOperator<R3ASettings.Builder> changes) {
             this.r3aSettings = changes.apply(r3aSettings == null ? null : r3aSettings.edit()).build();
+            return this;
+        }
+
+        public Builder setReferenceCompressionSettings(ReferenceCompressionSettings referenceCompressionSettings){
+            this.referenceCompressionSettings = referenceCompressionSettings;
             return this;
         }
         

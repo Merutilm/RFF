@@ -38,10 +38,14 @@ interface Actions extends Selectable{
         return item;
     }
 
-    static JMenu createJMenu(String name){
+    static JMenu createJMenu(String name, String description){
         JMenu menu = new JMenu(name);
+        menu.setToolTipText(description);
         menu.setFont(MUIConstants.DEFAULT_FONT);
         return menu;
+    }
+    static JMenu createJMenu(String name){
+        return createJMenu(name, null);
     }
 
     static void addItem(JMenu menu, JMenuItem item){

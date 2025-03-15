@@ -8,7 +8,7 @@ import kr.merutilm.rff.settings.FogSettings;
 import kr.merutilm.rff.settings.SlopeSettings;
 import kr.merutilm.rff.settings.StripeSettings;
 
-public class ShaderFlame implements BasicTheme {
+public class ShaderFlame implements Shader{
 
     @Override
     public String getName() {
@@ -33,13 +33,13 @@ public class ShaderFlame implements BasicTheme {
     }
 
     @Override
-    public SlopeSettings slopeSettings() {
-        return new SlopeSettings(200, 0.4, 1, 60, 135);      
+    public StripeSettings stripeSettings() {
+        return new StripeSettings(false, 4, 40, 0.4, 0);
     }
 
     @Override
-    public StripeSettings stripeSettings() {
-        return new StripeSettings(true, 4, 40, 0.4, 0);
+    public SlopeSettings slopeSettings() {
+        return new SlopeSettings(200, 0.4, 1, 60, 135);      
     }
 
     @Override

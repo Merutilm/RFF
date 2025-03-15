@@ -11,7 +11,8 @@ import javax.swing.SwingUtilities;
 import kr.merutilm.rff.formula.MandelbrotPerturbator;
 import kr.merutilm.rff.locater.MandelbrotLocator;
 import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
-import kr.merutilm.rff.preset.shader.BasicTheme;
+import kr.merutilm.rff.preset.location.Location;
+import kr.merutilm.rff.preset.Presets;
 import kr.merutilm.rff.struct.LWBigComplex;
 import kr.merutilm.rff.util.TextFormatter;
 
@@ -22,16 +23,18 @@ enum ActionsExplore implements Actions {
     ),
     REFRESH_COLOR("Refresh Color", "Refresh color using current Settings.", KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_DOWN_MASK), 
     (master, name, description, accelerator) ->
-    Actions.createItem(name, description, accelerator, refreshColorRunnable(master))),
+    Actions.createItem(name, description, accelerator, () -> master.getWindow().getRenderer().refreshColor())),
     RESET("Reset", "Reset to Initial Location. It contains \"Recompute\" operation.", KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.ALT_DOWN_MASK), 
     (master, name, description, accelerator) ->
     Actions.createItem(name, description, accelerator, () -> {
         RFFRenderPanel render = Actions.getRenderer(master);
         try {
             render.getState().cancel();
-            master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1
-            .setCenter(BasicTheme.INIT_C)
-            .setLogZoom(BasicTheme.INIT_LOG_ZOOM)).build());
+            Location def = Presets.Locations.DEFAULT.preset();
+            master.setSettings(e -> e.setCalculationSettings(e1 -> e1
+            .setCenter(LWBigComplex.valueOf(def.real(), def.imag()))
+            .setMaxIteration(def.maxIteration())
+            .setLogZoom(def.logZoom())));
             Actions.getRenderer(master).recompute();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -62,8 +65,8 @@ enum ActionsExplore implements Actions {
                     if (c == null) {
                         sendCenterNotFoundMessage();
                     } else {
-                        master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1
-                                .setCenter(c)).build());
+                        master.setSettings(e -> e.setCalculationSettings(e1 -> e1
+                                .setCenter(c)));
                         render.compute(id);
                     }
                 }catch (IllegalParallelRenderStateException e) {
@@ -96,9 +99,9 @@ enum ActionsExplore implements Actions {
                             getActionWhileFindingMinibrotZoom(master)
                             );
 
-                    master.setSettings(e -> e.edit().setCalculationSettings(e1 -> e1
+                    master.setSettings(e -> e.setCalculationSettings(e1 -> e1
                             .setCenter(locator.center())
-                            .setLogZoom(locator.logZoom())).build());
+                            .setLogZoom(locator.logZoom())));
                     render.compute(id);
 
                 }catch (IllegalParallelRenderStateException e) {
@@ -185,23 +188,5 @@ enum ActionsExplore implements Actions {
         return (int) (1000000 / master.getSettings().calculationSettings().logZoom());
     }
 
-    public static Runnable refreshColorRunnable(RFF master){
-        return () -> {
-            RFFRenderPanel render = Actions.getRenderer(master);
-            try {
-                render.getState().createThread(id -> {
-                    try {
-                        RFFStatusPanel panel = master.getWindow().getStatusPanel();
-                        render.reloadAndPaint(id, false);
-                        panel.setProcess("Done");
-                    } catch (IllegalParallelRenderStateException | InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                });
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        };
-    }
    
 }

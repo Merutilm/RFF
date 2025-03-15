@@ -6,7 +6,7 @@ import kr.merutilm.rff.util.AdvancedMath;
 
 import java.util.ArrayList;
 
-public interface LongRainbowTheme extends BasicTheme{
+public interface LongRainbowShader extends Shader{
 
     @Override
     default ColorSettings colorSettings() {

@@ -1,9 +1,11 @@
 package kr.merutilm.rff.ui;
 
 import kr.merutilm.rff.preset.shader.Shader;
-import kr.merutilm.rff.preset.shader.BasicTheme;
-import kr.merutilm.rff.settings.CalculationSettings;
-import kr.merutilm.rff.settings.ImageSettings;
+import kr.merutilm.rff.preset.Preset;
+import kr.merutilm.rff.preset.Presets;
+import kr.merutilm.rff.preset.calc.Calculation;
+import kr.merutilm.rff.preset.location.Location;
+import kr.merutilm.rff.preset.render.Render;
 import kr.merutilm.rff.settings.Settings;
 
 import java.util.function.UnaryOperator;
@@ -23,8 +25,7 @@ final class RFF {
     private static final int INIT_WIDTH = 1294;
     private static final int INIT_HEIGHT = 803;
 
-    private Shader theme = BasicTheme.DEFAULT_THEME.getTheme();
-    private Settings settings = theme.generate();
+    private Settings settings = Presets.INIT_SETTINGS;
 
     public RFF() throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException{
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -39,30 +40,29 @@ final class RFF {
         return settings;
     }
     
-
-    public Shader getTheme() {
-        return theme;
-    }
-
-    public void setTheme(Shader theme) {
-        this.theme = theme;
-        
-        if(theme instanceof BasicTheme bt){
-            Settings s = bt.generate();
-            CalculationSettings calc = settings.calculationSettings();
-            ImageSettings img = settings.imageSettings();
-            
-            this.settings = s.edit()
-                .setCalculationSettings(_ -> calc.edit())
-                .setImageSettings(e1 -> e1.setResolutionMultiplier(img.resolutionMultiplier()))
-                .build();
-        }else{
-            this.settings = theme.generate();
+    public void setPreset(Preset preset){
+        switch (preset) {
+            case Calculation p -> {
+                setSettings(e -> e.setCalculationSettings(e2 -> e2.setR3ASettings(p.r3aSettings()).setReferenceCompressionSettings(p.referenceCompressionSettings())));
+            }
+            case Location p -> {
+                setSettings(e -> e.setCalculationSettings(e2 -> e2.setCenter(p.createCenter()).setLogZoom(p.logZoom()).setMaxIteration(p.maxIteration())));
+            }
+            case Render p -> {
+                setSettings(e -> e.setImageSettings(p.createImageSettings()));
+            }
+            case Shader p -> {
+                setSettings(e -> e.setShaderSettings(p.createShaderSettings()));
+            }
+            default -> {
+                //noop
+            }
         }
     }
+    
 
-    public void setSettings(UnaryOperator<Settings> changes) {
-        this.settings = changes.apply(settings);
+    public void setSettings(UnaryOperator<Settings.Builder> changes) {
+        this.settings = changes.apply(settings.edit()).build();
     }
     
 

@@ -21,7 +21,7 @@ enum ActionsFile implements Actions {
         }
         RFFMap map = RFFMap.read(file);
         renderer.setCurrentMap(map);
-        ActionsExplore.refreshColorRunnable(master).run();
+        master.getWindow().getRenderer().refreshColor();
 
     })),
     ;

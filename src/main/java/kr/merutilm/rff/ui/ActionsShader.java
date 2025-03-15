@@ -18,8 +18,8 @@ enum ActionsShader implements Actions {
         ColorSettings color = getShaderSettings(master).colorSettings();
         
         Consumer<UnaryOperator<ColorSettings.Builder>> applier = e -> {
-            master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.setColorSettings(e::apply)).build());
-            ActionsExplore.refreshColorRunnable(master).run();
+            master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setColorSettings(e::apply)));
+            master.getWindow().getRenderer().refreshColor();
         };
 
         panel.createTextInput("Color Pulse Interval", "Required iterations for the palette to cycle once", color.iterationInterval(), Double::parseDouble, e ->
@@ -39,8 +39,8 @@ enum ActionsShader implements Actions {
         StripeSettings color = getShaderSettings(master).stripeSettings();
         
         Consumer<UnaryOperator<StripeSettings.Builder>> applier = e -> {
-            master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.setStripeSettings(e::apply)).build());
-            ActionsExplore.refreshColorRunnable(master).run();
+            master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setStripeSettings(e::apply)));
+            master.getWindow().getRenderer().refreshColor();
         };
 
 
@@ -66,8 +66,8 @@ enum ActionsShader implements Actions {
         SlopeSettings slope = getShaderSettings(master).slopeSettings();
         
         Consumer<UnaryOperator<SlopeSettings.Builder>> applier = e -> {
-            master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.setSlopeSettings(e::apply)).build());
-            ActionsExplore.refreshColorRunnable(master).run();
+            master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setSlopeSettings(e::apply)));
+            master.getWindow().getRenderer().refreshColor();
         };
 
         panel.createTextInput("Depth", "Slope depth", slope.depth(), Double::parseDouble, e ->
@@ -94,8 +94,8 @@ enum ActionsShader implements Actions {
             ColorFilterSettings colorFilter = getShaderSettings(master).colorFilterSettings();
         
             Consumer<UnaryOperator<ColorFilterSettings.Builder>> applier = e -> {
-                master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.setColorFilterSettings(e::apply)).build());
-                ActionsExplore.refreshColorRunnable(master).run();
+                master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setColorFilterSettings(e::apply)));
+                master.getWindow().getRenderer().refreshColor();
             };
     
             panel.createTextInput("Gamma", "Gamma value", colorFilter.gamma(), Double::parseDouble, e ->
@@ -120,8 +120,8 @@ enum ActionsShader implements Actions {
         FogSettings fog = getShaderSettings(master).fogSettings();
         
         Consumer<UnaryOperator<FogSettings.Builder>> applier = e -> {
-            master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.setFogSettings(e::apply)).build());
-            ActionsExplore.refreshColorRunnable(master).run();
+            master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setFogSettings(e::apply)));
+            master.getWindow().getRenderer().refreshColor();
         };
 
         panel.createTextInput("Radius", "Fog radius ratio in rendered image, fully blurred when the value is 1.", fog.radius(), Double::parseDouble, e ->
@@ -137,8 +137,8 @@ enum ActionsShader implements Actions {
         BloomSettings bloom = getShaderSettings(master).bloomSettings();
     
         Consumer<UnaryOperator<BloomSettings.Builder>> applier = e -> {
-            master.setSettings(e1 -> e1.edit().setShaderSettings(e2 -> e2.setBloomSettings(e::apply)).build());
-            ActionsExplore.refreshColorRunnable(master).run();
+            master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setBloomSettings(e::apply)));
+            master.getWindow().getRenderer().refreshColor();
         };
 
         panel.createTextInput("Threshold", "Threshold to apply", bloom.threshold(), Double::parseDouble, e ->

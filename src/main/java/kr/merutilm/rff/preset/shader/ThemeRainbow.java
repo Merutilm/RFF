@@ -2,7 +2,7 @@ package kr.merutilm.rff.preset.shader;
 
 import kr.merutilm.rff.settings.*;
 
-public class ThemeRainbow implements BasicTheme{
+public class ThemeRainbow implements Shader{
 
     @Override
     public String getName() {
@@ -19,13 +19,13 @@ public class ThemeRainbow implements BasicTheme{
     }
 
     @Override
-    public SlopeSettings slopeSettings() {
-        return new SlopeSettings(300, 0.3, 1, 60, 135);      
+    public StripeSettings stripeSettings() {
+        return new StripeSettings(true, 10, 50, 1, 0);
     }
 
     @Override
-    public StripeSettings stripeSettings() {
-        return new StripeSettings(true, 10, 50, 1, 0);
+    public SlopeSettings slopeSettings() {
+        return new SlopeSettings(300, 0.3, 1, 60, 135);      
     }
 
     @Override

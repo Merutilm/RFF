@@ -17,10 +17,10 @@ public record Settings(
     @Override
     public Builder edit() {
         return new Builder()
-        .setCalculationSettings(_ -> calculationSettings.edit())
-        .setImageSettings(_ -> imageSettings.edit())
-        .setShaderSettings(_ -> shaderSettings.edit())
-        .setVideoSettings(_ -> videoSettings.edit());
+        .setCalculationSettings(calculationSettings)
+        .setImageSettings(imageSettings)
+        .setShaderSettings(shaderSettings)
+        .setVideoSettings(videoSettings);
     }
 
     public static final class Builder implements StructBuilder<Settings>{
@@ -30,9 +30,19 @@ public record Settings(
         private ShaderSettings shaderSettings;
         private VideoSettings videoSettings;
 
+
+        public Builder setCalculationSettings(CalculationSettings calculationSettings){
+            this.calculationSettings = calculationSettings;
+            return this;
+        }
         
         public Builder setCalculationSettings(UnaryOperator<CalculationSettings.Builder> changes) {
             this.calculationSettings = changes.apply(calculationSettings == null ? null : calculationSettings.edit()).build();
+            return this;
+        }
+        
+        public Builder setImageSettings(ImageSettings imageSettings){
+            this.imageSettings = imageSettings;
             return this;
         }
 
@@ -41,8 +51,18 @@ public record Settings(
             return this;
         }
 
+        public Builder setShaderSettings(ShaderSettings shaderSettings){
+            this.shaderSettings = shaderSettings;
+            return this;
+        }
+
         public Builder setShaderSettings(UnaryOperator<ShaderSettings.Builder> changes) {
             this.shaderSettings = changes.apply(shaderSettings == null ? null : shaderSettings.edit()).build();
+            return this;
+        }
+
+        public Builder setVideoSettings(VideoSettings videoSettings){
+            this.videoSettings = videoSettings;
             return this;
         }
 

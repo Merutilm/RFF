@@ -27,6 +27,15 @@ enum RFFSettingsMenu {
         addAll(master, menu, ActionsShader.values());
         return menu;
     }),
+    PRESET(master -> {
+        JMenu menu = Actions.createJMenu("Preset");
+        menu.add(ActionsPreset.createCalcMenu(master));
+        menu.add(ActionsPreset.createLocationMenu(master));
+        menu.add(ActionsPreset.createRenderMenu(master));
+        menu.add(ActionsPreset.createShaderMenu(master));
+
+        return menu;
+    }),
     VIDEO(master -> {
         JMenu menu = Actions.createJMenu("Video");
         addAll(master, menu, ActionsVideo.values());
@@ -40,6 +49,7 @@ enum RFFSettingsMenu {
     ;
 
     private final Function<RFF, JMenu> function;
+    
 
     public static <T extends Actions> void addAll(RFF master, JMenu menu, T[] items){
         Arrays.stream(items).forEach(e -> {
