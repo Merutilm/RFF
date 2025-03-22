@@ -21,7 +21,7 @@ public class ParallelBitMapDispatcher extends ParallelArrayDispatcher<BitMap, Pa
         tryBreak();
     }
 
-    public synchronized void dispatch() throws InterruptedException {
+    public synchronized void dispatch() throws InterruptedException, IllegalParallelRenderStateException{
 
         if (renderers.isEmpty()) {
             return;
@@ -41,6 +41,7 @@ public class ParallelBitMapDispatcher extends ParallelArrayDispatcher<BitMap, Pa
         final int xRes = matrix.getWidth();
         final int yRes = matrix.getHeight();
 
+        renderState.tryBreak(renderID);
         for (ParallelBitMapRenderer renderer : renderers) {
 
             if(!renderer.isValid()){
@@ -94,15 +95,15 @@ public class ParallelBitMapDispatcher extends ParallelArrayDispatcher<BitMap, Pa
                                 }
                             }
                             return true;
-                        } catch (IllegalParallelRenderStateException ignored) {
+                        } catch (IllegalParallelRenderStateException e) {
                             return false;
                         }
                     }));
-                    
                 }
 
                 for (Future<Boolean> processor : processors) {
                     if(Boolean.FALSE.equals(processor.get())){
+                        tryBreak();
                         return;
                     }
                 }

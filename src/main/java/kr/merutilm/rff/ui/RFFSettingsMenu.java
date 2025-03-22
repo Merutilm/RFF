@@ -66,7 +66,7 @@ enum RFFSettingsMenu {
             for(Presets.Shaders a : Presets.Shaders.values()){
                 e.createFruit(ItemActions.createItem(a.toString(), "", null, () -> {
                     master.setPreset(a.preset());
-                    master.getWindow().getRenderer().refreshColorUnsafe();
+                    master.getWindow().getRenderer().refreshColor();
                 }));
             }
         });

@@ -26,10 +26,11 @@ public abstract class ParallelArrayDispatcher<M extends Matrix, R extends Parall
         this.initTime = System.currentTimeMillis() / 1000.0;
     }
 
-    public abstract void dispatch() throws InterruptedException;
+    public abstract void dispatch() throws InterruptedException, IllegalParallelRenderStateException;
 
-    public synchronized void process(ParallelRenderProcessVisualizer visualizer, long intervalMS) {
+    public synchronized void process(ParallelRenderProcessVisualizer visualizer, long intervalMS) throws IllegalParallelRenderStateException{
         AtomicBoolean processing = new AtomicBoolean(true);
+        tryBreak();
         
         Timer t = new Timer();
         t.schedule(new TimerTask() {
@@ -51,16 +52,15 @@ public abstract class ParallelArrayDispatcher<M extends Matrix, R extends Parall
 
         
         try {
-            
             dispatch();
             processing.set(false);
             t.cancel();
-        
             tryBreak();
+
             if (visualizer != null) {
                 visualizer.run(1);
             }
-        } catch (IllegalParallelRenderStateException | InterruptedException e) {
+        } catch (InterruptedException e) {
             processing.set(false);
             Thread.currentThread().interrupt();
         }

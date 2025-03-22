@@ -29,7 +29,8 @@ public final class ParallelRenderState {
 
         int currentID = currentID();
                 
-        currentThread = Thread.ofVirtual().start(() -> run.accept(currentID));
+        currentThread = new Thread(() -> run.accept(currentID));
+        currentThread.start();
     }
 
     /**

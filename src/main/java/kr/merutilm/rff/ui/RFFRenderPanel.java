@@ -38,6 +38,7 @@ final class RFFRenderPanel extends JPanel {
     private transient RFFMap currentMap;
     private transient Perturbator currentPerturbator;
     private final transient RFF master;
+    private volatile boolean isRendering = false;
     private static final double EXP_DEADLINE = 290;
     private static final String FINISHING_TEXT = "Finishing... ";
 
@@ -181,25 +182,34 @@ final class RFFRenderPanel extends JPanel {
 
 
     public synchronized void recompute() {
-
-        try {
-            state.createThread(id -> {
-                try {
-                    compute(id);
-                } catch (IllegalParallelRenderStateException e) {
-                    RFFLoggers.logCancelledMessage("Recompute", id);
-                }
-            });
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
+            try {
+                state.createThread(id -> {
+                    try {
+                        compute(id);
+                    } catch (IllegalParallelRenderStateException e) {
+                        RFFLoggers.logCancelledMessage("Recompute", id);
+                    }
+                });
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        
     }
 
-
     //this method can only be thread-safe when called via recompute()
-    public void compute(int currentID) throws IllegalParallelRenderStateException {
+    public void compute(int currentID) throws IllegalParallelRenderStateException{
+        try{
+            isRendering = true;
+            compute0(currentID);
+            isRendering = false;
+        }catch(IllegalParallelRenderStateException e){
+            isRendering = false;
+            throw e;
+        }
+    }
 
+    private void compute0(int currentID) throws IllegalParallelRenderStateException {
+        
         int w = getImgWidth();
         int h = getImgHeight();
 
@@ -273,16 +283,6 @@ final class RFFRenderPanel extends JPanel {
             }
         }
 
-
-        generator.createRenderer((x, y, _, _, _, _, _, _, _) -> {
-            DoubleExponent[] dc = offsetConversion(x, y);
-            //time mode
-            //long t = System.nanoTime();
-            //double iteration = currentPerturbator.iterate(dc[0], dc[1]);
-            //return (System.nanoTime() - t) / 10.0 + iteration / 1.0E20;
-            return currentPerturbator.iterate(dc[0], dc[1]);
-        });
-
         period = currentPerturbator.getReference().longestPeriod();
         int length = currentPerturbator.getReference().length();
         currentMap = new RFFMap(calc.logZoom(), period, calc.maxIteration(), iterations);
@@ -290,6 +290,11 @@ final class RFFRenderPanel extends JPanel {
         panel.setPeriodText(period, length - 1, currentPerturbator.getR3ATable().length());
         panel.setProcess("Preparing...");
 
+
+        generator.createRenderer((x, y, _, _, _, _, _, _, _) -> {
+            DoubleExponent[] dc = offsetConversion(x, y);
+            return currentPerturbator.iterate(dc[0], dc[1]);
+        });
         generator.process(p -> {
             boolean processing = p < 1;
 
@@ -305,8 +310,6 @@ final class RFFRenderPanel extends JPanel {
             }
             panel.refreshTime();
         }, 500);
-
-
     }
 
     public Perturbator getCurrentPerturbator() {
@@ -331,45 +334,39 @@ final class RFFRenderPanel extends JPanel {
         return a -> panel.setProcess(FINISHING_TEXT + TextFormatter.processText(a)
                                      + TextFormatter.frac(fracA, 2, TextFormatter.Parentheses.SQUARE));
     }
+    
 
-    public void refreshColor(){
-        try {
-            state.createThread(id -> {
-                try {
+    public synchronized void refreshColor(){
+        Runnable r = () -> {
+            try {
+                refreshColorUnsafe(state.currentID(), isRendering);
+                if(!isRendering){
                     RFFStatusPanel panel = master.getWindow().getStatusPanel();
-                    refreshColorUnsafe(id, false);
                     panel.setProcess("Done");
-                } catch (IllegalParallelRenderStateException | InterruptedException e) {
-                    Thread.currentThread().interrupt();
                 }
-            });
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    public void refreshColorUnsafe(){
-        try {
-            RFFStatusPanel panel = master.getWindow().getStatusPanel();
-            refreshColorUnsafe(state.currentID(), false);
-            panel.setProcess("Done");
-        }catch(IllegalParallelRenderStateException | InterruptedException e){
-            Thread.currentThread().interrupt();
+            }catch(InterruptedException e){
+                Thread.currentThread().interrupt();
+            }catch (IllegalParallelRenderStateException ignored){
+                //noop
+            }
+        };
+        if(isRendering){
+            r.run();
+        }else{
+            new Thread(r).start();
         }
     }
     /**
      * It is not thread-safe. Invoke via safe method.
      */
-    private void refreshColorUnsafe(int currentID, boolean compressed) throws IllegalParallelRenderStateException, InterruptedException {
+    private void refreshColorUnsafe(int currentID, boolean immediately) throws IllegalParallelRenderStateException, InterruptedException {
         ParallelRenderProcessVisualizer[] pv = new ParallelRenderProcessVisualizer[]{
                 gvf(1),
                 gvf(2)
         };
 
-        currentImage = RFFShaderProcessor.createImage(state, currentID, currentMap, master.getSettings(), compressed, pv);
-
+        currentImage = RFFShaderProcessor.createImage(state, currentID, currentMap, master.getSettings(), immediately, pv);
         repaint();
-
     }
 
     public void setCurrentMap(RFFMap currentMap) {

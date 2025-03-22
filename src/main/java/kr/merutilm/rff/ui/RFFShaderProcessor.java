@@ -48,6 +48,7 @@ final class RFFShaderProcessor {
 
         BitMap bitMap = new BitMap(iterations.getWidth() / currentDivisor, iterations.getHeight() / currentDivisor);
         shade(state, currentID, bitMap, iterations, settings, immediately, visualizers);
+        state.tryBreak(currentID);
 
         return bitMap.getImage();
     }
@@ -147,6 +148,5 @@ final class RFFShaderProcessor {
         } else {
             pp2.process(visualizers[1], 400);
         }
-
     }
 }

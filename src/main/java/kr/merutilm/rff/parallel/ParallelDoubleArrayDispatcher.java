@@ -22,7 +22,7 @@ public class ParallelDoubleArrayDispatcher extends ParallelArrayDispatcher<Doubl
     }
 
   
-    public synchronized void dispatch() throws InterruptedException {
+    public synchronized void dispatch() throws InterruptedException, IllegalParallelRenderStateException {
 
         if (renderers.isEmpty()) {
             return;
@@ -41,7 +41,7 @@ public class ParallelDoubleArrayDispatcher extends ParallelArrayDispatcher<Doubl
         final int yRes = matrix.getHeight();
         final double[] canvas = matrix.getCanvas();
 
-
+        renderState.tryBreak(renderID);
         for (ParallelDoubleArrayRenderer renderer : renderers) {
 
             if(!renderer.isValid()){
@@ -100,11 +100,11 @@ public class ParallelDoubleArrayDispatcher extends ParallelArrayDispatcher<Doubl
     
                 for (Future<Boolean> processor : processors) {
                     if(Boolean.FALSE.equals(processor.get())){
+                        tryBreak();
                         return;
                     }
-                }
-                
-            }catch(ExecutionException e){
+                } 
+            } catch(ExecutionException e){
                 ConsoleUtils.logError(e);
                 return;
             }
