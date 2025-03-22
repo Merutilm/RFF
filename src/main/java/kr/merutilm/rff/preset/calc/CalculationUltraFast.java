@@ -12,7 +12,7 @@ public class CalculationUltraFast implements Calculation{
     }
     @Override
     public R3ASettings r3aSettings() {
-        return new R3ASettings(16, 16, -3, R3ASelectionMethod.HIGHEST, R3ACompressionMethod.NO_COMPRESSION);
+        return new R3ASettings(4, 2, -3, R3ASelectionMethod.HIGHEST, R3ACompressionMethod.NO_COMPRESSION);
     }
 
     @Override

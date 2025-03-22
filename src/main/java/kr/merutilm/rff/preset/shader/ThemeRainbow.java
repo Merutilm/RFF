@@ -20,7 +20,7 @@ public class ThemeRainbow implements Shader{
 
     @Override
     public StripeSettings stripeSettings() {
-        return new StripeSettings(true, 10, 50, 1, 0);
+        return new StripeSettings(false, 10, 50, 1, 0);
     }
 
     @Override

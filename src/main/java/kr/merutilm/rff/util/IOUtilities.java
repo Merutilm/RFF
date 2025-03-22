@@ -21,6 +21,8 @@ public final class IOUtilities {
         CALCULATION_SETTINGS("rfc"),
         IMAGE_SETTINGS("rfi"),
         COLOR_PALETTE("rfp"),
+        IMAGE("png"),
+        VIDEO("mp4"),
         
         ;
 
@@ -37,7 +39,9 @@ public final class IOUtilities {
     }
 
     public enum DefaultDirectory{
-        MAP_AS_VIDEO_DATA("Videos"),
+        MAP_AS_VIDEO_DATA("videos"),
+        MAP("maps"),
+        IMAGE("images"),
         ;
 
         private final String name;
@@ -91,8 +95,8 @@ public final class IOUtilities {
             throw new IllegalArgumentException("Invalid Extension");
         }
     }
-    private static JFileChooser setupChooser(String title, String extension, String desc){
-        JFileChooser ch = new JFileChooser();
+    private static JFileChooser setupChooser(String title, File defaultFilePath, String extension, String desc){
+        JFileChooser ch = new JFileChooser(defaultFilePath.isDirectory() ? defaultFilePath : null);
         ch.setDialogTitle(title);
         ch.setMultiSelectionEnabled(false);
         ch.setFileFilter(new FileFilter() {
@@ -110,8 +114,8 @@ public final class IOUtilities {
         return ch;
     }
 
-    public static File saveFile(String title, String extension, String desc){
-        JFileChooser ch = setupChooser(title, extension, desc);
+    public static File saveFile(String title, File defaultFilePath, String extension, String desc){
+        JFileChooser ch = setupChooser(title, defaultFilePath, extension, desc);
         int r = ch.showSaveDialog(null);
         if (r == JFileChooser.APPROVE_OPTION) {
 		    return ch.getSelectedFile();
@@ -119,8 +123,8 @@ public final class IOUtilities {
         return null;
     }
 
-    public static File selectFile(String title, String extension, String desc){
-        JFileChooser ch = setupChooser(title, extension, desc);
+    public static File openFile(String title, File defaultFilePath, String extension, String desc){
+        JFileChooser ch = setupChooser(title, defaultFilePath, extension, desc);
         int r = ch.showOpenDialog(null);
         if (r == JFileChooser.APPROVE_OPTION) {
 		    return ch.getSelectedFile();
@@ -128,8 +132,8 @@ public final class IOUtilities {
         return null;
     }
 
-    public static File selectFolder(String title){
-        JFileChooser ch = new JFileChooser();
+    public static File openFolder(String title, File defaultFilePath){
+        JFileChooser ch = new JFileChooser(defaultFilePath.isDirectory() ? defaultFilePath : null);
         ch.setDialogTitle(title);
         ch.setMultiSelectionEnabled(false);
         ch.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);

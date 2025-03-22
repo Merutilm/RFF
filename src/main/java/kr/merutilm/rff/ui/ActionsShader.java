@@ -10,16 +10,16 @@ import kr.merutilm.rff.settings.*;
 import kr.merutilm.rff.util.IOUtilities;
 
 
-enum ActionsShader implements Actions {
+enum ActionsShader implements ItemActions {
 
     PALETTE("Palette", "Shader:Palette", null, 
     (master, name, description, accelerator) -> 
-    Actions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+    ItemActions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         ColorSettings color = getShaderSettings(master).colorSettings();
         
         Consumer<UnaryOperator<ColorSettings.Builder>> applier = e -> {
             master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setColorSettings(e::apply)));
-            master.getWindow().getRenderer().refreshColor();
+            master.getWindow().getRenderer().refreshColorUnsafe();
         };
 
         panel.createTextInput("Color Pulse Interval", "Required iterations for the palette to cycle once", color.iterationInterval(), Double::parseDouble, e ->
@@ -35,12 +35,12 @@ enum ActionsShader implements Actions {
 
     STRIPE("Stripe", "Shader:Stripe", null, 
     (master, name, description, accelerator) -> 
-    Actions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+    ItemActions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         StripeSettings color = getShaderSettings(master).stripeSettings();
         
         Consumer<UnaryOperator<StripeSettings.Builder>> applier = e -> {
             master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setStripeSettings(e::apply)));
-            master.getWindow().getRenderer().refreshColor();
+            master.getWindow().getRenderer().refreshColorUnsafe();
         };
 
 
@@ -62,12 +62,12 @@ enum ActionsShader implements Actions {
     }))),
     SLOPE("Slope","Shader:Slope", null, 
     (master, name, description, accelerator) -> 
-    Actions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+    ItemActions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         SlopeSettings slope = getShaderSettings(master).slopeSettings();
         
         Consumer<UnaryOperator<SlopeSettings.Builder>> applier = e -> {
             master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setSlopeSettings(e::apply)));
-            master.getWindow().getRenderer().refreshColor();
+            master.getWindow().getRenderer().refreshColorUnsafe();
         };
 
         panel.createTextInput("Depth", "Slope depth", slope.depth(), Double::parseDouble, e ->
@@ -90,12 +90,12 @@ enum ActionsShader implements Actions {
     }))),
     COLOR_FILTER("Color Filter","Shader:ColorFilter", null, 
         (master, name, description, accelerator) -> 
-        Actions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+        ItemActions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
             ColorFilterSettings colorFilter = getShaderSettings(master).colorFilterSettings();
         
             Consumer<UnaryOperator<ColorFilterSettings.Builder>> applier = e -> {
                 master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setColorFilterSettings(e::apply)));
-                master.getWindow().getRenderer().refreshColor();
+                master.getWindow().getRenderer().refreshColorUnsafe();
             };
     
             panel.createTextInput("Gamma", "Gamma value", colorFilter.gamma(), Double::parseDouble, e ->
@@ -116,12 +116,12 @@ enum ActionsShader implements Actions {
         }))),
     FOG("Fog", "Shader:Fog", null,
     (master, name, description, accelerator) -> 
-    Actions.createItem(name, description, accelerator, () ->  new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+    ItemActions.createItem(name, description, accelerator, () ->  new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         FogSettings fog = getShaderSettings(master).fogSettings();
         
         Consumer<UnaryOperator<FogSettings.Builder>> applier = e -> {
             master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setFogSettings(e::apply)));
-            master.getWindow().getRenderer().refreshColor();
+            master.getWindow().getRenderer().refreshColorUnsafe();
         };
 
         panel.createTextInput("Radius", "Fog radius ratio in rendered image, fully blurred when the value is 1.", fog.radius(), Double::parseDouble, e ->
@@ -133,12 +133,12 @@ enum ActionsShader implements Actions {
     }))),
     BLOOM("Bloom", "Shader:Bloom", null, 
     (master, name, description, accelerator) -> 
-    Actions.createItem(name, description, accelerator, () ->  new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+    ItemActions.createItem(name, description, accelerator, () ->  new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         BloomSettings bloom = getShaderSettings(master).bloomSettings();
     
         Consumer<UnaryOperator<BloomSettings.Builder>> applier = e -> {
             master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setBloomSettings(e::apply)));
-            master.getWindow().getRenderer().refreshColor();
+            master.getWindow().getRenderer().refreshColorUnsafe();
         };
 
         panel.createTextInput("Threshold", "Threshold to apply", bloom.threshold(), Double::parseDouble, e ->

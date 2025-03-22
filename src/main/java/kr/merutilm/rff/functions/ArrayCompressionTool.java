@@ -6,18 +6,19 @@ package kr.merutilm.rff.functions;
  * It can be used if there are duplicate values in the array. <p>
  * Given a range, rebase the first element in that range sequentially starting with index {@code 1}. 
  * <p><p>
- * (e.g., if the given ranges are {@code 11-15}, the first value in the range, {@code 11}, will be rebased to index {@code 1} when compressed. <p>
+ * (e.g., if the given ranges are {@code 11-15}, and the rebase index is {@code 1}, the first value in the range, {@code 11}, will be rebased to index {@code 1} when compressed. <p>
  * at the same time, the other elements will be also rebased {@code 12 → 2}, {@code 13 → 3}, {@code 14 → 4}, and {@code 15 → 5}.)
 
+ * @param rebsae the index to rebase
  * @param start the start index of uncompressed array
  * @param end the end index of uncompressed array
  */
 
-public record ArrayCompressionTool(int start, int end) {
+public record ArrayCompressionTool(int rebase, int start, int end) {
     
     public ArrayCompressionTool {
-        if(1 >= start){
-            throw new IllegalArgumentException("target index must be smaller than start index");
+        if(rebase >= start){
+            throw new IllegalArgumentException("rebase index must be smaller than start index");
         }
     }
 

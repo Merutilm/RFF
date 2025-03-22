@@ -28,11 +28,12 @@ public class HTMLStringBuilder {
         this.builder = new StringBuilder(s);
     }
 
-    public HTMLStringBuilder appendln(String str){
+    public HTMLStringBuilder appendln(Object str){
         return append(str).lineBreak();
     }
 
-    public HTMLStringBuilder append(String str){
+
+    public HTMLStringBuilder append(Object str){
         builder.append(str);
         return this;
     }
@@ -42,12 +43,12 @@ public class HTMLStringBuilder {
         return this;
     }
 
-    public HTMLStringBuilder wrap(Tag tag, String str){
+    public HTMLStringBuilder wrap(Tag tag, Object str){
         builder.append(tag.start()).append(str).append(tag.end());
         return this;
     }
     
-    public HTMLStringBuilder wrapln(Tag tag, String str){
+    public HTMLStringBuilder wrapln(Tag tag, Object str){
         return wrap(tag, str).lineBreak();
     }
 

@@ -14,7 +14,6 @@ import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.parallel.ParallelDoubleArrayDispatcher;
 import kr.merutilm.rff.parallel.ParallelRenderProcessVisualizer;
 import kr.merutilm.rff.parallel.ParallelRenderState;
-import kr.merutilm.rff.preset.Presets;
 import kr.merutilm.rff.settings.CalculationSettings;
 import kr.merutilm.rff.settings.ImageSettings;
 import kr.merutilm.rff.settings.Settings;
@@ -205,7 +204,7 @@ final class RFFRenderPanel extends JPanel {
         int h = getImgHeight();
 
         if (master.getSettings().calculationSettings().autoIteration()) {
-            master.setSettings(e -> e.setCalculationSettings(e1 -> e1.setMaxIteration(Math.max(Presets.INIT_LOCATION.maxIteration(), period * 50L))));
+            master.setSettings(e -> e.setCalculationSettings(e1 -> e1.setMaxIteration(Math.max(master.getSettings().calculationSettings().maxIteration(), period * 50L))));
         }
 
         Settings settings = master.getSettings();
@@ -288,20 +287,20 @@ final class RFFRenderPanel extends JPanel {
         int length = currentPerturbator.getReference().length();
         currentMap = new RFFMap(calc.logZoom(), period, calc.maxIteration(), iterations);
 
-        panel.setReferenceText(period, length - 1);
+        panel.setPeriodText(period, length - 1, currentPerturbator.getR3ATable().length());
         panel.setProcess("Preparing...");
 
         generator.process(p -> {
             boolean processing = p < 1;
 
             if (RFFShaderProcessor.getImageCompressDivisor(settings.imageSettings()) > 1 || processing) {
-                refreshColor(currentID, true);
+                refreshColorUnsafe(currentID, true);
             }
 
             if (processing) {
                 panel.setProcess("Calculating... " + TextFormatter.processText(p));
             } else {
-                refreshColor(currentID, false);
+                refreshColorUnsafe(currentID, false);
                 panel.setProcess("Done");
             }
             panel.refreshTime();
@@ -334,24 +333,34 @@ final class RFFRenderPanel extends JPanel {
     }
 
     public void refreshColor(){
-            try {
-                state.createThread(id -> {
-                    try {
-                        RFFStatusPanel panel = master.getWindow().getStatusPanel();
-                        refreshColor(id, false);
-                        panel.setProcess("Done");
-                    } catch (IllegalParallelRenderStateException | InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                });
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+        try {
+            state.createThread(id -> {
+                try {
+                    RFFStatusPanel panel = master.getWindow().getStatusPanel();
+                    refreshColorUnsafe(id, false);
+                    panel.setProcess("Done");
+                } catch (IllegalParallelRenderStateException | InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public void refreshColorUnsafe(){
+        try {
+            RFFStatusPanel panel = master.getWindow().getStatusPanel();
+            refreshColorUnsafe(state.currentID(), false);
+            panel.setProcess("Done");
+        }catch(IllegalParallelRenderStateException | InterruptedException e){
+            Thread.currentThread().interrupt();
+        }
     }
     /**
      * It is not thread-safe. Invoke via safe method.
      */
-    private void refreshColor(int currentID, boolean compressed) throws IllegalParallelRenderStateException, InterruptedException {
+    private void refreshColorUnsafe(int currentID, boolean compressed) throws IllegalParallelRenderStateException, InterruptedException {
         ParallelRenderProcessVisualizer[] pv = new ParallelRenderProcessVisualizer[]{
                 gvf(1),
                 gvf(2)

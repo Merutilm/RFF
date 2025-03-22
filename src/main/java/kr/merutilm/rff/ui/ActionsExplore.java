@@ -16,43 +16,40 @@ import kr.merutilm.rff.preset.Presets;
 import kr.merutilm.rff.struct.LWBigComplex;
 import kr.merutilm.rff.util.TextFormatter;
 
-enum ActionsExplore implements Actions {
+enum ActionsExplore implements ItemActions {
     RECOMPUTE("Recompute", "Recompute using current Location.", KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_DOWN_MASK), 
     (master, name, description, accelerator) ->
-    Actions.createItem(name, description, accelerator, () -> Actions.getRenderer(master).recompute())
+    ItemActions.createItem(name, description, accelerator, () -> ItemActions.getRenderer(master).recompute())
     ),
     REFRESH_COLOR("Refresh Color", "Refresh color using current Settings.", KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_DOWN_MASK), 
     (master, name, description, accelerator) ->
-    Actions.createItem(name, description, accelerator, () -> master.getWindow().getRenderer().refreshColor())),
+    ItemActions.createItem(name, description, accelerator, () -> master.getWindow().getRenderer().refreshColor())),
     RESET("Reset", "Reset to Initial Location. It contains \"Recompute\" operation.", KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.ALT_DOWN_MASK), 
     (master, name, description, accelerator) ->
-    Actions.createItem(name, description, accelerator, () -> {
-        RFFRenderPanel render = Actions.getRenderer(master);
+    ItemActions.createItem(name, description, accelerator, () -> {
+        RFFRenderPanel render = ItemActions.getRenderer(master);
         try {
             render.getState().cancel();
             Location def = Presets.Locations.DEFAULT.preset();
-            master.setSettings(e -> e.setCalculationSettings(e1 -> e1
-            .setCenter(LWBigComplex.valueOf(def.real(), def.imag()))
-            .setMaxIteration(def.maxIteration())
-            .setLogZoom(def.logZoom())));
-            Actions.getRenderer(master).recompute();
+            master.setPreset(def);
+            ItemActions.getRenderer(master).recompute();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     })),
     CANCEL("Cancel Render", "Cancels the render. If you want to continue, Use \"Recompute\" operation.", KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), 
     (master, name, description, accelerator) ->
-    Actions.createItem(name, description, accelerator, () -> {
+    ItemActions.createItem(name, description, accelerator, () -> {
                 try {
-            Actions.getRenderer(master).getState().cancel();
+            ItemActions.getRenderer(master).getState().cancel();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     })),
     FIND_CENTER("Find Center", "Find the Minibrot center using current period.", KeyStroke.getKeyStroke(KeyEvent.VK_9, InputEvent.CTRL_DOWN_MASK), 
     (master, name, description, accelerator) ->
-    Actions.createItem(name, description, accelerator, () -> {
-        RFFRenderPanel render = Actions.getRenderer(master);
+    ItemActions.createItem(name, description, accelerator, () -> {
+        RFFRenderPanel render = ItemActions.getRenderer(master);
         if (render.getCurrentPerturbator() == null) {
             return;
         } 
@@ -83,8 +80,8 @@ enum ActionsExplore implements Actions {
     })),
     LOCATE_MINIBROT("Locate Minibrot", "Locate the Minibrot using current period.", KeyStroke.getKeyStroke(KeyEvent.VK_0, InputEvent.CTRL_DOWN_MASK), 
     (master, name, description, accelerator) ->
-    Actions.createItem(name, description, accelerator, () ->  {
-        RFFRenderPanel render = Actions.getRenderer(master);
+    ItemActions.createItem(name, description, accelerator, () ->  {
+        RFFRenderPanel render = ItemActions.getRenderer(master);
         if (render.getCurrentPerturbator() == null) {
             return;
         }

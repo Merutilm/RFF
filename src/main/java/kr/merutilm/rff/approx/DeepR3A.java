@@ -81,7 +81,7 @@ public record DeepR3A(DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr
             return new DeepR3A(anr, ani, bnr, bni, skip, radius);
         }
     }
-    public boolean isValid(DoubleExponent dzr, DoubleExponent dzi){
-        return DoubleExponentMath.hypotApproximate(dzr, dzi).isSmallerThan(radius);
+    public boolean isValid(DoubleExponent dzRadius){
+        return dzRadius.isSmallerThan(radius);
     }
 }

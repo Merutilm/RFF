@@ -142,6 +142,11 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
         return reference;
     }
 
+    @Override
+    public DeepR3ATable getR3ATable() {
+        return table;
+    }
+
     public DoubleExponent dcMax(){
         return dcMax;
     }

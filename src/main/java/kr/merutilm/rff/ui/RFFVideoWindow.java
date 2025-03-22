@@ -131,7 +131,7 @@ final class RFFVideoWindow extends JFrame{
         imgWidth = (int)(targetMatrix.getWidth() * multiplier);            
         imgHeight = (int)(targetMatrix.getHeight() * multiplier);
         
-        Thread.ofVirtual().start(() -> {
+        new Thread(() -> {
         
             try(
                 FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(out, imgWidth, imgHeight);

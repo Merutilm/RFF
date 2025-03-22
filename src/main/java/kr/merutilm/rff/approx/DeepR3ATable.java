@@ -5,6 +5,7 @@ import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.parallel.ParallelRenderState;
 import kr.merutilm.rff.settings.R3ASettings;
 import kr.merutilm.rff.struct.DoubleExponent;
+import kr.merutilm.rff.util.DoubleExponentMath;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,8 +48,7 @@ public class DeepR3ATable extends R3ATable{
             state.tryBreak(currentID);
             actionPerCreatingTableIteration.accept(iteration, (double) iteration / longestPeriod);
 
-            int unCompressedTableIndex = iterationToOriginalTableIndex(r3aPeriod, iteration);
-            boolean independant = r3aCompressor == null || r3aCompressor.isIndependant(unCompressedTableIndex);
+            boolean independant = pulledR3ACompressor == null || pulledR3ACompressor.isIndependant(iterationToPulledTableIndex(r3aPeriod, iteration));
             
             for (int j = tablePeriod.length - 1; j >= 0; j--) {
 
@@ -111,20 +111,19 @@ public class DeepR3ATable extends R3ATable{
         int longestPeriod = tablePeriod[tablePeriod.length - 1];
         int maxSkip = longestPeriod - iteration;
         
-
-        
         List<DeepR3A> table = this.table.get(index);
-
+        
         if(table == null || table.isEmpty()){
             return null;
         }
+        DoubleExponent r = DoubleExponentMath.hypotApproximate(dzr, dzi);
         
         return switch (settings.r3aSelectionMethod()) {
             case LOWEST -> {
                 DeepR3A r3a = null;
 
                 for(DeepR3A test : table){
-                    if (maxSkip >= test.skip() && test.isValid(dzr, dzi)) {
+                    if (maxSkip >= test.skip() && test.isValid(r)) {
                         r3a = test;
                     }else yield r3a;
                 }
@@ -133,13 +132,13 @@ public class DeepR3ATable extends R3ATable{
             case HIGHEST -> {
 
                 DeepR3A r3a = table.getFirst();
-                if(!r3a.isValid(dzr, dzi)){
+                if(!r3a.isValid(r)){
                     yield null;
                 }
 
                 for (int j = table.size() - 1; j >= 0; j--) {
                     DeepR3A test = table.get(j);
-                    if (maxSkip >= test.skip() && test.isValid(dzr, dzi)) {
+                    if (maxSkip >= test.skip() && test.isValid(r)) {
                         yield test;
                     }
                 }
@@ -148,5 +147,10 @@ public class DeepR3ATable extends R3ATable{
 
             }
         };
+    }
+
+    @Override
+    public int length() {
+        return table.size();
     }
 }

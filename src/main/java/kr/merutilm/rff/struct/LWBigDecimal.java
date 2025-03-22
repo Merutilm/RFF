@@ -25,7 +25,7 @@ public class LWBigDecimal extends Number{
         return (int)(precision / LOG10_2);
     }
     public static int exp2ToPrecision(int exp2){
-        return (int)(exp2 * LOG10_2);
+        return (int)Math.min(0, exp2 * LOG10_2);
     }
     public static LWBigDecimal valueOf(String value, int precision){
         BigDecimal d1 = new BigDecimal(value);
@@ -193,7 +193,7 @@ public class LWBigDecimal extends Number{
             d = d.divide(BD_TWO.pow(-exp2), -exp2ToPrecision(exp2), RoundingMode.FLOOR);
         }
         if(exp2 > 0){
-            d = d.multiply(BD_TWO.pow(exp2)).setScale(-exp2ToPrecision(exp2), RoundingMode.FLOOR);;
+            d = d.multiply(BD_TWO.pow(exp2)).setScale(-exp2ToPrecision(exp2), RoundingMode.FLOOR);
         }
 
         return d;

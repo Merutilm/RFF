@@ -12,11 +12,11 @@ public class CalculationFast implements Calculation{
     }
     @Override
     public R3ASettings r3aSettings() {
-        return new R3ASettings(16, 16, -4, R3ASelectionMethod.HIGHEST, R3ACompressionMethod.LITTLE_COMPRESSION);
+        return new R3ASettings(8, 2, -4, R3ASelectionMethod.HIGHEST, R3ACompressionMethod.LITTLE_COMPRESSION);
     }
 
     @Override
     public ReferenceCompressionSettings referenceCompressionSettings() {
-        return new ReferenceCompressionSettings(10000, 7);
+        return new ReferenceCompressionSettings(100000, 7);
     }
 }

@@ -3,7 +3,7 @@ package kr.merutilm.rff.approx;
 import kr.merutilm.rff.formula.LightMandelbrotReference;
 import kr.merutilm.rff.util.AdvancedMath;
 
-public record LightR3A(double anr, double ani, double bnr, double bni, int skip, double radius) implements R3A{
+public record LightR3A(double anr, double ani, double bnr, double bni, int skip, int start, double radius) implements R3A{
 
     public static final class Builder{
         private double anr; 
@@ -80,14 +80,14 @@ public record LightR3A(double anr, double ani, double bnr, double bni, int skip,
         }
 
         public LightR3A build(){
-            return new LightR3A(anr, ani, bnr, bni, skip, radius);
+            return new LightR3A(anr, ani, bnr, bni, skip, start, radius);
         }
     }
     
 
    
 
-    public boolean isValid(double dzr, double dzi){
-        return AdvancedMath.hypotApproximate(dzr, dzi) < radius;
+    public boolean isValid(double dzRad){
+        return dzRad < radius;
     }
 }

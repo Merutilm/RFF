@@ -18,10 +18,10 @@ import kr.merutilm.rff.settings.DataSettings;
 import kr.merutilm.rff.settings.ExportSettings;
 import kr.merutilm.rff.settings.VideoSettings;
 
-enum ActionsVideo implements Actions {
+enum ActionsVideo implements ItemActions {
     DATA("Data", "Open the video data Settings. Used when generating video data files.", null, 
     (master, name, description, accelerator) ->
-    Actions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+    ItemActions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         DataSettings data = getVideoSettings(master).dataSettings();
         
         Consumer<UnaryOperator<DataSettings.Builder>> applier = e -> 
@@ -34,7 +34,7 @@ enum ActionsVideo implements Actions {
 
     ANIMATION("Animation", "Open the video animation settings. Used when creating video.", null, 
     (master, name, description, accelerator) -> 
-    Actions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+    ItemActions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         AnimationSettings animation = getVideoSettings(master).animationSettings();
         
         Consumer<UnaryOperator<AnimationSettings.Builder>> applier = e -> 
@@ -58,7 +58,7 @@ enum ActionsVideo implements Actions {
 
     EXPORT_SETTINGS("Export Settings", "Open the video export settings. You can set the quality of the video to export.", null,
     (master, name, description, accelerator) -> 
-    Actions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+    ItemActions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         ExportSettings export = getVideoSettings(master).exportSettings();
         
         Consumer<UnaryOperator<ExportSettings.Builder>> applier = e -> 
@@ -77,11 +77,11 @@ enum ActionsVideo implements Actions {
     }))),
     GENERATE_VIDEO_DATA("Generate Video Data", "Generate the video data to directory.", null, 
     (master, name, description, accelerator) -> 
-    Actions.createItem(name, description, accelerator, () -> {
+    ItemActions.createItem(name, description, accelerator, () -> {
         File defOpen = new File(IOUtilities.getOriginalResource(), IOUtilities.DefaultDirectory.MAP_AS_VIDEO_DATA.toString());
-        File dir = defOpen.isDirectory() ? defOpen : IOUtilities.selectFolder("Folder to Export Samples");
+        File dir = IOUtilities.openFolder("Folder to Export Samples", defOpen);
         DataSettings dataSettings = master.getSettings().videoSettings().dataSettings();
-        RFFRenderPanel render = Actions.getRenderer(master);
+        RFFRenderPanel render = ItemActions.getRenderer(master);
         if(dir == null){
             return;
         }
@@ -116,17 +116,18 @@ enum ActionsVideo implements Actions {
     })),
     EXPORT_ZOOMING_VIDEO("Export Zooming Video", "Export zooming video using generated video data files.", null, 
     (master, name, description, accelerator) -> 
-    Actions.createItem(name, description, accelerator, () -> {
+    ItemActions.createItem(name, description, accelerator, () -> {
         File defOpen = new File(IOUtilities.getOriginalResource(), IOUtilities.DefaultDirectory.MAP_AS_VIDEO_DATA.toString());
-            File selected = defOpen.isDirectory() ? defOpen : IOUtilities.selectFolder("Select Sample Folder");
-            if(selected == null){
-                return;
-            }
-            File toSave = defOpen.isDirectory() ? new File(defOpen, IOUtilities.DefaultFileName.VIDEO + ".mp4") : IOUtilities.saveFile(name, "mp4", "video");
-            if(toSave == null){
-                return;
-            }
-            RFFVideoWindow.createVideo(master.getSettings(), selected, toSave);
+        File selected = IOUtilities.openFolder("Select Sample Folder", defOpen);
+        if(selected == null){
+            return;
+        }
+        File defSave = new File(IOUtilities.getOriginalResource(), IOUtilities.DefaultDirectory.MAP_AS_VIDEO_DATA.toString());
+        File toSave = IOUtilities.saveFile(name, defSave, "mp4", "video");
+        if(toSave == null){
+            return;
+        }
+        RFFVideoWindow.createVideo(master.getSettings(), selected, toSave);
     })),
     ;
    

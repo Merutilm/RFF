@@ -1,62 +1,97 @@
 package kr.merutilm.rff.ui;
 
-import java.util.Arrays;
 import java.util.function.Function;
 
 import javax.swing.JMenu;
-import javax.swing.JMenuItem;
+
+import kr.merutilm.rff.preset.Presets;
 
 enum RFFSettingsMenu {
     FILE(master -> {
-        JMenu menu = Actions.createJMenu("File");
-        addAll(master, menu, ActionsFile.values());
-        return menu;
+        RFFMenuTree.Builder menuBuilder = RFFMenuTree.Builder.init("File");
+        for(ActionsFile a : ActionsFile.values()){
+            menuBuilder.createFruit(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
+        }
+
+        return (JMenu) menuBuilder.build().createUI();
     }),
     FRACTAL(master -> {
-        JMenu menu = Actions.createJMenu("Fractal");
-        addAll(master, menu, ActionsFractal.values());
-        return menu;
+        RFFMenuTree.Builder menuBuilder = RFFMenuTree.Builder.init("Fractal");
+        for(ActionsFractal a : ActionsFractal.values()){
+            menuBuilder.createFruit(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
+        }
+        
+        return (JMenu) menuBuilder.build().createUI();
     }),
     IMAGE(master -> {
-        JMenu menu = Actions.createJMenu("Image");
-        addAll(master, menu, ActionsImage.values());
-        return menu;
+        RFFMenuTree.Builder menuBuilder = RFFMenuTree.Builder.init("Image");
+        for(ActionsImage a : ActionsImage.values()){
+            menuBuilder.createFruit(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
+        }
+        
+        return (JMenu) menuBuilder.build().createUI();
     }),
     SHADER(master -> {
-        JMenu menu = Actions.createJMenu("Shader");
-        addAll(master, menu, ActionsShader.values());
-        return menu;
+        RFFMenuTree.Builder menuBuilder = RFFMenuTree.Builder.init("Shader");
+        for(ActionsShader a : ActionsShader.values()){
+            menuBuilder.createFruit(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
+        }
+        
+        return (JMenu) menuBuilder.build().createUI();
     }),
     PRESET(master -> {
-        JMenu menu = Actions.createJMenu("Preset");
-        menu.add(ActionsPreset.createCalcMenu(master));
-        menu.add(ActionsPreset.createLocationMenu(master));
-        menu.add(ActionsPreset.createRenderMenu(master));
-        menu.add(ActionsPreset.createShaderMenu(master));
+        RFFMenuTree.Builder menuBuilder = RFFMenuTree.Builder.init("Preset");
+        menuBuilder.createBranch("Calculation", e -> {
+            for(Presets.Calculations a : Presets.Calculations.values()){
+                e.createFruit(ItemActions.createItem(a.toString(), "", null, () -> master.setPreset(a.preset())));
+            }
+        });
+        menuBuilder.createBranch("Location", e -> {
+            for(Presets.Locations a : Presets.Locations.values()){
+                e.createFruit(ItemActions.createItem(a.toString(), "", null, () -> {
+                    master.setPreset(a.preset());
+                    master.getWindow().getRenderer().recompute();
+                }));
+            }
+        });
+        menuBuilder.createBranch("Render", e -> {
+            for(Presets.Renders a : Presets.Renders.values()){
+                e.createFruit(ItemActions.createItem(a.toString(), "", null, () -> {
+                    master.setPreset(a.preset());
+                    master.getWindow().getRenderer().recompute();
+                }));
+            }
+        });
+        menuBuilder.createBranch("Shader", e -> {
+            for(Presets.Shaders a : Presets.Shaders.values()){
+                e.createFruit(ItemActions.createItem(a.toString(), "", null, () -> {
+                    master.setPreset(a.preset());
+                    master.getWindow().getRenderer().refreshColorUnsafe();
+                }));
+            }
+        });
 
-        return menu;
+        return (JMenu) menuBuilder.build().createUI();
     }),
     VIDEO(master -> {
-        JMenu menu = Actions.createJMenu("Video");
-        addAll(master, menu, ActionsVideo.values());
-        return menu;
+        RFFMenuTree.Builder menuBuilder = RFFMenuTree.Builder.init("Video");
+        for(ActionsVideo a : ActionsVideo.values()){
+            menuBuilder.createFruit(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
+        }
+        
+        return (JMenu) menuBuilder.build().createUI();
     }),
     EXPLORE(master -> {
-        JMenu menu = Actions.createJMenu("Explore");
-        addAll(master, menu, ActionsExplore.values());
-        return menu;
+        RFFMenuTree.Builder menuBuilder = RFFMenuTree.Builder.init("File");
+        for(ActionsExplore a : ActionsExplore.values()){
+            menuBuilder.createFruit(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
+        }
+        
+        return (JMenu) menuBuilder.build().createUI();
     }),
     ;
 
     private final Function<RFF, JMenu> function;
-    
-
-    public static <T extends Actions> void addAll(RFF master, JMenu menu, T[] items){
-        Arrays.stream(items).forEach(e -> {
-            JMenuItem item = e.initializer().init(master, e.toString(), e.description(), e.keyStroke());
-            Actions.addItem(menu, item);
-        });
-    }
 
     public JMenu getMenu(RFF master) {
         return function.apply(master);

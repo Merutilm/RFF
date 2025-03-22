@@ -64,7 +64,7 @@ public class ArrayCompressor {
         for (int i = tools.size() - 1; i >= 0; i--) {
             ArrayCompressionTool tool = tools.get(i);
             if (tool.start() <= rebased && rebased <= tool.end()) {
-                rebased -= tool.start() - 1;
+                rebased -= tool.start() - tool.rebase();
             }else if (rebased > tool.end()){
                 break;
             }
@@ -168,7 +168,7 @@ public class ArrayCompressor {
     }
 
 
-    public List<ArrayCompressionTool> rebasingTools(){
+    public List<ArrayCompressionTool> tools(){
         return tools;
     }
 

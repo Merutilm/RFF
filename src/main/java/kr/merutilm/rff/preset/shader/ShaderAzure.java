@@ -35,7 +35,7 @@ public class ShaderAzure implements Shader{
 
     @Override
     public StripeSettings stripeSettings() {
-        return new StripeSettings(true, 4, 40, 0.4, 0);
+        return new StripeSettings(true, 4, 40, 0.2, 0);
     }
     
     @Override
@@ -45,7 +45,7 @@ public class ShaderAzure implements Shader{
 
     @Override
     public ColorFilterSettings colorFilterSettings() {
-        return new ColorFilterSettings(1,0.2,0.5,0.0,0);
+        return new ColorFilterSettings(1,0.2,0.5,0.0,0.05);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class ShaderAzure implements Shader{
 
     @Override
     public BloomSettings bloomSettings() {
-        return new BloomSettings(0.03, 0.125, 0, 1);
+        return new BloomSettings(0.0, 0.1, 0, 1.2);
     }
     
 }

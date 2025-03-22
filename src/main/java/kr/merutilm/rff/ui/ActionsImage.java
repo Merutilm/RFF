@@ -13,11 +13,11 @@ import kr.merutilm.rff.io.BitMapImage;
 import kr.merutilm.rff.settings.ImageSettings;
 import kr.merutilm.rff.util.IOUtilities;
 
-enum ActionsImage implements Actions {
+enum ActionsImage implements ItemActions {
     
     RESOLUTION("Set Resolution", "Set the resolution of rendered image. It contains \"Recompute\" operation.",  null, 
     (master, name, description, accelerator) ->
-    Actions.createItem(name, description, accelerator, () ->  new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+    ItemActions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
 
         ImageSettings image = getImageSettings(master);
 
@@ -26,19 +26,20 @@ enum ActionsImage implements Actions {
 
         panel.createTextInput(name, "The resolution multiplier of current window.", image.resolutionMultiplier(), Double::parseDouble, e -> {
             applier.accept(t -> t.setResolutionMultiplier(e));
-            Actions.getRenderer(master).recompute();
+            ItemActions.getRenderer(master).recompute();
         });
 
     }))),
     SAVE_IMAGE("Save Image", "Export current rendered image to file", KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), 
     (master, name, description, accelerator) ->
-    Actions.createItem(name, description, accelerator, () -> {
-        File file = IOUtilities.saveFile(name, "png", "Image");
+    ItemActions.createItem(name, description, accelerator, () -> {
+        File defSave = new File(IOUtilities.getOriginalResource(), IOUtilities.DefaultDirectory.IMAGE.toString());
+        File file = IOUtilities.saveFile(name, defSave, IOUtilities.Extension.IMAGE.toString(), "Save Image");
         if(file == null){
             return;
         }
         try {
-            new BitMapImage(Actions.getRenderer(master).getCurrentImage()).export(file);
+            new BitMapImage(ItemActions.getRenderer(master).getCurrentImage()).export(file);
         } catch (IOException e) {
             throw new IllegalStateException();
         }

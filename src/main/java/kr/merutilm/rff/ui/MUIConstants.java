@@ -12,6 +12,8 @@ final class MUIConstants {
 
     }
 
+    public static final int MENU_ITEM_MIN_WIDTH = 180;
+
     public static final int UI_HEIGHT = 30;
     
     public static final int UI_SELECTION_HEIGHT = 25;

@@ -11,13 +11,13 @@ import kr.merutilm.rff.settings.R3ACompressionMethod;
 import kr.merutilm.rff.settings.R3ASettings;
 import kr.merutilm.rff.util.ArrayFunction;
 
-public class R3ATable {
+public abstract class R3ATable {
 
     protected final R3ASettings settings;
-    protected final ArrayCompressor r3aCompressor;
+    protected final ArrayCompressor pulledR3ACompressor;
     protected final Period r3aPeriod;
     
-    public R3ATable(MandelbrotReference reference, R3ASettings r3aSettings){
+    protected R3ATable(MandelbrotReference reference, R3ASettings r3aSettings){
         int[] referencePeriod = reference.period();
         int longestPeriod = reference.longestPeriod();
         int minSkip = r3aSettings.minSkipReference();
@@ -25,45 +25,48 @@ public class R3ATable {
         if(longestPeriod < minSkip){
             this.settings = r3aSettings;
             this.r3aPeriod = null;
-            this.r3aCompressor = null;
+            this.pulledR3ACompressor = null;
             return;
         }
 
         R3ACompressionMethod compressionMethod = r3aSettings.r3aCompressionMethod();
         Period r3aPeriod = R3ATable.Period.create(referencePeriod, r3aSettings);
-        ArrayCompressor r3aCompressor = compressionMethod == R3ACompressionMethod.STRONGEST ? generateR3ACompressor(r3aPeriod, reference.refReal()) : null;        
+        ArrayCompressor pulledR3ACompressor = compressionMethod == R3ACompressionMethod.STRONGEST ? createPulledR3ACompressor(r3aPeriod, reference.refReal()) : null;        
         
         this.settings = r3aSettings;
         this.r3aPeriod = r3aPeriod;
-        this.r3aCompressor = r3aCompressor;
+        this.pulledR3ACompressor = pulledR3ACompressor;
         
     }
 
+    public abstract int length();
 
-    private static ArrayCompressor generateR3ACompressor(Period r3aPeriod, ArrayCompressor refCompressor){
+    private static ArrayCompressor createPulledR3ACompressor(Period r3aPeriod, ArrayCompressor refCompressor){
         
 
         List<ArrayCompressionTool> r3aTools = new ArrayList<>();
         int[] tablePeriod = r3aPeriod.tablePeriod;
         int[] tablePeriodElements = r3aPeriod.tableElements;
+        int[] requiredPerturbation = r3aPeriod.requiredPerturbation;
 
-        for (ArrayCompressionTool tool : refCompressor.rebasingTools()) {
+        for (ArrayCompressionTool tool : refCompressor.tools()) {
             
             int start = tool.start();
             int length = tool.range();
             int index = Arrays.binarySearch(tablePeriod, length + 1);
             //if the reference compressor is same as period
-            if(index >= 0){
-                int tableIndex = iterationToOriginalTableIndex(r3aPeriod, start);
+            if(index >= 0 && requiredPerturbation[index] == Period.getRequiredPerturbationCount(false)){
+                int tableIndex = iterationToPulledTableIndex(r3aPeriod, start);
                 int periodElements = tablePeriodElements[index];
-                
-                r3aTools.add(new ArrayCompressionTool(tableIndex + 1, tableIndex + periodElements - 1));
+
+                r3aTools.add(new ArrayCompressionTool(1, tableIndex + 1, tableIndex + periodElements - 1));
+    
             }
         }
         return new ArrayCompressor(r3aTools);
     }
 
-    protected static int iterationToOriginalTableIndex(Period r3aPeriod, int iteration){
+    protected static int iterationToPulledTableIndex(Period r3aPeriod, int iteration){
         //
         // get index <=> Inverse calculation of index compression
         // First approach : check the remainder == 1
@@ -135,10 +138,10 @@ public class R3ATable {
 
         return switch(settings.r3aCompressionMethod()){
             case NO_COMPRESSION -> iteration;
-            case LITTLE_COMPRESSION -> iterationToOriginalTableIndex(r3aPeriod, iteration);
+            case LITTLE_COMPRESSION -> iterationToPulledTableIndex(r3aPeriod, iteration);
             case STRONGEST -> {
-                int index = iterationToOriginalTableIndex(r3aPeriod, iteration);
-                yield index == -1 || r3aCompressor == null ? -1 : r3aCompressor.compress(index);
+                int index = iterationToPulledTableIndex(r3aPeriod, iteration);
+                yield index == -1 || pulledR3ACompressor == null ? -1 : pulledR3ACompressor.compress(index);
             }
             default -> -1;
         };
@@ -290,6 +293,7 @@ public class R3ATable {
                         requiredPerturbationArrayTemp = ArrayFunction.exp2xArr(requiredPerturbationArrayTemp);
                     }
                     tablePeriodArrayTemp[periodArraySize] = p;
+                    requiredPerturbationArrayTemp[periodArraySize] = getRequiredPerturbationCount(false);
                     periodArraySize++;
                     currentRefPeriod = p;
     

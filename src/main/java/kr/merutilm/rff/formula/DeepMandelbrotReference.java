@@ -119,7 +119,7 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, C
                 } else if (reuseIndex != 0) {
                     if (reuseIndex > compressCriteria) { 
 
-                        ArrayCompressionTool compressor = new ArrayCompressionTool(iteration - reuseIndex + 1, iteration);
+                        ArrayCompressionTool compressor = new ArrayCompressionTool(1, iteration - reuseIndex + 1, iteration);
                         compressed += compressor.range(); //get the increment of iteration
                         tools.add(compressor);
                     }

@@ -22,8 +22,8 @@ final class RFF {
 
     private final RFFRenderWindow window;
 
-    private static final int INIT_WIDTH = 1294;
-    private static final int INIT_HEIGHT = 803;
+    private static final int INIT_WIDTH = 1280;
+    private static final int INIT_HEIGHT = 720;
 
     private Settings settings = Presets.INIT_SETTINGS;
 

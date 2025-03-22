@@ -15,14 +15,10 @@ import kr.merutilm.rff.settings.ReuseReferenceMethod;
 import kr.merutilm.rff.settings.Settings;
 import kr.merutilm.rff.settings.VideoSettings;
 
-public class Presets {
+public class Presets implements Selectable{
 
-    
-    private Presets(){
 
-    }
-
-    public static final Calculation INIT_CALCULATION = Calculations.FAST.preset();
+    public static final Calculation INIT_CALCULATION = Calculations.ULTRA_FAST.preset();
     public static final Location INIT_LOCATION = Locations.DEFAULT.preset();
 
     public static final Render INIT_RENDER = Renders.MEDIUM.preset();
@@ -57,6 +53,8 @@ public class Presets {
         NORMAL(new CalculationNormal()),
         ACCURATE(new CalculationAccurate()),
         STABLE(new CalculationStable()),
+        ULTRA_STABLE(new CalculationUltraStable()),
+        EXTREME_STABLE(new CalculationExtremeStable()),
         ;
         private final Calculation preset;
     

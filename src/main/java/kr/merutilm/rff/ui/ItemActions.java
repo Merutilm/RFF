@@ -10,7 +10,7 @@ import javax.swing.KeyStroke;
 import kr.merutilm.rff.functions.BooleanConsumer;
 import kr.merutilm.rff.selectable.Selectable;
 
-interface Actions extends Selectable{
+interface ItemActions extends Selectable{
     
     static RFFRenderPanel getRenderer(RFF master) {
         return master.getWindow().getRenderer();
@@ -21,32 +21,19 @@ interface Actions extends Selectable{
     }
 
     static JCheckBoxMenuItem createCheckBoxItem(String name, String description, KeyStroke accelerator, boolean initValue, BooleanConsumer action){
-        JCheckBoxMenuItem item = new JCheckBoxMenuItem(name, initValue);
-        item.setToolTipText(description);
+        JCheckBoxMenuItem item = new RFFCheckBoxMenuItem(name, description, initValue);
         item.setAccelerator(accelerator);
-        item.setFont(MUIConstants.DEFAULT_FONT);
         item.addItemListener(e -> action.accept(e.getStateChange() == ItemEvent.SELECTED));
         return item;
     }
 
     static JMenuItem createItem(String name, String description, KeyStroke accelerator, Runnable action){
-        JMenuItem item = new JMenuItem(name);
-        item.setToolTipText(description);
+        JMenuItem item = new RFFMenuItem(name, description);
         item.setAccelerator(accelerator);
-        item.setFont(MUIConstants.DEFAULT_FONT);
         item.addActionListener(_ -> action.run());
         return item;
     }
 
-    static JMenu createJMenu(String name, String description){
-        JMenu menu = new JMenu(name);
-        menu.setToolTipText(description);
-        menu.setFont(MUIConstants.DEFAULT_FONT);
-        return menu;
-    }
-    static JMenu createJMenu(String name){
-        return createJMenu(name, null);
-    }
 
     static void addItem(JMenu menu, JMenuItem item){
         menu.add(item);

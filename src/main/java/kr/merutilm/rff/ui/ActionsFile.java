@@ -9,13 +9,14 @@ import javax.swing.KeyStroke;
 import kr.merutilm.rff.io.RFFMap;
 import kr.merutilm.rff.util.IOUtilities;
 
-enum ActionsFile implements Actions {
+enum ActionsFile implements ItemActions {
 
     OPEN_MAP("Open Map", "Open RFF Map file(" + IOUtilities.Extension.MAP + ")", KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.CTRL_DOWN_MASK), 
     (master, name, description, accelerator) ->
-    Actions.createItem(name, description, accelerator, () -> {
+    ItemActions.createItem(name, description, accelerator, () -> {
         RFFRenderPanel renderer = master.getWindow().getRenderer();
-        File file = IOUtilities.selectFile(name, IOUtilities.Extension.MAP.toString(), "RFF Map");
+        File defOpen = new File(IOUtilities.getOriginalResource(), IOUtilities.DefaultDirectory.MAP.toString());
+        File file = IOUtilities.openFile(name, defOpen, IOUtilities.Extension.MAP.toString(), "RFF Map");
         if (file == null) {
             return;
         }

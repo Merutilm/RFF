@@ -5,18 +5,18 @@ import kr.merutilm.rff.settings.R3ASelectionMethod;
 import kr.merutilm.rff.settings.R3ASettings;
 import kr.merutilm.rff.settings.ReferenceCompressionSettings;
 
-public class CalculationAccurate implements Calculation {
+public class CalculationUltraStable implements Calculation {
     @Override
     public String getName() {
-        return "Accurate";
+        return "Ultra Stable";
     }
     @Override
     public R3ASettings r3aSettings() {
-        return new R3ASettings(8, 2, -6, R3ASelectionMethod.HIGHEST, R3ACompressionMethod.LITTLE_COMPRESSION);
+        return new R3ASettings(16, 4, -4, R3ASelectionMethod.HIGHEST, R3ACompressionMethod.STRONGEST);
     }
 
     @Override
     public ReferenceCompressionSettings referenceCompressionSettings() {
-        return new ReferenceCompressionSettings(100000, 15);
+        return new ReferenceCompressionSettings(1000, 6);
     }
 }

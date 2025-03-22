@@ -9,6 +9,7 @@ import java.util.*;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
+import javax.swing.SwingUtilities;
 
 import kr.merutilm.rff.util.IOUtilities;
 
@@ -35,7 +36,7 @@ final class RFFRenderWindow extends JFrame {
             public void componentResized(ComponentEvent e) {
                 super.componentResized(e);
                 if (e.getComponent().isShowing()) {
-                    drawPanel.recompute();
+                    SwingUtilities.invokeLater(drawPanel::recompute);
                 }
             }
         });
@@ -54,11 +55,16 @@ final class RFFRenderWindow extends JFrame {
         add(statusPanel, BorderLayout.SOUTH);
         add(drawPanel, BorderLayout.CENTER);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-
-        pack();
+        setWindowSize(w, h);
         setLocationRelativeTo(null);
         setVisible(true);
-        drawPanel.recompute();
+        SwingUtilities.invokeLater(drawPanel::recompute);
+    }
+
+    public void setWindowSize(int w, int h){
+        pack(); //first-packing, it sets the height of statusPanel and menubar, and we will obtain the drawPanel size errors. 
+        setPreferredSize(new Dimension(w * 2 - drawPanel.getWidth(), h * 2 - drawPanel.getHeight())); //adjust the panel size to fit the init size
+        pack(); //re-packing for resizing window
     }
 
     public void setCurrentSettingsWindow(RFFSettingsWindow currentSettingsWindow) {

@@ -176,6 +176,11 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
         return reference;
     }
 
+    @Override
+    public LightR3ATable getR3ATable() {
+        return table;
+    }
+
     public double dcMax() {
         return dcMax;
     }

@@ -118,7 +118,7 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
                 } else if (reuseIndex != 0) {
                     if (reuseIndex > compressCriteria) { // reference compression criteria
 
-                        ArrayCompressionTool compressor = new ArrayCompressionTool(iteration - reuseIndex + 1, iteration);
+                        ArrayCompressionTool compressor = new ArrayCompressionTool(1, iteration - reuseIndex + 1, iteration);
                         compressed += compressor.range(); //get the increment of iteration
                         tools.add(compressor);
                     }

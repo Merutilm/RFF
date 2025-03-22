@@ -19,10 +19,69 @@ import kr.merutilm.rff.settings.R3ASelectionMethod;
 import kr.merutilm.rff.settings.ReuseReferenceMethod;
 import kr.merutilm.rff.settings.R3ACompressionMethod;
 
-enum ActionsFractal implements Actions {
+enum ActionsFractal implements ItemActions {
+    REFERENCE("Reference", "Open the reference settings. You can set the Location, Zoom, and etc. here.", null, 
+    (master, name, description, accelerator) ->
+    ItemActions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (window, panel) -> {
+        CalculationSettings calc = getCalculationSettings(master);
+
+        Consumer<UnaryOperator<CalculationSettings.Builder>> applier = e ->
+                master.setSettings(e1 -> e1.setCalculationSettings(e::apply));
+        AtomicReference<String> realStr = new AtomicReference<>(calc.center().re().toString());
+        AtomicReference<String> imagStr = new AtomicReference<>(calc.center().im().toString());
+        AtomicReference<Double> zoomStr = new AtomicReference<>(calc.logZoom());
+
+
+        panel.createTextInput("Center:Re", "Real part of center, The changes will be applied when this window is closed.", calc.center().re().toString(), s -> s, realStr::set);
+        panel.createTextInput("Center:Im", "Imaginary part of center, The changes will be applied when this window is closed.", calc.center().im().toString(), s -> s, imagStr::set);
+        panel.createTextInput("Log Zoom", "The logarithm by 10 of zoom, The changes will be applied when this window is closed.", calc.logZoom(), Double::parseDouble, zoomStr::set);
+        panel.createSelectInput("Reuse Reference", "Set the method of reference reusing.", calc.reuseReference(), ReuseReferenceMethod.values(), e ->
+                applier.accept(f -> f.setReuseReference(e)), false
+        );
+        panel.createTextInput("Reference Compress Criteria", new HTMLStringBuilder().wrapln(Tag.BOLD, "Reference Compress Criteria").appendln("When compressing references, sets the minimum amount of references to compress at one time.").appendln("Reference compression slows down the calculation but frees up memory space.").append("To disable, write -1.").toString(), calc.referenceCompressionSettings().compressCriteria(), Integer::parseInt, e ->
+                applier.accept(f -> f.setReferenceCompressionSettings(g -> g.setCompressCriteria(e)))
+        );
+        panel.createTextInput("Reference Compress Threshold", new HTMLStringBuilder().wrapln(Tag.BOLD, "Reference Compress Threshold").appendln("When compressing references, sets the negative exponents of ten of minimum error to be considered equal.").appendln("Reference compression slows down the calculation but frees up memory space.").append("To disable, write -1.").toString(), calc.referenceCompressionSettings().compressionThresholdPower(), Integer::parseInt, e ->
+                applier.accept(f -> f.setReferenceCompressionSettings(g -> g.setCompressionThresholdPower(e)))
+        );
+        window.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                applier.accept(f -> {
+                    double zoom = zoomStr.get();
+                    int precision = Perturbator.precision(zoom);
+
+                    LWBigDecimal re = LWBigDecimal.valueOf(realStr.get(), precision);
+                    LWBigDecimal im = LWBigDecimal.valueOf(imagStr.get(), precision);
+
+                    return f.setCenter(new LWBigComplex(re, im)).setLogZoom(zoom);
+                });
+            }
+        });
+
+    }))),
+    ITERATIONS("Iteration", "Open the iteration settings. You can set the Max Iteration, Auto Iteration, and etc. here.", null, 
+    (master, name, description, accelerator) ->
+    ItemActions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+        CalculationSettings calc = getCalculationSettings(master);
+
+        Consumer<UnaryOperator<CalculationSettings.Builder>> applier = e ->
+                master.setSettings(e1 -> e1.setCalculationSettings(e::apply));
+
+        panel.createTextInput("Max Iteration", "Set maximum iteration. It is disabled when Auto iteration is enabled.", calc.maxIteration(), Long::parseLong, e ->
+                applier.accept(f -> f.setMaxIteration(e)));
+
+        panel.createTextInput("Bailout", "Set the bailout radius.", calc.bailout(), Double::parseDouble, e ->
+                applier.accept(f -> f.setBailout(e))
+        );
+        panel.createSelectInput("Decimalize Iteration Method", "Iteration decimalization method", calc.decimalizeIterationMethod(), DecimalizeIterationMethod.values(), e ->
+                applier.accept(f -> f.setDecimalizeIterationMethod(e)), true
+        );
+    }))),
     R3A("R3A", new HTMLStringBuilder().wrapln(Tag.BOLD, "Recursive Reference Rebasing Approximation.").appendln("Determine all of the period based on reference orbit, skips the period of iteration at once.").append("The render speed will be significantly faster when using it recursively.").toString(), null, 
     (master, name, description, accelerator) ->
-    Actions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
+    ItemActions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
         R3ASettings r3a = getCalculationSettings(master).r3aSettings();
 
         Consumer<UnaryOperator<R3ASettings.Builder>> applier = e ->
@@ -44,76 +103,18 @@ enum ActionsFractal implements Actions {
                 applier.accept(f -> f.setR3ACompressionMethod(e)), false
         );
     }))),
-
-    ITERATIONS("Iteration", "Open the iteration settings. You can set the Max Iteration, Auto Iteration, and etc. here.", null, 
-    (master, name, description, accelerator) ->
-    Actions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
-        CalculationSettings calc = getCalculationSettings(master);
-
-        Consumer<UnaryOperator<CalculationSettings.Builder>> applier = e ->
-                master.setSettings(e1 -> e1.setCalculationSettings(e::apply));
-
-        panel.createTextInput("Max Iteration", "Set maximum iteration. It is disabled when Auto iteration is enabled.", calc.maxIteration(), Long::parseLong, e ->
-                applier.accept(f -> f.setMaxIteration(e)));
-
-        panel.createTextInput("Bailout", "Set the bailout radius.", calc.bailout(), Double::parseDouble, e ->
-                applier.accept(f -> f.setBailout(e))
-        );
-        panel.createSelectInput("Decimalize Iteration Method", "Iteration decimalization method", calc.decimalizeIterationMethod(), DecimalizeIterationMethod.values(), e ->
-                applier.accept(f -> f.setDecimalizeIterationMethod(e)), true
-        );
-    }))),
     AUTOMATIC_ITERATIONS("Automatic Iterations", "Set max iteration automatic.", null, 
     (master, name, description, accelerator) -> 
-    Actions.createCheckBoxItem(name, description, accelerator, getCalculationSettings(master).autoIteration(), b -> 
+    ItemActions.createCheckBoxItem(name, description, accelerator, getCalculationSettings(master).autoIteration(), b -> 
         master.setSettings(e1 -> e1.setCalculationSettings(e2 -> e2.setAutoIteration(b)))
     )),
     ABSOLUTE_ITERATION_MODE("Absolute Iteration Mode", new HTMLStringBuilder().wrapln(Tag.BOLD, "Absolute Iteration Mode").appendln("Define the iteration as while-loop count instead of the perturbation.").toString(), null, 
     (master, name, description, accelerator) -> 
-    Actions.createCheckBoxItem(name, description, accelerator, getCalculationSettings(master).absoluteIterationMode(), b -> 
+    ItemActions.createCheckBoxItem(name, description, accelerator, getCalculationSettings(master).absoluteIterationMode(), b -> 
         master.setSettings(e1 -> e1.setCalculationSettings(e2 -> e2.setAbsoluteIterationMode(b)))
     )),
-    REFERENCE("Reference", "Open the reference settings. You can set the Location, Zoom, and etc. here.", null, 
-    (master, name, description, accelerator) ->
-    Actions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (window, panel) -> {
-        CalculationSettings calc = getCalculationSettings(master);
-
-        Consumer<UnaryOperator<CalculationSettings.Builder>> applier = e ->
-                master.setSettings(e1 -> e1.setCalculationSettings(e::apply));
-        AtomicReference<String> realStr = new AtomicReference<>(calc.center().re().toString());
-        AtomicReference<String> imagStr = new AtomicReference<>(calc.center().im().toString());
-        AtomicReference<Double> zoomStr = new AtomicReference<>(calc.logZoom());
-
-
-        panel.createTextInput("Center:Re", "Real part of center, The changes will be applied when this window is closed.", calc.center().re().toString(), s -> s, realStr::set);
-        panel.createTextInput("Center:Im", "Imaginary part of center, The changes will be applied when this window is closed.", calc.center().im().toString(), s -> s, imagStr::set);
-        panel.createTextInput("Log Zoom", "The logarithm by 10 of zoom, The changes will be applied when this window is closed.", calc.logZoom(), Double::parseDouble, zoomStr::set);
-        panel.createSelectInput("Reuse Reference", "Set the method of reference reusing.", calc.reuseReference(), ReuseReferenceMethod.values(), e ->
-                applier.accept(f -> f.setReuseReference(e)), false
-        );
-        panel.createTextInput("Reference Compress Criteria", new HTMLStringBuilder().wrapln(Tag.BOLD, "Reference Compress Criteria").appendln("When compressing references, sets the minimum amount of references to compress at one time.").appendln("Reference compression slows down the calculation but frees up memory space.").append("To disable, write -1.").toString(), calc.referenceCompressionSettings().compressCriteria(), Integer::parseInt, e ->
-                applier.accept(f -> f.setReferenceCompressionSettings(g -> g.setCompressCriteria(e)))
-        );
-        panel.createTextInput("Reference Compress Threshold", new HTMLStringBuilder().wrapln(Tag.BOLD, "Reference Compress Threshold").appendln("When compressing references, sets the negative exponents of ten of minimum error to be considered equal.").appendln("Reference compression slows down the calculation but frees up memory space.").append("To disable, write -1.").toString(), calc.referenceCompressionSettings().compressionThresholdPower(), Integer::parseInt, e ->
-        applier.accept(f -> f.setReferenceCompressionSettings(g -> g.setCompressionThresholdPower(e)))
-);
-        window.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                super.windowClosing(e);
-                applier.accept(f -> {
-                    double zoom = zoomStr.get();
-                    int precision = Perturbator.precision(zoom);
-
-                    LWBigDecimal re = LWBigDecimal.valueOf(realStr.get(), precision);
-                    LWBigDecimal im = LWBigDecimal.valueOf(imagStr.get(), precision);
-
-                    return f.setCenter(new LWBigComplex(re, im)).setLogZoom(zoom);
-                });
-            }
-        });
-
-    })));
+    ;
+        
 
 
     private final String name;

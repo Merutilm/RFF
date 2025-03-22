@@ -34,9 +34,9 @@ public class ShaderFlame implements Shader{
 
     @Override
     public StripeSettings stripeSettings() {
-        return new StripeSettings(false, 4, 40, 0.4, 0);
+        return new StripeSettings(true, 4, 40, 0.2, 0);
     }
-
+    
     @Override
     public SlopeSettings slopeSettings() {
         return new SlopeSettings(200, 0.4, 1, 60, 135);      
@@ -44,7 +44,7 @@ public class ShaderFlame implements Shader{
 
     @Override
     public ColorFilterSettings colorFilterSettings() {
-        return new ColorFilterSettings(1,0.2,0.5,0.0,0);
+        return new ColorFilterSettings(1,0.2,0.5,0.0,0.05);
     }
 
     @Override
@@ -54,7 +54,6 @@ public class ShaderFlame implements Shader{
 
     @Override
     public BloomSettings bloomSettings() {
-        return new BloomSettings(0.03, 0.125, 0, 1);
+        return new BloomSettings(0.0, 0.1, 0, 1.2);
     }
-    
 }

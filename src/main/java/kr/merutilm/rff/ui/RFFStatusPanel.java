@@ -9,6 +9,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
+
+import kr.merutilm.rff.ui.HTMLStringBuilder.Tag;
 import kr.merutilm.rff.util.AdvancedMath;
 
 final class RFFStatusPanel extends JPanel {
@@ -53,10 +55,12 @@ final class RFFStatusPanel extends JPanel {
         zoom.getNameLabel().setText(SPACE + "Zoom : " + text);
     }
 
-    public void setReferenceText(int period, int length) {
+    public void setPeriodText(int period, int length, int r3aLength) {
         String tPeriod = NumberFormat.getNumberInstance(Locale.US).format(period);
         String tLength = NumberFormat.getNumberInstance(Locale.US).format(length);
-        this.period.getNameLabel().setText(SPACE + "Period : " + tPeriod + " (" + tLength + ")");
+        String tR3ALength = NumberFormat.getNumberInstance(Locale.US).format(r3aLength);
+        this.period.getNameLabel().setText(SPACE + "Period : " + tPeriod);
+        this.period.setToolTipText(new HTMLStringBuilder().wrap(Tag.BOLD,"Reference Length : ").appendln(tLength).wrap(Tag.BOLD, "R3A Table Length : ").append(tR3ALength).toString());
     }
 
     public void initTime() {
