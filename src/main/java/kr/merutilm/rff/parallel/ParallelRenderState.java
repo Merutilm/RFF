@@ -31,6 +31,7 @@ public final class ParallelRenderState {
                 
         currentThread = new Thread(() -> run.accept(currentID));
         currentThread.start();
+        
     }
 
     /**
