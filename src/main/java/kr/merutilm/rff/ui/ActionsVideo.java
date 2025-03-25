@@ -17,6 +17,7 @@ import kr.merutilm.rff.settings.CalculationSettings;
 import kr.merutilm.rff.settings.DataSettings;
 import kr.merutilm.rff.settings.ExportSettings;
 import kr.merutilm.rff.settings.VideoSettings;
+import kr.merutilm.rff.settings.Settings;
 
 enum ActionsVideo implements ItemActions {
     DATA("Data", "Open the video data Settings. Used when generating video data files.", null, 
@@ -95,12 +96,14 @@ enum ActionsVideo implements ItemActions {
                             Files.delete(f.toPath());
                         }
                     }
+                    Settings settings = master.getSettings();
 
                     while (master.getSettings().calculationSettings().logZoom() > CalculationSettings.MINIMUM_ZOOM) {
-                        render.compute(id);
+                        render.compute(settings, id);
                         render.getCurrentMap().exportAsVideoData(dir);
-                        master.setSettings(e -> e.setCalculationSettings(
-                                e1 -> e1.zoomOut(Math.log10(dataSettings.defaultZoomIncrement()))));
+                        settings = settings.edit().setCalculationSettings(
+                            e1 -> e1.zoomOut(Math.log10(dataSettings.defaultZoomIncrement()))).build();
+                        master.setSettings(settings);
                     }
 
                 } catch (IOException e) {

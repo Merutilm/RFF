@@ -15,6 +15,7 @@ import kr.merutilm.rff.preset.location.Location;
 import kr.merutilm.rff.preset.Presets;
 import kr.merutilm.rff.struct.LWBigComplex;
 import kr.merutilm.rff.util.TextFormatter;
+import kr.merutilm.rff.settings.Settings;
 
 enum ActionsExplore implements ItemActions {
     RECOMPUTE("Recompute", "Recompute using current Location.", KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_DOWN_MASK), 
@@ -62,9 +63,9 @@ enum ActionsExplore implements ItemActions {
                     if (c == null) {
                         sendCenterNotFoundMessage();
                     } else {
-                        master.setSettings(e -> e.setCalculationSettings(e1 -> e1
-                                .setCenter(c)));
-                        render.compute(id);
+                        Settings settings = master.getSettings().edit().setCalculationSettings(e1 -> e1.setCenter(c)).build();
+                        master.setSettings(settings);
+                        render.compute(settings, id);
                     }
                 }catch (IllegalParallelRenderStateException e) {
                     sendCenterNotFoundMessage();
@@ -82,24 +83,32 @@ enum ActionsExplore implements ItemActions {
     (master, name, description, accelerator) ->
     ItemActions.createItem(name, description, accelerator, () ->  {
         RFFRenderPanel render = ItemActions.getRenderer(master);
+        RFFStatusPanel panel = master.getWindow().getStatusPanel();
+        Settings settings = master.getSettings();
+        double logZoom = settings.calculationSettings().logZoom();
+
         if (render.getCurrentPerturbator() == null) {
             return;
         }
         try{
+
+
             render.getState().createThread(id -> {
                 try{
+                    
                     int period = render.getCurrentPerturbator().getReference().longestPeriod();
                     MandelbrotLocator locator = MandelbrotLocator.locateMinibrot(render.getState(),
                                     id, (MandelbrotPerturbator) render.getCurrentPerturbator(),
-                            getActionWhileFindingMinibrotCenter(master, period),
-                            getActionWhileCreatingTable(master),
-                            getActionWhileFindingMinibrotZoom(master)
+                            getActionWhileFindingMinibrotCenter(panel, logZoom, period),
+                            getActionWhileCreatingTable(panel, logZoom),
+                            getActionWhileFindingMinibrotZoom(panel)
                             );
-
-                    master.setSettings(e -> e.setCalculationSettings(e1 -> e1
-                            .setCenter(locator.center())
-                            .setLogZoom(locator.logZoom())));
-                    render.compute(id);
+                    
+                    Settings modifiedSettings = settings.edit().setCalculationSettings(e1 -> e1
+                    .setCenter(locator.center())
+                    .setLogZoom(locator.logZoom())).build();
+                    master.setSettings(modifiedSettings);
+                    render.compute(modifiedSettings, id);
 
                 }catch (IllegalParallelRenderStateException e) {
                     sendCenterNotFoundMessage();
@@ -148,9 +157,8 @@ enum ActionsExplore implements ItemActions {
         SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Cannot find center. Zoom in a little and try again.", "Error", JOptionPane.ERROR_MESSAGE));
     }
 
-    public static BiConsumer<Integer, Double> getActionWhileCreatingTable(RFF master){
-        RFFStatusPanel panel = master.getWindow().getStatusPanel();
-        int interval = periodPanelRefreshInterval(master);
+    public static BiConsumer<Integer, Double> getActionWhileCreatingTable(RFFStatusPanel panel, double logZoom){
+        int interval = periodPanelRefreshInterval(logZoom);
         return (p, i) -> {
 
             if (p % interval == 0) {
@@ -160,9 +168,8 @@ enum ActionsExplore implements ItemActions {
         };
     }
 
-    public static BiConsumer<Integer, Integer> getActionWhileFindingMinibrotCenter(RFF master, int period){
-        RFFStatusPanel panel = master.getWindow().getStatusPanel();
-        int interval = periodPanelRefreshInterval(master);
+    public static BiConsumer<Integer, Integer> getActionWhileFindingMinibrotCenter(RFFStatusPanel panel, double logZoom, int period){
+        int interval = periodPanelRefreshInterval(logZoom);
         return (p, i) -> {
                             
             if (p % interval == 0) {
@@ -176,13 +183,12 @@ enum ActionsExplore implements ItemActions {
 
 
 
-    public static DoubleConsumer getActionWhileFindingMinibrotZoom(RFF master){
-        RFFStatusPanel panel = master.getWindow().getStatusPanel();
+    public static DoubleConsumer getActionWhileFindingMinibrotZoom(RFFStatusPanel panel){
         return d -> SwingUtilities.invokeLater(() -> panel.setProcess("Finding Zoom... 10^-" + String.format("%.2f", d)));
     }
 
-    public static int periodPanelRefreshInterval(RFF master){
-        return (int) (1000000 / master.getSettings().calculationSettings().logZoom());
+    public static int periodPanelRefreshInterval(double logZoom){
+        return (int) (1000000 / logZoom);
     }
 
    

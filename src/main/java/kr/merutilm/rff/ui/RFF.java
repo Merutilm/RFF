@@ -60,7 +60,9 @@ final class RFF {
         }
     }
     
-
+    public void setSettings(Settings settings) {
+        this.settings = settings;
+    }
     public void setSettings(UnaryOperator<Settings.Builder> changes) {
         this.settings = changes.apply(settings.edit()).build();
     }

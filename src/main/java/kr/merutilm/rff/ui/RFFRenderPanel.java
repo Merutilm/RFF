@@ -186,10 +186,16 @@ final class RFFRenderPanel extends JPanel {
 
 
     public synchronized void recompute() {
+        
+        if (master.getSettings().calculationSettings().autoIteration()) {
+            master.setSettings(e -> e.setCalculationSettings(e1 -> e1.setMaxIteration(Math.max(master.getSettings().calculationSettings().maxIteration(), period * 50L))));
+        }
+        Settings settings = master.getSettings();
+      
         try {
             state.createThread(id -> {
                 try {
-                    compute(id);
+                    compute(settings, id);
                 } catch (IllegalParallelRenderStateException e) {
                     RFFLoggers.logCancelledMessage("Recompute", id);
                 }
@@ -201,10 +207,10 @@ final class RFFRenderPanel extends JPanel {
     }
 
     //this method can only be thread-safe when called via recompute()
-    public void compute(int currentID) throws IllegalParallelRenderStateException{
+    public void compute(Settings settings, int currentID) throws IllegalParallelRenderStateException{
         try{
             isRendering = true;
-            compute0(currentID);
+            compute0(settings, currentID);
             isRendering = false;
         }catch(IllegalParallelRenderStateException e){
             isRendering = false;
@@ -212,15 +218,8 @@ final class RFFRenderPanel extends JPanel {
         }
     }
 
-    private void compute0(int currentID) throws IllegalParallelRenderStateException {
+    private void compute0(Settings settings, int currentID) throws IllegalParallelRenderStateException {
         
-    
-
-        if (master.getSettings().calculationSettings().autoIteration()) {
-            master.setSettings(e -> e.setCalculationSettings(e1 -> e1.setMaxIteration(Math.max(master.getSettings().calculationSettings().maxIteration(), period * 50L))));
-        }
-
-        Settings settings = master.getSettings();
         int w = getImgWidth(settings);
         int h = getImgHeight(settings);
         
@@ -242,7 +241,7 @@ final class RFFRenderPanel extends JPanel {
         DoubleExponent[] offset = offsetConversion(settings, 0, 0);
         DoubleExponent dcMax = DoubleExponentMath.hypot(offset[0], offset[1]);
 
-        int refreshInterval = ActionsExplore.periodPanelRefreshInterval(master);
+        int refreshInterval = ActionsExplore.periodPanelRefreshInterval(settings.calculationSettings().logZoom());
         IntConsumer actionPerRefCalcIteration = p -> {
             if (p % refreshInterval == 0) {
                 panel.setProcess("Period " + p);
@@ -264,9 +263,9 @@ final class RFFRenderPanel extends JPanel {
             case CENTERED_REFERENCE -> {
                 int period = currentPerturbator.getReference().longestPeriod();
                 MandelbrotLocator center = MandelbrotLocator.locateMinibrot(state, currentID, (MandelbrotPerturbator) currentPerturbator,
-                        ActionsExplore.getActionWhileFindingMinibrotCenter(master, period),
-                        ActionsExplore.getActionWhileCreatingTable(master),
-                        ActionsExplore.getActionWhileFindingMinibrotZoom(master)
+                        ActionsExplore.getActionWhileFindingMinibrotCenter(panel, logZoom, period),
+                        ActionsExplore.getActionWhileCreatingTable(panel, logZoom),
+                        ActionsExplore.getActionWhileFindingMinibrotZoom(panel)
                 );
                 currentPerturbator = null; //try to call gc
 
@@ -306,7 +305,7 @@ final class RFFRenderPanel extends JPanel {
             return currentPerturbator.iterate(dc[0], dc[1]);
         });
 
-        process(currentID, settings, generator);
+        process(currentID, settings, panel, generator);
 
     }
     /**
@@ -317,8 +316,8 @@ final class RFFRenderPanel extends JPanel {
      * @param generator the iterator
      * @throws IllegalParallelRenderStateException
      */
-    private void process(int currentID, Settings settings, ParallelDoubleArrayDispatcher generator) throws IllegalParallelRenderStateException{
-        RFFStatusPanel panel = master.getWindow().getStatusPanel();
+    private void process(int currentID, Settings settings, RFFStatusPanel panel, ParallelDoubleArrayDispatcher generator) throws IllegalParallelRenderStateException{
+        
         generator.process(p -> {
             boolean processing = p < 1;
 
@@ -390,7 +389,7 @@ final class RFFRenderPanel extends JPanel {
     /**
      * <b>It is not a thread-safe method. Invoke via thread-safe method.</b> <p>
      * Refreshes the image. <p>
-     * Ensures the most recent settings.
+     * Ensures the most recent synchronized settings.
      */
     private void refreshColorUnsafe(int currentID, boolean immediately) throws IllegalParallelRenderStateException, InterruptedException {
         ParallelRenderProcessVisualizer[] pv = new ParallelRenderProcessVisualizer[]{
