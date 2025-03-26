@@ -17,6 +17,6 @@ public class CalculationAccurate implements Calculation {
 
     @Override
     public ReferenceCompressionSettings referenceCompressionSettings() {
-        return new ReferenceCompressionSettings(100000, 15);
+        return new ReferenceCompressionSettings(1000000, 15);
     }
 }

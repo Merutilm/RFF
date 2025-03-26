@@ -17,6 +17,6 @@ public class CalculationFast implements Calculation{
 
     @Override
     public ReferenceCompressionSettings referenceCompressionSettings() {
-        return new ReferenceCompressionSettings(100000, 7);
+        return new ReferenceCompressionSettings(1000000, 7);
     }
 }

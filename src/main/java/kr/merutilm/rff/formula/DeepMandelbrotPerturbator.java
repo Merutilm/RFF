@@ -11,7 +11,7 @@ import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.parallel.ParallelRenderState;
 import kr.merutilm.rff.settings.CalculationSettings;
 import kr.merutilm.rff.struct.DoubleExponent;
-import kr.merutilm.rff.struct.LWBigComplex;
+import kr.merutilm.rff.precision.LWBigComplex;
 import kr.merutilm.rff.util.DoubleExponentMath;
 
 public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {

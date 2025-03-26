@@ -16,7 +16,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  * <h2>Ridiculously Fast Fractal</h2>
- * Check how RFF works : <a href="https://docs.google.com/document/d/1IZMfTcF_-2f3HcX7AS9v8I57P8M1yTJgpzfBPYq9JIg/edit?pli=1&tab=t.jphmxxug3mna#heading=h.j5b0q4ufohul">...</a>
+ * Check how RFF works : <a href="https://docs.google.com/document/d/1IZMfTcF_-2f3HcX7AS9v8I57P8M1yTJgpzfBPYq9JIg/edit?pli=1&tab=t.jphmxxug3mna#heading=h.j5b0q4ufohul">2</a>
  */
 final class RFF {
 

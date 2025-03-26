@@ -3,7 +3,7 @@ package kr.merutilm.rff.approx;
 import kr.merutilm.rff.formula.LightMandelbrotReference;
 import kr.merutilm.rff.util.AdvancedMath;
 
-public record LightR3A(double anr, double ani, double bnr, double bni, int skip, int start, double radius) implements R3A{
+public record LightR3A(double anr, double ani, double bnr, double bni, int skip, double radius) implements R3A{
 
     public static final class Builder{
         private double anr; 
@@ -40,27 +40,27 @@ public record LightR3A(double anr, double ani, double bnr, double bni, int skip,
             return start;
         }
 
-        // public Builder merge(LightR3A r3a){
-        //     double anrMerge = r3a.anr * anr - r3a.ani * ani;
-        //     double aniMerge = r3a.anr * ani + r3a.ani * anr;
-        //     double bnrMerge = r3a.anr * bnr - r3a.ani * bni + r3a.bnr;
-        //     double bniMerge = r3a.anr * bni + r3a.ani * bnr + r3a.bni;
+        public Builder merge(LightR3A r3a){
+            double anrMerge = r3a.anr * anr - r3a.ani * ani;
+            double aniMerge = r3a.anr * ani + r3a.ani * anr;
+            double bnrMerge = r3a.anr * bnr - r3a.ani * bni + r3a.bnr;
+            double bniMerge = r3a.anr * bni + r3a.ani * bnr + r3a.bni;
 
-        //     radius = Math.min(radius, r3a.radius);
-        //     anr = anrMerge;
-        //     ani = aniMerge;
-        //     bnr = bnrMerge;
-        //     bni = bniMerge;
-        //     return this;
-        // }
+            radius = Math.min(radius, r3a.radius);
+            anr = anrMerge;
+            ani = aniMerge;
+            bnr = bnrMerge;
+            bni = bniMerge;
+            return this;
+        }
 
         public Builder step() {
 
             int iter = start + skip++; //n+k
-            int index = reference.refReal().compress(iter);
+            int index = reference.referenceCompressor().compress(iter);
 
-            double z2r = 2 * reference.refReal().getArray()[index];
-            double z2i = 2 * reference.refImag().getArray()[index];
+            double z2r = 2 * reference.refReal()[index];
+            double z2i = 2 * reference.refImag()[index];
             double anrStep = anr * z2r - ani * z2i;
             double aniStep = anr * z2i + ani * z2r;
             double bnrStep = bnr * z2r - bni * z2i + 1;
@@ -80,7 +80,7 @@ public record LightR3A(double anr, double ani, double bnr, double bni, int skip,
         }
 
         public LightR3A build(){
-            return new LightR3A(anr, ani, bnr, bni, skip, start, radius);
+            return new LightR3A(anr, ani, bnr, bni, skip, radius);
         }
     }
     

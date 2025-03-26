@@ -3,6 +3,7 @@ package kr.merutilm.rff.struct;
 import java.math.BigInteger;
 import java.util.Objects;
 
+import kr.merutilm.rff.precision.LWBigDecimal;
 import kr.merutilm.rff.util.DoubleExponentMath;
 
 
@@ -12,6 +13,8 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
     
     public final int exp;
     public final long bits;
+
+    public static final double EXP_DEADLINE = 290;
 
     public static final int DOUBLE_PRECISION = 52;
 

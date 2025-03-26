@@ -82,7 +82,7 @@ enum RFFSettingsMenu {
         return (JMenu) menuBuilder.build().createUI();
     }),
     EXPLORE(master -> {
-        RFFMenuTree.Builder menuBuilder = RFFMenuTree.Builder.init("File");
+        RFFMenuTree.Builder menuBuilder = RFFMenuTree.Builder.init("Explore");
         for(ActionsExplore a : ActionsExplore.values()){
             menuBuilder.createFruit(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
         }

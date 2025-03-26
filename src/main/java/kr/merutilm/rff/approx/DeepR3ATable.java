@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-public class DeepR3ATable extends R3ATable{
+public class DeepR3ATable extends R3ATable<DeepR3A>{
 
     private final List<List<DeepR3A>> table;
 
@@ -48,14 +48,14 @@ public class DeepR3ATable extends R3ATable{
             state.tryBreak(currentID);
             actionPerCreatingTableIteration.accept(iteration, (double) iteration / longestPeriod);
 
-            boolean independant = pulledR3ACompressor == null || pulledR3ACompressor.isIndependant(iterationToPulledTableIndex(r3aPeriod, iteration));
+            boolean independent = pulledR3ACompressor == null || pulledR3ACompressor.isIndependent(iterationToPulledTableIndex(r3aPeriod, iteration));
             
             for (int j = tablePeriod.length - 1; j >= 0; j--) {
 
                 int requiredPerturbationCount = r3aPeriod.requiredPerturbation()[j];
                 
                 
-                if(periodCount[j] == 0 && independant){
+                if(periodCount[j] == 0 && independent){
                     currentStep[j] = DeepR3A.Builder.create(reference, epsilon, dcMax, iteration);
                 }
 
@@ -72,8 +72,8 @@ public class DeepR3ATable extends R3ATable{
                         DeepR3A.Builder currentLevel = currentStep[k];
                         
                         if(currentLevel != null && periodCount[k] == tablePeriod[k]){
-                            int index = iterationToTableIndex(currentLevel.start());
-                            safetyMatchTable(table, index);
+                            int index = iterationToCompTableIndex(currentLevel.start());
+                            safetyMatchTableSize(table, index);
            
                             List<DeepR3A> r3a = table.get(index);
                             r3a.add(currentLevel.build());
@@ -102,7 +102,7 @@ public class DeepR3ATable extends R3ATable{
             return null;
         }
         
-        int index = iterationToTableIndex(iteration);
+        int index = iterationToCompTableIndex(iteration);
 
         if(index == -1 || index >= table.size()){
             return null;

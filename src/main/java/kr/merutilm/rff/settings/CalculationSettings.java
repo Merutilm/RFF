@@ -5,7 +5,7 @@ import java.util.function.UnaryOperator;
 import kr.merutilm.rff.struct.Struct;
 import kr.merutilm.rff.struct.StructBuilder;
 import kr.merutilm.rff.struct.DoubleExponent;
-import kr.merutilm.rff.struct.LWBigComplex;
+import kr.merutilm.rff.precision.LWBigComplex;
 
 public record CalculationSettings(
         LWBigComplex center,

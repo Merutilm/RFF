@@ -1,6 +1,6 @@
 package kr.merutilm.rff.formula;
 
-import kr.merutilm.rff.struct.LWBigComplex;
+import kr.merutilm.rff.precision.LWBigComplex;
 
 @FunctionalInterface
 public interface Formula {

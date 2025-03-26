@@ -3,7 +3,7 @@ package kr.merutilm.rff.ui;
 import javax.swing.JMenu;
 
 
-public class RFFMenuBarMenu extends JMenu{
+class RFFMenuBarMenu extends JMenu{
     
     public RFFMenuBarMenu(String name){
         this(name, null);

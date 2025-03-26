@@ -4,15 +4,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.DoubleConsumer;
 
-import kr.merutilm.rff.formula.DeepMandelbrotPerturbator;
-import kr.merutilm.rff.formula.MandelbrotPerturbator;
-import kr.merutilm.rff.formula.MandelbrotReference;
-import kr.merutilm.rff.formula.Perturbator;
+import kr.merutilm.rff.formula.*;
 import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.parallel.ParallelRenderState;
 import kr.merutilm.rff.settings.CalculationSettings;
 import kr.merutilm.rff.struct.DoubleExponent;
-import kr.merutilm.rff.struct.LWBigComplex;
+import kr.merutilm.rff.precision.LWBigComplex;
 import kr.merutilm.rff.util.DoubleExponentMath;
 
 public record MandelbrotLocator(LWBigComplex center, DoubleExponent dcMax, double logZoom) implements Locator {
@@ -41,7 +38,7 @@ public record MandelbrotLocator(LWBigComplex center, DoubleExponent dcMax, doubl
     }
     
 
-    private static DeepMandelbrotPerturbator findAccurateCenterPerturbator(ParallelRenderState state, int currentID, MandelbrotPerturbator scene, BiConsumer<Integer, Integer> actionWhileFindingMinibrotCenter, BiConsumer<Integer, Double> actionWhileCreatingTable) throws IllegalParallelRenderStateException{
+    private static MandelbrotPerturbator findAccurateCenterPerturbator(ParallelRenderState state, int currentID, MandelbrotPerturbator scene, BiConsumer<Integer, Integer> actionWhileFindingMinibrotCenter, BiConsumer<Integer, Double> actionWhileCreatingTable) throws IllegalParallelRenderStateException{
         
         // multiply zoom by 2 and find center offset.
         // set the center to center + centerOffset.
@@ -54,8 +51,10 @@ public record MandelbrotLocator(LWBigComplex center, DoubleExponent dcMax, doubl
         CalculationSettings doubledZoomCalc = calc.edit().addCenter(findCenterOffset(scene), doubledZoomPrecision).setLogZoom(zoom * 2).build();
         DoubleExponent doubledZoomDcMax = scene.getDcMaxByDoubleExponent().divide(DoubleExponentMath.pow10(zoom));
 
+
         AtomicInteger centerFixCount = new AtomicInteger();
-        DeepMandelbrotPerturbator doubledZoomScene = null;
+
+        MandelbrotPerturbator doubledZoomScene = null;
         while (doubledZoomScene == null || !checkMaxIterationOnly(doubledZoomScene, doubledZoomDcMax, maxIteration)) {
 
             state.tryBreak(currentID);
@@ -65,7 +64,11 @@ public record MandelbrotLocator(LWBigComplex center, DoubleExponent dcMax, doubl
                 doubledZoomCalc = doubledZoomCalc.edit().addCenter(off, doubledZoomPrecision).build();    
             }
             centerFixCount.getAndIncrement();
-            doubledZoomScene = new DeepMandelbrotPerturbator(state, currentID, doubledZoomCalc, doubledZoomDcMax, doubledZoomPrecision, period, p -> actionWhileFindingMinibrotCenter.accept(p, centerFixCount.get()), actionWhileCreatingTable, true);
+            if(scene.getLogZoom() < DoubleExponent.EXP_DEADLINE / 2){
+                doubledZoomScene = new LightMandelbrotPerturbator(state, currentID, doubledZoomCalc, doubledZoomDcMax.doubleValue(), doubledZoomPrecision, period, p -> actionWhileFindingMinibrotCenter.accept(p, centerFixCount.get()), actionWhileCreatingTable, true);
+            }else{
+                doubledZoomScene = new DeepMandelbrotPerturbator(state, currentID, doubledZoomCalc, doubledZoomDcMax, doubledZoomPrecision, period, p -> actionWhileFindingMinibrotCenter.accept(p, centerFixCount.get()), actionWhileCreatingTable, true);
+            }
         }
 
 

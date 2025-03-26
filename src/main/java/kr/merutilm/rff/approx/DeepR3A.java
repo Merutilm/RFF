@@ -57,9 +57,9 @@ public record DeepR3A(DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr
         public Builder step() {
 
             int iter = start + skip++;
-            int index = reference.refReal().compress(iter);
-            DoubleExponent z2r = reference.refReal().getArray()[index].doubled();
-            DoubleExponent z2i = reference.refImag().getArray()[index].doubled();
+            int index = reference.referenceCompressor().compress(iter);
+            DoubleExponent z2r = reference.refReal()[index].doubled();
+            DoubleExponent z2i = reference.refImag()[index].doubled();
             DoubleExponent anrStep = anr.multiply(z2r).subtract(ani.multiply(z2i));
             DoubleExponent aniStep = anr.multiply(z2i).add(ani.multiply(z2r));
             DoubleExponent bnrStep = bnr.multiply(z2r).subtract(bni.multiply(z2i)).add(DoubleExponent.ONE);

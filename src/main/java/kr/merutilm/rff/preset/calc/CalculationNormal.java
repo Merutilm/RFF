@@ -18,6 +18,6 @@ public class CalculationNormal implements Calculation{
 
     @Override
     public ReferenceCompressionSettings referenceCompressionSettings() {
-        return new ReferenceCompressionSettings(100000, 11);
+        return new ReferenceCompressionSettings(1000000, 11);
     }
 }

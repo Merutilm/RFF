@@ -7,20 +7,22 @@ import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.IntConsumer;
 
+import kr.merutilm.rff.approx.LightR3A;
+import kr.merutilm.rff.functions.ReferenceCompressor;
 import kr.merutilm.rff.settings.CalculationSettings;
 import kr.merutilm.rff.util.AdvancedMath;
 import kr.merutilm.rff.util.ArrayFunction;
 import kr.merutilm.rff.approx.LightR3ATable;
 import kr.merutilm.rff.functions.ArrayCompressionTool;
-import kr.merutilm.rff.functions.CompressedDoubleArray;
 import kr.merutilm.rff.functions.ArrayCompressor;
 import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.parallel.ParallelRenderState;
 import kr.merutilm.rff.settings.R3ASettings;
 import kr.merutilm.rff.settings.ReferenceCompressionSettings;
-import kr.merutilm.rff.struct.LWBigComplex;
+import kr.merutilm.rff.precision.LWBigComplex;
 
-public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, CompressedDoubleArray refReal, CompressedDoubleArray refImag,
+public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, double[] refReal, double[] refImag,
+                                       ReferenceCompressor<LightR3A> referenceCompressor,
                                        int[] period,
                                        LWBigComplex lastReference,
                                        LWBigComplex fpgBn) implements MandelbrotReference {
@@ -52,6 +54,7 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
         int reuseIndex = 0;
 
         List<ArrayCompressionTool> tools = new ArrayList<>();
+        List<LightR3A> mergeR3A = new ArrayList<>();
         int compressed = 0;
         double bailout = calc.bailout();
         long maxIteration = calc.maxIteration();
@@ -59,12 +62,17 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
         int compressCriteria = refCompressionSettings.compressCriteria();
         int compressionThresholdPower = refCompressionSettings.compressionThresholdPower();
         double compressionThreshold = compressionThresholdPower <= 0 ? 0 : Math.pow(10, -compressionThresholdPower);
+//        double mergeAnr = 1;
+//        double mergeAni = 0;
+//        double mergeBnr = 0;
+//        double mergeBni = 0;
+
 
         while (zr * zr + zi * zi < bailout * bailout && iteration < maxIteration) {
 
             state.tryBreak(renderID);
 
-            // use Fast-Period-Guessing, and create RRA Table
+            // use Fast-Period-Guessing, and create R3A Table
             double radius2 = zr * zr + zi * zi;
             double fpgLimit = radius2 / dcMax;
 
@@ -114,16 +122,37 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
                 if (AdvancedMath.abs(zr / rr[refIndex] - 1) <= compressionThreshold  &&
                     AdvancedMath.abs(zi / ri[refIndex] - 1) <= compressionThreshold
                 ) {
+//                    double mergeAnrTemp = mergeAnr * zr * 2 - mergeAni * zi * 2;
+//                    double mergeAniTemp = mergeAnr * zi * 2 + mergeAni * zr * 2;
+//                    double mergeBnrTemp = mergeBnr * zr * 2 - mergeBni * zi * 2 + 1;
+//                    double mergeBniTemp = mergeBnr * zi * 2 + mergeBni * zr * 2;
+//                    mergeAnr = mergeAnrTemp;
+//                    mergeAni = mergeAniTemp;
+//                    mergeBnr = mergeBnrTemp;
+//                    mergeBni = mergeBniTemp;
                     reuseIndex++;
-                } else if (reuseIndex != 0) {
-                    if (reuseIndex > compressCriteria) { // reference compression criteria
+                } else {
+                    if (reuseIndex != 0) {
+                        if (reuseIndex > compressCriteria) { // reference compression criteria
 
-                        ArrayCompressionTool compressor = new ArrayCompressionTool(1, iteration - reuseIndex + 1, iteration);
-                        compressed += compressor.range(); //get the increment of iteration
-                        tools.add(compressor);
+                            ArrayCompressionTool compressor = new ArrayCompressionTool(1, iteration - reuseIndex + 1, iteration);
+                            compressed += compressor.range(); //get the increment of iteration
+                            tools.add(compressor);
+//                            mergeR3A.add(new LightR3A(mergeAnr, mergeAni, mergeBnr, mergeBni, compressor.range() - 1, Double.MAX_VALUE));
+                            // Since its usage is merging only duplicate R3As,
+                            // the radius is always smaller than the R3A to be merged.
+                            // When LightR3A.merge() is invoked, the radius is computed via the "Math.min" operator,
+                            // so the radius is not required.
+                        }
+                        //If it is enough to large, set all reference in the range to 0 and save the index
+
+                        reuseIndex = 0;
                     }
-                    //If it is enough to large, set all reference in the range to 0 and save the index
-                    reuseIndex = 0;
+//                    mergeAnr = 1;
+//                    mergeAni = 0;
+//                    mergeBnr = 0;
+//                    mergeBni = 0;
+
                 }
             }
             
@@ -197,19 +226,17 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
         rr = Arrays.copyOfRange(rr, 0, period - compressed + 1);
         ri = Arrays.copyOfRange(ri, 0, period - compressed + 1);
         periodArray = periodArrayLength == 0 ? new int[]{period} : Arrays.copyOfRange(periodArray, 0, periodArrayLength);
-        
-        CompressedDoubleArray refReal = new CompressedDoubleArray(rr, tools);
-        CompressedDoubleArray refImag = new CompressedDoubleArray(ri, tools);
 
-        return new LightMandelbrotReference(formula, center, refReal, refImag, periodArray, z, fpgBn);
+        return new LightMandelbrotReference(formula, center, rr, ri, new ReferenceCompressor<>(tools, mergeR3A), periodArray, z, fpgBn);
     }
 
     public double real(int iteration) {
-        return refReal.get(iteration);
+        return refReal[referenceCompressor.compress(iteration)];
     }
 
     public double imag(int iteration) {
-        return refImag.get(iteration);
+
+        return refImag[referenceCompressor.compress(iteration)];
     }
 
     public LightR3ATable generateR3A(ParallelRenderState state, int renderID, R3ASettings r3aSettings, double dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
@@ -218,25 +245,26 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
 
     @Override
     public int length() {
-        return refReal.getArray().length;
+        return refReal.length;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(refReal, refImag, Arrays.hashCode(period), lastReference, fpgBn);
+        return Objects.hash(Arrays.hashCode(refReal), Arrays.hashCode(refImag), Arrays.hashCode(period), lastReference, fpgBn);
     }
 
     @Override
     public boolean equals(Object o) {
         return o instanceof LightMandelbrotReference(
-                Formula f, LWBigComplex c, CompressedDoubleArray rr, CompressedDoubleArray ri,
+                Formula f, LWBigComplex c, double[] rr, double[] ri, ReferenceCompressor<LightR3A> rc,
                 int[] p, LWBigComplex l,
                 LWBigComplex bn
         ) &&
                Objects.equals(formula, f) &&
                Objects.equals(refCenter, c) &&
-               Objects.equals(refReal, rr) &&
-               Objects.equals(refImag, ri) &&
+               Arrays.equals(refReal, rr) &&
+               Arrays.equals(refImag, ri) &&
+               Objects.equals(referenceCompressor, rc) &&
                Arrays.equals(period, p) &&
                Objects.equals(lastReference, l) &&
                Objects.equals(fpgBn, bn);

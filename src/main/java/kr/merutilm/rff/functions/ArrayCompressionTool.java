@@ -9,7 +9,7 @@ package kr.merutilm.rff.functions;
  * (e.g., if the given ranges are {@code 11-15}, and the rebase index is {@code 1}, the first value in the range, {@code 11}, will be rebased to index {@code 1} when compressed. <p>
  * at the same time, the other elements will be also rebased {@code 12 → 2}, {@code 13 → 3}, {@code 14 → 4}, and {@code 15 → 5}.)
 
- * @param rebsae the index to rebase
+ * @param rebase the index to rebase
  * @param start the start index of uncompressed array
  * @param end the end index of uncompressed array
  */

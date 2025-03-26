@@ -13,7 +13,7 @@ import kr.merutilm.rff.locater.MandelbrotLocator;
 import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.preset.location.Location;
 import kr.merutilm.rff.preset.Presets;
-import kr.merutilm.rff.struct.LWBigComplex;
+import kr.merutilm.rff.precision.LWBigComplex;
 import kr.merutilm.rff.util.TextFormatter;
 import kr.merutilm.rff.settings.Settings;
 

@@ -39,7 +39,6 @@ final class RFFRenderPanel extends JPanel {
     private transient Perturbator currentPerturbator;
     private final transient RFF master;
     private volatile boolean isRendering = false;
-    private static final double EXP_DEADLINE = 290;
     private static final String FINISHING_TEXT = "Finishing... ";
 
     private int period = 1;
@@ -272,7 +271,7 @@ final class RFFRenderPanel extends JPanel {
                 CalculationSettings refCalc = calc.edit().setCenter(center.center()).setLogZoom(center.logZoom()).build();
                 int refPrecision = Perturbator.precision(center.logZoom());
 
-                if (refCalc.logZoom() > EXP_DEADLINE) {
+                if (refCalc.logZoom() > DoubleExponent.EXP_DEADLINE) {
                     currentPerturbator = new DeepMandelbrotPerturbator(state, currentID, refCalc, center.dcMax(), refPrecision, period, actionPerRefCalcIteration, actionPerCreatingTableIteration)
                             .reuse(state, currentID, calc, dcMax, precision);
                 } else {
@@ -283,7 +282,7 @@ final class RFFRenderPanel extends JPanel {
             }
             case DISABLED -> {
                 currentPerturbator = null; //try to call gc
-                if (logZoom > EXP_DEADLINE) {
+                if (logZoom > DoubleExponent.EXP_DEADLINE) {
                     currentPerturbator = new DeepMandelbrotPerturbator(state, currentID, calc, dcMax, precision, -1, actionPerRefCalcIteration, actionPerCreatingTableIteration);
                 } else {
                     currentPerturbator = new LightMandelbrotPerturbator(state, currentID, calc, dcMax.doubleValue(), precision, -1, actionPerRefCalcIteration, actionPerCreatingTableIteration);
@@ -312,9 +311,9 @@ final class RFFRenderPanel extends JPanel {
      * Processes the renderer. <p>
      * The method invoked by compute0() ensures thread-safe, so it is also thread-safe.
      * @param currentID current state id
-     * @param settings The setting at the time {@link RFFRenderPanel#compute(int) compute(int)} was executed.
+     * @param settings The setting at the time {@link RFFRenderPanel#compute0(Settings, int) compute(int)} was executed.
      * @param generator the iterator
-     * @throws IllegalParallelRenderStateException
+     * @throws IllegalParallelRenderStateException If the render state changed
      */
     private void process(int currentID, Settings settings, RFFStatusPanel panel, ParallelDoubleArrayDispatcher generator) throws IllegalParallelRenderStateException{
         

@@ -1,6 +1,7 @@
 package kr.merutilm.rff.formula;
-import kr.merutilm.rff.functions.ArrayCompressor;
-import kr.merutilm.rff.struct.LWBigComplex;
+import kr.merutilm.rff.approx.R3A;
+import kr.merutilm.rff.functions.ReferenceCompressor;
+import kr.merutilm.rff.precision.LWBigComplex;
 
 public interface MandelbrotReference extends Reference{
 
@@ -14,8 +15,7 @@ public interface MandelbrotReference extends Reference{
      */
     LWBigComplex lastReference();
 
-    ArrayCompressor refReal();
-    ArrayCompressor refImag();
+    <R extends R3A> ReferenceCompressor<R> referenceCompressor();
 
     /**
      * Gets FPGBn for center-locating.

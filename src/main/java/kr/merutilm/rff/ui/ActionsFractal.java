@@ -9,8 +9,8 @@ import java.util.function.UnaryOperator;
 import javax.swing.KeyStroke;
 
 import kr.merutilm.rff.formula.Perturbator;
-import kr.merutilm.rff.struct.LWBigComplex;
-import kr.merutilm.rff.struct.LWBigDecimal;
+import kr.merutilm.rff.precision.LWBigComplex;
+import kr.merutilm.rff.precision.LWBigDecimal;
 import kr.merutilm.rff.ui.HTMLStringBuilder.Tag;
 import kr.merutilm.rff.settings.CalculationSettings;
 import kr.merutilm.rff.settings.R3ASettings;

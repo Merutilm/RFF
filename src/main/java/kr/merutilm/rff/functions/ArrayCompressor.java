@@ -21,24 +21,25 @@ public class ArrayCompressor {
 
     /**
      * Checks whether the given index is independant. <p>
-     * The time complexity is {@code O(log N)} because it uses {@link ArrayCompressionTool#binarySearch(List, int, int, int, int) binary-search}.
-     * @see {@link ArrayCompressionTool#containedIndex(List, int)}, {@link ArrayCompressionTool#binarySearch(List, int, int, int, int)}.
+     * The time complexity is {@code O(log N)} because it uses {@link ArrayCompressor#binarySearch(int, int, int, int) binary-search}.
+     * @see ArrayCompressor#containedIndex(int) containedIndex
+     * @see ArrayCompressor#binarySearch(int, int, int, int) binarySearch
      * @param index To checking index
-     * @return {@code true} when given index is independant.
+     * @return {@code true} when given index is independent.
      */
-    public boolean isIndependant(int index){
+    public boolean isIndependent(int index){
         return containedIndex(index) == -1;
     }
 
     /**
      * Rebases the given index. <p>
      * The rebased index is not the compressed index because it is a middle step that has not proceeded the pulling process. <p>
-     * To get the final index, use the {@link ArrayCompressionTool#pull(List, int) pull()} method.
+     * To get the final index, use the {@link ArrayCompressor#pull(int) pull()} method.
      * @param index To rebasing index
      * @return The rebased index.
      */
     public int rebase(int index){
-        if(tools.isEmpty() || index < tools.get(0).start()){
+        if(tools.isEmpty() || index < tools.getFirst().start()){
             return index;
         }
 
@@ -81,7 +82,7 @@ public class ArrayCompressor {
     public int pull(int index){
         // "Rebased" iteration is not a target of compressions.
         // The space created by compression is filled by pushing indices to front. This is the definition of this method.
-        // CAUTION : given index must be unrebaseable.
+        // CAUTION : given index must be not rebaseable.
         //
         // Example
         // let's assume we have two tools below.
@@ -114,8 +115,8 @@ public class ArrayCompressor {
 
     /**
      * Gets the contained index of the given list. <p>
-     * The time complexity is {@code O(log N)} because it uses {@link ArrayCompressionTool#binarySearch binary-search}.
-     * @see {{@link ArrayCompressionTool#binarySearch(List, int, int, int, int)}.
+     * The time complexity is {@code O(log N)} because it uses {@link ArrayCompressor#binarySearch binary-search}.
+     * @see ArrayCompressor#binarySearch(int, int, int, int) binarySearch
      * @param index To checking index
      * @return the index of the given list.
      */
@@ -134,7 +135,7 @@ public class ArrayCompressor {
      * @return The index of the given list. returns {@code -1} if the given index is unrebaseable.
      */
     private int binarySearch(int index, int compIndex, int indexGap, int lastIndexGap){
-        if(compIndex < 0 || compIndex >= tools.size() || tools.get(0).start() > index){
+        if(compIndex < 0 || compIndex >= tools.size() || tools.getFirst().start() > index){
             return -1;
         }
 
@@ -158,7 +159,6 @@ public class ArrayCompressor {
 
     /**
      * Gets the compressed index of compressed array.
-     * @param tools the list of rebasing tool
      * @param index the index you want
      * @return Finally compressed index
      */

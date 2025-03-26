@@ -5,16 +5,16 @@ import java.util.Arrays;
 import java.util.List;
 
 import kr.merutilm.rff.formula.MandelbrotReference;
-import kr.merutilm.rff.functions.ArrayCompressor;
 import kr.merutilm.rff.functions.ArrayCompressionTool;
+import kr.merutilm.rff.functions.ReferenceCompressor;
 import kr.merutilm.rff.settings.R3ACompressionMethod;
 import kr.merutilm.rff.settings.R3ASettings;
 import kr.merutilm.rff.util.ArrayFunction;
 
-public abstract class R3ATable {
+public abstract class R3ATable<R extends R3A> {
 
     protected final R3ASettings settings;
-    protected final ArrayCompressor pulledR3ACompressor;
+    protected final ReferenceCompressor<R> pulledR3ACompressor;
     protected final Period r3aPeriod;
     
     protected R3ATable(MandelbrotReference reference, R3ASettings r3aSettings){
@@ -31,7 +31,7 @@ public abstract class R3ATable {
 
         R3ACompressionMethod compressionMethod = r3aSettings.r3aCompressionMethod();
         Period r3aPeriod = R3ATable.Period.create(referencePeriod, r3aSettings);
-        ArrayCompressor pulledR3ACompressor = compressionMethod == R3ACompressionMethod.STRONGEST ? createPulledR3ACompressor(r3aPeriod, reference.refReal()) : null;        
+        ReferenceCompressor<R> pulledR3ACompressor = compressionMethod == R3ACompressionMethod.STRONGEST ? createPulledR3ACompressor(r3aPeriod, reference.referenceCompressor()) : null;
         
         this.settings = r3aSettings;
         this.r3aPeriod = r3aPeriod;
@@ -41,16 +41,18 @@ public abstract class R3ATable {
 
     public abstract int length();
 
-    private static ArrayCompressor createPulledR3ACompressor(Period r3aPeriod, ArrayCompressor refCompressor){
-        
+    private static <R extends R3A> ReferenceCompressor<R> createPulledR3ACompressor(Period r3aPeriod, ReferenceCompressor<R> refCompressor){
 
+        List<ArrayCompressionTool> refCompTools = refCompressor.tools();
         List<ArrayCompressionTool> r3aTools = new ArrayList<>();
+        List<R> matchingR3A = new ArrayList<>();
         int[] tablePeriod = r3aPeriod.tablePeriod;
         int[] tablePeriodElements = r3aPeriod.tableElements;
         int[] requiredPerturbation = r3aPeriod.requiredPerturbation;
 
-        for (ArrayCompressionTool tool : refCompressor.tools()) {
-            
+
+        for (int i = 0; i < refCompTools.size(); i++) {
+            ArrayCompressionTool tool = refCompTools.get(i);
             int start = tool.start();
             int length = tool.range();
             int index = Arrays.binarySearch(tablePeriod, length + 1);
@@ -60,10 +62,10 @@ public abstract class R3ATable {
                 int periodElements = tablePeriodElements[index];
 
                 r3aTools.add(new ArrayCompressionTool(1, tableIndex + 1, tableIndex + periodElements - 1));
-    
+                //matchingR3A.add(refCompressor.getMatchingR3A(i));
             }
         }
-        return new ArrayCompressor(r3aTools);
+        return new ReferenceCompressor<>(r3aTools, matchingR3A);
     }
 
     protected static int iterationToPulledTableIndex(Period r3aPeriod, int iteration){
@@ -120,7 +122,7 @@ public abstract class R3ATable {
         return remainder == 1 ? index : -1;
     }
 
-    protected static final <R extends R3A> void safetyMatchTable(List<List<R>> table, int index){
+    protected static <R extends R3A> void safetyMatchTableSize(List<List<R>> table, int index){
         while(table.size() < index){
             table.add(null);
         }
@@ -134,7 +136,7 @@ public abstract class R3ATable {
     
 
     
-    protected int iterationToTableIndex(int iteration){
+    protected int iterationToCompTableIndex(int iteration){
 
         return switch(settings.r3aCompressionMethod()){
             case NO_COMPRESSION -> iteration;
@@ -143,7 +145,6 @@ public abstract class R3ATable {
                 int index = iterationToPulledTableIndex(r3aPeriod, iteration);
                 yield index == -1 || pulledR3ACompressor == null ? -1 : pulledR3ACompressor.compress(index);
             }
-            default -> -1;
         };
 
     }
@@ -152,7 +153,7 @@ public abstract class R3ATable {
 
     protected record Period(int[] tablePeriod, int[] requiredPerturbation, int[] tableElements) {
         @Override
-        public final boolean equals(Object o) {
+        public boolean equals(Object o) {
             return o instanceof Period(int[] t, int[] r, int[] te) &&
                 Arrays.equals(tablePeriod, t) &&
                 Arrays.equals(requiredPerturbation, r) &&
@@ -160,14 +161,14 @@ public abstract class R3ATable {
         }
     
         @Override
-        public final String toString() {
+        public String toString() {
             return "Period : " + Arrays.toString(tablePeriod)
                 + "\nRequired Perturbation : " + Arrays.toString(requiredPerturbation)
                 + "\nTable Elements : " + Arrays.toString(tableElements); 
         }
     
         @Override
-        public final int hashCode() {
+        public int hashCode() {
             return Arrays.hashCode(tablePeriod) + Arrays.hashCode(requiredPerturbation) + Arrays.hashCode(tableElements);
         }
 
@@ -183,7 +184,7 @@ public abstract class R3ATable {
             // 26 52 78 104 130 -> 26, 52 -> 1 27 (77/26 = 2.xxx)
             // 
             // the remainder of [2]/[1] can also be divided by smaller period.
-            // it can be recurive.
+            // it can be recursive.
             //
             // period 11 : 11/3 =3.xxx (3 elements)                                                                              elements = 3 
             // period 26 : 26/11=2.xxx (3*2 elements), 26%11 = 4, 4/3 = 1.xxx (1 element)                                        elements = 3*2+1=7
@@ -260,7 +261,7 @@ public abstract class R3ATable {
     
             tablePeriodArrayTemp[0] = currentRefPeriod;
             requiredPerturbationArrayTemp[0] = getRequiredPerturbationCount(Arrays.binarySearch(referencePeriod, currentRefPeriod) < 0);
-            //first period is always minimum skip iteration when the longest period is larger than this
+            //first period is always minimum skip iteration when the longest period is larger than this,
             //and it is artificially-created period if generated period is not an element of generated period.
     
             for (int p : referencePeriod) {
@@ -318,7 +319,7 @@ public abstract class R3ATable {
             return new Period(tablePeriod, requiredPerturbation, tablePeriodElements);
         }
         
-        private static final record Temp(int[] tablePeriod, int[] requiredPerturbation){
+        private record Temp(int[] tablePeriod, int[] requiredPerturbation){
             @Override
             public String toString(){
                 return "";

@@ -17,6 +17,6 @@ public class CalculationUltraStable implements Calculation {
 
     @Override
     public ReferenceCompressionSettings referenceCompressionSettings() {
-        return new ReferenceCompressionSettings(1000, 6);
+        return new ReferenceCompressionSettings(10000, 6);
     }
 }

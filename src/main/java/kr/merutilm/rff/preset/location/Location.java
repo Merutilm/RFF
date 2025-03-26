@@ -1,7 +1,7 @@
 package kr.merutilm.rff.preset.location;
 
 import kr.merutilm.rff.preset.Preset;
-import kr.merutilm.rff.struct.LWBigComplex;
+import kr.merutilm.rff.precision.LWBigComplex;
 
 public interface Location extends Preset{
     String real();

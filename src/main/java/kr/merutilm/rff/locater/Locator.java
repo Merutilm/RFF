@@ -1,6 +1,6 @@
 package kr.merutilm.rff.locater;
 
-import kr.merutilm.rff.struct.LWBigComplex;
+import kr.merutilm.rff.precision.LWBigComplex;
 
 public interface Locator {
 
