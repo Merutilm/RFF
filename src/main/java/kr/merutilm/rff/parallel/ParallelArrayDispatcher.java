@@ -52,6 +52,9 @@ public abstract class ParallelArrayDispatcher<M extends Matrix, R extends Parall
 
         
         try {
+            if (visualizer != null) {
+                visualizer.run(0);
+            }
             dispatch();
             processing.set(false);
             t.cancel();

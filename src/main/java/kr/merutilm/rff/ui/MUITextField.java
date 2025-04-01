@@ -6,7 +6,6 @@ import java.util.function.Function;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.event.DocumentEvent;
@@ -14,7 +13,7 @@ import javax.swing.event.DocumentListener;
 
 import kr.merutilm.rff.util.ConsoleUtils;
 
-final class MUITextField<T> extends JPanel {
+final class MUITextField<T> extends RFFPanel {
 
     private transient T previousValue;
 

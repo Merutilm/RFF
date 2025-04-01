@@ -5,7 +5,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.awt.GridLayout;
 
-import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
@@ -13,7 +12,7 @@ import javax.swing.border.BevelBorder;
 import kr.merutilm.rff.ui.HTMLStringBuilder.Tag;
 import kr.merutilm.rff.util.AdvancedMath;
 
-final class RFFStatusPanel extends JPanel {
+final class RFFStatusPanel extends RFFPanel {
     
     private final MUILabelPanel iteration;
     private final MUILabelPanel zoom;
@@ -42,11 +41,12 @@ final class RFFStatusPanel extends JPanel {
     private void initPanel(MUILabelPanel panel) {
         panel.getNameLabel().setHorizontalAlignment(SwingConstants.LEFT);
         panel.getNameLabel().setFont(MUIConstants.DEFAULT_FONT);
+        panel.getNameLabel().setText(SPACE);
         panel.setBorder(new BevelBorder(BevelBorder.LOWERED));
         add(panel);
     }
     public void setIterationText(long it) {
-        String text = (it == -1 ? "?" : NumberFormat.getNumberInstance(Locale.US).format(it));
+        String text = (it == 0 ? "?" : NumberFormat.getNumberInstance(Locale.US).format(it));
         iteration.getNameLabel().setText(SPACE + "Iterations : " + text);
     }
 

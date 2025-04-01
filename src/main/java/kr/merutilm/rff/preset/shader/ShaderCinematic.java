@@ -53,6 +53,6 @@ public class ShaderCinematic implements Shader {
 
     @Override
     public BloomSettings bloomSettings() {
-        return new BloomSettings(0.03, 0.125, 0, 1);
+        return new BloomSettings(0.03, 0.1, 0, 1);
     }
 }

@@ -17,7 +17,6 @@ import java.util.TimeZone;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.WindowConstants;
 import javax.swing.border.LineBorder;
@@ -46,19 +45,18 @@ final class RFFVideoWindow extends JFrame{
 
     private static final int VIDEO_PREVIEW_WINDOW_MAX_LEN = 640;
     
-    private final JPanel panel;
+    private final RFFPanel panel;
     private final JProgressBar bar;
     private transient BufferedImage img;
 
     private RFFVideoWindow(int imageWidth, int imageHeight){
         super("Preview Video");
         setIconImage(IOUtilities.getApplicationIcon());
-        setPreferredSize(new Dimension(imageWidth, imageHeight + MUIConstants.UI_HEIGHT));
         setLayout(new BorderLayout());
 
         ParallelRenderState state = new ParallelRenderState();
 
-        this.panel = new JPanel(){
+        this.panel = new RFFPanel(){
             @Override
             public void paint(Graphics g) {
                 super.paint(g);
@@ -89,6 +87,10 @@ final class RFFVideoWindow extends JFrame{
 
         add(panel, BorderLayout.CENTER);
         add(bar, BorderLayout.SOUTH);
+
+        setPreferredSize(new Dimension(imageWidth, imageHeight + MUIConstants.UI_HEIGHT));
+        setWindowSize(imageWidth, imageHeight);
+
         setResizable(false);
         getContentPane().setBackground(Color.BLACK);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -106,6 +108,13 @@ final class RFFVideoWindow extends JFrame{
         
         pack();
         setVisible(true);
+    }
+
+    public void setWindowSize(int w, int h){
+        pack(); //first-packing, it sets the height of statusPanel and menubar, and we will obtain the drawPanel size errors.
+        setPreferredSize(new Dimension(w * 2 - panel.getWidth(), h * 2 - panel.getHeight())); //adjust the panel size to fit the init size
+        pack(); //re-packing for resizing window
+
     }
 
     public static void createVideo(Settings settings, File dir, File out) {
@@ -126,10 +135,10 @@ final class RFFVideoWindow extends JFrame{
         DoubleMatrix targetMatrix = targetMap.iterations();
         int imgWidth; 
         int imgHeight;
-        double multiplier = exportSettings.multiSampling();
+        int multiplier = exportSettings.multiSampling();
 
-        imgWidth = (int)(targetMatrix.getWidth() * multiplier);            
-        imgHeight = (int)(targetMatrix.getHeight() * multiplier);
+        imgWidth = targetMatrix.getWidth() * multiplier;
+        imgHeight = targetMatrix.getHeight() * multiplier;
         
         new Thread(() -> {
         
@@ -165,36 +174,36 @@ final class RFFVideoWindow extends JFrame{
                     if(frame == null){
                         break;
                     }
-                    Settings settingsModified = modifyToVideoSettings(frame, settings, currentSec);
-                    BufferedImage img = RFFShaderProcessor.createImage(state, currentID, frame, settingsModified, false);
-                    if(animationSettings.showText()){
-                        Graphics2D g = img.createGraphics();
-                        int xg = 20;
-                        int yg = 10;
-                        int size = imgWidth / 40;
-                        int off = size / 15;
-                        g.setFont(new Font(Font.SERIF, Font.BOLD, size));
-                        String zoomStr = String.format("Zoom : E%.3f", frame.zoom());
-                        g.setColor(new Color(0,0,0,128));
-                        g.drawString(zoomStr, xg + off, size + yg + off);
-                        g.setColor(new Color(255,255,255,128));
-                        g.drawString(zoomStr, xg, size + yg);
-                        
-                    }
-                    if(!window.isDisplayable()){
-                        break;
-                    }
-                    window.setImage(img);
-                    
-                    Java2DFrameConverter.copy(window.img, f);
-                    recorder.record(f, avutil.AV_PIX_FMT_ABGR);
-                    double progressRatio = (maxNumber - currentFrameNumber) / (maxNumber + animationSettings.overZoom());
-                    long spent = System.currentTimeMillis() - startMillis;
-                    long remained = (long)((1 - progressRatio) / progressRatio * spent);
-
-                    window.panel.repaint();
-                    window.bar.setValue((int)(progressRatio * 10000));
-                    window.bar.setString(String.format("Processing... %.2f", progressRatio * 100) + "% [" + sdf.format(new Date(remained)) + "]");
+//                    Settings settingsModified = modifyToVideoSettings(frame, settings, currentSec);
+//                    BufferedImage img = RFFShaderProcessor.createImage(state, currentID, frame, settingsModified);
+//                    if(animationSettings.showText()){
+//                        Graphics2D g = img.createGraphics();
+//                        int xg = 20;
+//                        int yg = 10;
+//                        int size = imgWidth / 40;
+//                        int off = size / 15;
+//                        g.setFont(new Font(Font.SERIF, Font.BOLD, size));
+//                        String zoomStr = String.format("Zoom : E%.3f", frame.zoom());
+//                        g.setColor(new Color(0,0,0,128));
+//                        g.drawString(zoomStr, xg + off, size + yg + off);
+//                        g.setColor(new Color(255,255,255,128));
+//                        g.drawString(zoomStr, xg, size + yg);
+//
+//                    }
+//                    if(!window.isDisplayable()){
+//                        break;
+//                    }
+//                    window.setImage(img);
+//
+//                    Java2DFrameConverter.copy(window.img, f);
+//                    recorder.record(f, avutil.AV_PIX_FMT_ABGR);
+//                    double progressRatio = (maxNumber - currentFrameNumber) / (maxNumber + animationSettings.overZoom());
+//                    long spent = System.currentTimeMillis() - startMillis;
+//                    long remained = (long)((1 - progressRatio) / progressRatio * spent);
+//
+//                    window.panel.repaint();
+//                    window.bar.setValue((int)(progressRatio * 10000));
+//                    window.bar.setString(String.format("Processing... %.2f", progressRatio * 100) + "% [" + sdf.format(new Date(remained)) + "]");
                 }
                 window.setVisible(false);
                 window.dispose();
@@ -213,12 +222,11 @@ final class RFFVideoWindow extends JFrame{
     private static Settings modifyToVideoSettings(RFFMap frame, Settings settings, double currentSec) {
         AnimationSettings animation = settings.videoSettings().animationSettings();
         double sof = currentSec * animation.stripeAnimationSpeed();
-        FunctionEase ease = animation.stripeAnimationEase().fun();
 
         return frame.modifyToMapSettings(settings).edit()
                 .setShaderSettings(e -> e
                         .setStripeSettings(e1 -> e1
-                                .setOffset((int) Math.floor(sof) + ease.apply((sof % 1 + 1) % 1)))
+                                .setOffset(sof))
                         )
                 .build();
     }
@@ -228,7 +236,7 @@ final class RFFVideoWindow extends JFrame{
     }
 
 
-    private static RFFMap getFrame(ParallelRenderState state, int currentID, File dir, double frame, DataSettings vds, double multiplier) throws IllegalParallelRenderStateException, InterruptedException{
+    private static RFFMap getFrame(ParallelRenderState state, int currentID, File dir, double frame, DataSettings vds, int multiplier) throws IllegalParallelRenderStateException, InterruptedException{
         
         if (frame < 1) {
 

@@ -1,18 +1,17 @@
 package kr.merutilm.rff.io;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
-import java.util.ArrayList;
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
-import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
-import kr.merutilm.rff.parallel.ParallelBitMapDispatcher;
-import kr.merutilm.rff.parallel.ParallelRenderState;
 import kr.merutilm.rff.struct.HexColor;
 import kr.merutilm.rff.struct.IntMatrix;
-import kr.merutilm.rff.struct.Point2D;
+
+import javax.imageio.ImageIO;
 
 public class BitMap extends IntMatrix {
 
@@ -201,69 +200,23 @@ public class BitMap extends IntMatrix {
         return sizes;
     }
 
-     /**
-     * 이미지에서 픽셀 값이 0인 부분의 색을 추론합니다
-     */
-    public BitMap imagine() throws IllegalParallelRenderStateException, InterruptedException{
-        
-        BitMap imaginedCanvas = cloneCanvas();
-        int[] data = imaginedCanvas.getCanvas();
-        ParallelRenderState state = new ParallelRenderState();
-        int id = state.currentID();
-        List<Point2D> nonnullPixels = new ArrayList<>();
-
-        
-        for (int i = 0; i < imaginedCanvas.getLength(); i++) {
-            if(data[i] != 0){
-                nonnullPixels.add(convertLocation(i));
-            }
-        }
-       
-        if(nonnullPixels.size() <= 1 || nonnullPixels.size() == data.length){
-            return this;
-        }
-        
-        ParallelBitMapDispatcher dispatcher = new ParallelBitMapDispatcher(state, id, imaginedCanvas);
-       
-        dispatcher.createRenderer((x, y, _, _, _, _, _, c, _) -> {
-            if(c != null){
-                return c;
-            }
-
-            double rs = 0;
-            double gs = 0;
-            double bs = 0;
-            double as = 0;
-            double ms = 0;
-
-
-            for (Point2D refP : nonnullPixels) {
-                double distance = refP.distance(new Point2D(x, y));
-                final double multiplier = Math.pow(0.80, distance);
-                HexColor refCol = dispatcher.texture2D(refP);
-                
-                rs += refCol.r() * multiplier;
-                gs += refCol.g() * multiplier;
-                bs += refCol.b() * multiplier;
-                as += refCol.a() * multiplier;  
-      
-                ms += multiplier;
-            }
-
-            rs /= ms;
-            gs /= ms;
-            bs /= ms;
-            as /= ms;
-
-        
-            return HexColor.get((int)rs, (int)gs, (int)bs, (int)as);
-        
-        });
-
-        dispatcher.dispatch();
-
-        return dispatcher.getMatrix();
+    public static void export(BufferedImage image, File file) throws IOException {
+        ImageIO.write(image, "png", file);
     }
+
+
+
+    public static void highGraphics(Graphics2D g) {
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
+        g.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+    }
+
 
     @Override
     public BitMap cloneCanvas() {

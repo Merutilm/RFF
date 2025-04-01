@@ -48,8 +48,8 @@ public record StripeSettings(
             return this;
         }
 
-        public Builder setOffset(double offsetRatio) {
-            this.offset = offsetRatio;
+        public Builder setOffset(double offset) {
+            this.offset = offset;
             return this;
         }
         @Override

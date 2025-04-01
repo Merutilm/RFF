@@ -39,7 +39,7 @@ public class ArrayCompressor {
      * @return The rebased index.
      */
     public int rebase(int index){
-        if(tools.isEmpty() || index < tools.getFirst().start()){
+        if(tools.isEmpty() || index < tools.getFirst().start() || index > tools.getLast().end()){
             return index;
         }
 

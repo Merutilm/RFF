@@ -30,11 +30,11 @@ public class ShaderLongRainbow implements LongRainbowShader {
 
     @Override
     public FogSettings fogSettings() {
-        return new FogSettings(0.1, 0.5);
+        return new FogSettings(0.05, 0.5);
     }
 
     @Override
     public BloomSettings bloomSettings() {
-        return new BloomSettings(0, 0.1, 0, 1);
+        return new BloomSettings(0, 0.05, 0, 1);
     }
 }

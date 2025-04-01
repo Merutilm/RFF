@@ -5,7 +5,7 @@ import java.awt.BorderLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-final class MUILabelPanel extends JPanel{
+final class MUILabelPanel extends RFFPanel{
 
     private final JLabel label;
 

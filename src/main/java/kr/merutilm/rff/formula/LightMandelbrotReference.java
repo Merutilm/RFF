@@ -22,7 +22,7 @@ import kr.merutilm.rff.settings.ReferenceCompressionSettings;
 import kr.merutilm.rff.precision.LWBigComplex;
 
 public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, double[] refReal, double[] refImag,
-                                       ReferenceCompressor<LightR3A> referenceCompressor,
+                                       ReferenceCompressor<LightR3A> referenceCompressor, boolean hasCompressor,
                                        int[] period,
                                        LWBigComplex lastReference,
                                        LWBigComplex fpgBn) implements MandelbrotReference {
@@ -227,16 +227,15 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
         ri = Arrays.copyOfRange(ri, 0, period - compressed + 1);
         periodArray = periodArrayLength == 0 ? new int[]{period} : Arrays.copyOfRange(periodArray, 0, periodArrayLength);
 
-        return new LightMandelbrotReference(formula, center, rr, ri, new ReferenceCompressor<>(tools, mergeR3A), periodArray, z, fpgBn);
+        return new LightMandelbrotReference(formula, center, rr, ri, new ReferenceCompressor<>(tools, mergeR3A), !tools.isEmpty(), periodArray, z, fpgBn);
     }
 
     public double real(int iteration) {
-        return refReal[referenceCompressor.compress(iteration)];
+        return hasCompressor ? refReal[referenceCompressor.compress(iteration)] : refReal[iteration];
     }
 
     public double imag(int iteration) {
-
-        return refImag[referenceCompressor.compress(iteration)];
+        return hasCompressor ? refImag[referenceCompressor.compress(iteration)] : refImag[iteration];
     }
 
     public LightR3ATable generateR3A(ParallelRenderState state, int renderID, R3ASettings r3aSettings, double dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
@@ -256,7 +255,7 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
     @Override
     public boolean equals(Object o) {
         return o instanceof LightMandelbrotReference(
-                Formula f, LWBigComplex c, double[] rr, double[] ri, ReferenceCompressor<LightR3A> rc,
+                Formula f, LWBigComplex c, double[] rr, double[] ri, ReferenceCompressor<LightR3A> rc, boolean hc,
                 int[] p, LWBigComplex l,
                 LWBigComplex bn
         ) &&
@@ -265,6 +264,7 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
                Arrays.equals(refReal, rr) &&
                Arrays.equals(refImag, ri) &&
                Objects.equals(referenceCompressor, rc) &&
+               Objects.equals(hasCompressor, hc) &&
                Arrays.equals(period, p) &&
                Objects.equals(lastReference, l) &&
                Objects.equals(fpgBn, bn);
@@ -275,8 +275,8 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
         return getClass() + "[ " +
                STR_FORMULA + formula +
                STR_CENTER + refCenter +
-               STR_REFERENCE_REAL + Objects.toString(refReal) +
-               STR_REFERENCE_IMAG + Objects.toString(refImag) +
+               STR_REFERENCE_REAL + Arrays.toString(refReal) +
+               STR_REFERENCE_IMAG + Arrays.toString(refImag) +
                STR_PERIOD + Arrays.toString(period) +
                STR_LAST_REF + lastReference +
                STR_FPG_BN + fpgBn + "\n]";

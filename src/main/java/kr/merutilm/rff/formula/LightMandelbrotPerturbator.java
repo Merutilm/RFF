@@ -50,14 +50,15 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
         int absIteration = 0;
         int maxRefIteration = reference.longestPeriod();
 
+//        double minRad = 0;
         double dzr = 0; // delta z
         double dzi = 0;
-
         double zr; // z
         double zi;
 
         double cd = 0;
         double pd = cd;
+        boolean isAbs = calc.absoluteIterationMode();
         // if (i == 1) {
         //     System.out.println("[SKIP VALUES]");
         // }
@@ -86,7 +87,7 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
                     iteration += r3a.skip();
                     refIteration += r3a.skip();
                     if (iteration >= maxIteration) {
-                        return maxIteration;
+                        return isAbs ? absIteration : maxIteration;
                     }
                      
                     // if (dcr1 * dcr1 + dci1 * dci1 < 4e-181) { //Tracking refIteration Skips
@@ -108,6 +109,8 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
                     continue;
                 }
             }
+
+
             
             if(refIteration != maxRefIteration){
                 double zr1 = reference.real(refIteration) * 2 + dzr;
@@ -136,6 +139,11 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
                 refIteration = 0;
                 dzr = zr;
                 dzi = zi;
+
+//                if(minRad / 100 > cd){
+//                    return isAbs ? absIteration : maxIteration;
+//                }
+//                minRad = cd;
             }
 
             if (cd > bailout * bailout) {
@@ -146,7 +154,7 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
 
         }
         
-        if(calc.absoluteIterationMode()){
+        if(isAbs){
             return absIteration;
         }
 

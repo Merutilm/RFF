@@ -8,8 +8,7 @@ public final class ParallelRenderState {
 
     private Thread currentThread = null;
     /**
-     * Throws the {@link IllegalParallelRenderStateException#IllegalRenderStateException() Exception} when state ID and current ID do not match
-     * @see ParallelRenderState#createBreakpoint()
+     * Throws the {@link IllegalParallelRenderStateException#IllegalParallelRenderStateException() Exception} when state ID and current ID do not match
      */
     public void tryBreak(int currentID) throws IllegalParallelRenderStateException {
         if (currentID != this.stateID) {
@@ -19,7 +18,7 @@ public final class ParallelRenderState {
 
     /**
      * Creates The Thread. it only works if the state ID and current ID match.
-     * Otherwise, The {@link IllegalParallelRenderStateException#IllegalRenderStateException() Exception} will be thrown.
+     * Otherwise, The {@link IllegalParallelRenderStateException#IllegalParallelRenderStateException() Exception} will be thrown.
      * @param run Run a task what you want.
      */
     public synchronized void createThread(IntConsumer run) throws InterruptedException{

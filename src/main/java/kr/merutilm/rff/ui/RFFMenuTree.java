@@ -1,6 +1,7 @@
 package kr.merutilm.rff.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -9,7 +10,7 @@ import javax.swing.JMenuItem;
 
 record RFFMenuTree(List<RFFMenuTree> elements, String name, JMenuItem matcher) {
 
-    public static final class Builder {
+    static final class Builder {
         //type 1 : multi elements
         private final List<Builder> elements;
         private final String name;
@@ -23,7 +24,7 @@ record RFFMenuTree(List<RFFMenuTree> elements, String name, JMenuItem matcher) {
         }
 
         private Builder(JMenuItem item){
-            this.elements = null;
+            this.elements = Collections.emptyList();
             this.name = null;
             this.matcher = item;
         }
@@ -32,23 +33,21 @@ record RFFMenuTree(List<RFFMenuTree> elements, String name, JMenuItem matcher) {
             return new Builder(name);
         }
 
-        public Builder createBranch(String name, Consumer<Builder> build){
+        public void createMenu(String name, Consumer<Builder> build){
             Builder b = init(name);
             build.accept(b);
             elements.add(b);
-            return this;
         }
 
 
-        public Builder createFruit(JMenuItem item){
+        public void createItem(JMenuItem item){
             elements.add(new Builder(item));
-            return this;
         }
         
 
         public RFFMenuTree build(){
-            if(elements == null){
-                return new RFFMenuTree(null, null, matcher);
+            if(elements.isEmpty()){
+                return new RFFMenuTree(Collections.emptyList(), null, matcher);
             }else{
                 return new RFFMenuTree(elements.stream().map(Builder::build).toList(), name, null);
             }
@@ -60,7 +59,7 @@ record RFFMenuTree(List<RFFMenuTree> elements, String name, JMenuItem matcher) {
     }
     
     private JMenuItem createUI(boolean head){
-        if(elements == null){
+        if(elements.isEmpty()){
             return matcher;
         }else{
             JMenu menu = head ? new RFFMenuBarMenu(name) : new RFFMenu(name);

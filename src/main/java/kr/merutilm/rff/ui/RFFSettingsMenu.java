@@ -10,7 +10,7 @@ enum RFFSettingsMenu {
     FILE(master -> {
         RFFMenuTree.Builder menuBuilder = RFFMenuTree.Builder.init("File");
         for(ActionsFile a : ActionsFile.values()){
-            menuBuilder.createFruit(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
+            menuBuilder.createItem(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
         }
 
         return (JMenu) menuBuilder.build().createUI();
@@ -18,7 +18,7 @@ enum RFFSettingsMenu {
     FRACTAL(master -> {
         RFFMenuTree.Builder menuBuilder = RFFMenuTree.Builder.init("Fractal");
         for(ActionsFractal a : ActionsFractal.values()){
-            menuBuilder.createFruit(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
+            menuBuilder.createItem(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
         }
         
         return (JMenu) menuBuilder.build().createUI();
@@ -26,7 +26,7 @@ enum RFFSettingsMenu {
     IMAGE(master -> {
         RFFMenuTree.Builder menuBuilder = RFFMenuTree.Builder.init("Image");
         for(ActionsImage a : ActionsImage.values()){
-            menuBuilder.createFruit(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
+            menuBuilder.createItem(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
         }
         
         return (JMenu) menuBuilder.build().createUI();
@@ -34,39 +34,39 @@ enum RFFSettingsMenu {
     SHADER(master -> {
         RFFMenuTree.Builder menuBuilder = RFFMenuTree.Builder.init("Shader");
         for(ActionsShader a : ActionsShader.values()){
-            menuBuilder.createFruit(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
+            menuBuilder.createItem(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
         }
         
         return (JMenu) menuBuilder.build().createUI();
     }),
     PRESET(master -> {
         RFFMenuTree.Builder menuBuilder = RFFMenuTree.Builder.init("Preset");
-        menuBuilder.createBranch("Calculation", e -> {
+        menuBuilder.createMenu("Calculation", e -> {
             for(Presets.Calculations a : Presets.Calculations.values()){
-                e.createFruit(ItemActions.createItem(a.toString(), "", null, () -> master.setPreset(a.preset())));
+                e.createItem(ItemActions.createItem(a.toString(), "", null, () -> master.setPreset(a.preset())));
             }
         });
-        menuBuilder.createBranch("Location", e -> {
+        menuBuilder.createMenu("Location", e -> {
             for(Presets.Locations a : Presets.Locations.values()){
-                e.createFruit(ItemActions.createItem(a.toString(), "", null, () -> {
+                e.createItem(ItemActions.createItem(a.toString(), "", null, () -> {
                     master.setPreset(a.preset());
-                    master.getWindow().getRenderer().recompute();
+                    master.getWindow().getRenderer().requestRecompute();
                 }));
             }
         });
-        menuBuilder.createBranch("Render", e -> {
+        menuBuilder.createMenu("Render", e -> {
             for(Presets.Renders a : Presets.Renders.values()){
-                e.createFruit(ItemActions.createItem(a.toString(), "", null, () -> {
+                e.createItem(ItemActions.createItem(a.toString(), "", null, () -> {
                     master.setPreset(a.preset());
-                    master.getWindow().getRenderer().recompute();
+                    master.getWindow().getRenderer().requestRecompute();
                 }));
             }
         });
-        menuBuilder.createBranch("Shader", e -> {
+        menuBuilder.createMenu("Shader", e -> {
             for(Presets.Shaders a : Presets.Shaders.values()){
-                e.createFruit(ItemActions.createItem(a.toString(), "", null, () -> {
+                e.createItem(ItemActions.createItem(a.toString(), "", null, () -> {
                     master.setPreset(a.preset());
-                    master.getWindow().getRenderer().refreshColor();
+                    master.getWindow().getRenderer().requestColor();
                 }));
             }
         });
@@ -76,7 +76,7 @@ enum RFFSettingsMenu {
     VIDEO(master -> {
         RFFMenuTree.Builder menuBuilder = RFFMenuTree.Builder.init("Video");
         for(ActionsVideo a : ActionsVideo.values()){
-            menuBuilder.createFruit(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
+            menuBuilder.createItem(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
         }
         
         return (JMenu) menuBuilder.build().createUI();
@@ -84,7 +84,7 @@ enum RFFSettingsMenu {
     EXPLORE(master -> {
         RFFMenuTree.Builder menuBuilder = RFFMenuTree.Builder.init("Explore");
         for(ActionsExplore a : ActionsExplore.values()){
-            menuBuilder.createFruit(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
+            menuBuilder.createItem(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
         }
         
         return (JMenu) menuBuilder.build().createUI();

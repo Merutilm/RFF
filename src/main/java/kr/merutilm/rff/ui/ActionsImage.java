@@ -9,7 +9,7 @@ import java.util.function.UnaryOperator;
 
 import javax.swing.KeyStroke;
 
-import kr.merutilm.rff.io.BitMapImage;
+import kr.merutilm.rff.io.BitMap;
 import kr.merutilm.rff.settings.ImageSettings;
 import kr.merutilm.rff.util.IOUtilities;
 
@@ -22,11 +22,11 @@ enum ActionsImage implements ItemActions {
         ImageSettings image = getImageSettings(master);
 
         Consumer<UnaryOperator<ImageSettings.Builder>> applier = e -> master
-                .setSettings(e1 -> e1.setImageSettings(e::apply));
+                .setSettings(e1 -> e1.setImageSettings(e));
 
         panel.createTextInput(name, "The resolution multiplier of current window.", image.resolutionMultiplier(), Double::parseDouble, e -> {
             applier.accept(t -> t.setResolutionMultiplier(e));
-            ItemActions.getRenderer(master).recompute();
+            ItemActions.getRenderer(master).requestRecompute();
         });
 
     }))),
@@ -39,7 +39,7 @@ enum ActionsImage implements ItemActions {
             return;
         }
         try {
-            new BitMapImage(ItemActions.getRenderer(master).getCurrentImage()).export(file);
+            BitMap.export(ItemActions.getRenderer(master).getCurrentImage(), file);
         } catch (IOException e) {
             throw new IllegalStateException();
         }

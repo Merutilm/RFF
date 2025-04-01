@@ -5,14 +5,13 @@ import java.util.function.Consumer;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 import javax.swing.plaf.basic.BasicToggleButtonUI;
 
 import kr.merutilm.rff.selectable.Selectable;
 
-final class MUISelectionFieldPanel<S extends Enum<S> & Selectable> extends JPanel{
+final class MUISelectionFieldPanel<S extends Enum<S> & Selectable> extends RFFPanel{
 
     public MUISelectionFieldPanel(String name, String description, S defaultValue, S[] options, Consumer<S> enterFunction){
         super(new GridLayout(1, 2, 10, 0));
@@ -21,7 +20,7 @@ final class MUISelectionFieldPanel<S extends Enum<S> & Selectable> extends JPane
         label.setForeground(MUIConstants.TEXT_COLOR);
         label.setHorizontalAlignment(SwingConstants.CENTER);
 
-        JPanel buttonPanel = new JPanel(new GridLayout(1, options.length));
+        RFFPanel buttonPanel = new RFFPanel(new GridLayout(1, options.length));
         buttonPanel.setBorder(MUIConstants.INPUT_BORDER);
         buttonPanel.setBackground(MUIConstants.INPUT_BACKGROUND);
 

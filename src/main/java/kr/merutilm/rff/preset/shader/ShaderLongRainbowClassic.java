@@ -31,6 +31,6 @@ public class ShaderLongRainbowClassic implements LongRainbowShader {
 
     @Override
     public BloomSettings bloomSettings() {
-        return new BloomSettings(0, 0.1, 0, 0);
+        return new BloomSettings(0, 0.05, 0, 0);
     }
 }

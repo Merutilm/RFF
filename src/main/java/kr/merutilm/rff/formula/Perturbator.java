@@ -10,6 +10,8 @@ import kr.merutilm.rff.precision.LWBigComplex;
 
 public abstract class Perturbator {
     private static final int PRECISION_ADDITION = 18;
+    public static final long MINIMUM_ITERATION = 300;
+    public static final long AUTOMATIC_ITERATION_MULTIPLIER = 50;
     private static final double LN2 = Math.log(2);
     protected final ParallelRenderState state;
     protected final Formula formula;
@@ -91,7 +93,7 @@ public abstract class Perturbator {
 
     public abstract Reference getReference();
     
-    public abstract R3ATable getR3ATable();
+    public abstract R3ATable<?> getR3ATable();
 
     public abstract Perturbator reuse(ParallelRenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision) throws IllegalParallelRenderStateException;
 

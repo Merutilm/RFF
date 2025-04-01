@@ -8,7 +8,6 @@ public record AnimationSettings(
     double overZoom,
     boolean showText,
     double mps,
-    Ease stripeAnimationEase,
     double stripeAnimationSpeed 
     ) implements Struct<AnimationSettings>{
     
@@ -18,7 +17,6 @@ public record AnimationSettings(
         .setOverZoom(overZoom)
         .setShowText(showText)
         .setMps(mps)
-        .setStripeAnimationEase(stripeAnimationEase)
         .setStripeAnimationSpeed(stripeAnimationSpeed);
     }
 
@@ -26,7 +24,6 @@ public record AnimationSettings(
         private double overZoom;
         private boolean showText;
         private double mps;
-        private Ease stripeAnimationEase;
         private double stripeAnimationSpeed;
 
         public Builder setOverZoom(double overZoomValue) {
@@ -44,10 +41,6 @@ public record AnimationSettings(
             return this;
         }
 
-        public Builder setStripeAnimationEase(Ease stripeAnimationEase) {
-            this.stripeAnimationEase = stripeAnimationEase;
-            return this;
-        }
         public Builder setStripeAnimationSpeed(double stripeAnimationSpeed) {
             this.stripeAnimationSpeed = stripeAnimationSpeed;
             return this;
@@ -56,7 +49,7 @@ public record AnimationSettings(
 
         @Override
         public AnimationSettings build() {
-            return new AnimationSettings(overZoom, showText, mps, stripeAnimationEase, stripeAnimationSpeed);
+            return new AnimationSettings(overZoom, showText, mps, stripeAnimationSpeed);
         }
 
     }

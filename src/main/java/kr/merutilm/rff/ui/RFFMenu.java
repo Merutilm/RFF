@@ -15,12 +15,13 @@ class RFFMenu extends JMenu{
         RFFMenuItemActionUtil.init(this, description);
     }
 
+
+
     @Override
     public Dimension getPreferredSize() {
         Dimension d = super.getPreferredSize();
         d.width = Math.max(MUIConstants.MENU_ITEM_MIN_WIDTH, d.width);
         return d;
     }
-    
 
 }

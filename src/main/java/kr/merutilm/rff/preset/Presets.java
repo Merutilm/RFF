@@ -6,20 +6,13 @@ import kr.merutilm.rff.preset.render.*;
 import kr.merutilm.rff.preset.shader.*;
 import kr.merutilm.rff.selectable.Ease;
 import kr.merutilm.rff.selectable.Selectable;
-import kr.merutilm.rff.settings.AnimationSettings;
-import kr.merutilm.rff.settings.CalculationSettings;
-import kr.merutilm.rff.settings.DataSettings;
-import kr.merutilm.rff.settings.DecimalizeIterationMethod;
-import kr.merutilm.rff.settings.ExportSettings;
-import kr.merutilm.rff.settings.ReuseReferenceMethod;
-import kr.merutilm.rff.settings.Settings;
-import kr.merutilm.rff.settings.VideoSettings;
+import kr.merutilm.rff.settings.*;
 
 public final class Presets implements Selectable{
 
 
-    public static final Calculation INIT_CALCULATION = Calculations.STABLE.preset();
-    public static final Location INIT_LOCATION = new LocationDebug();
+    public static final Calculation INIT_CALCULATION = Calculations.ULTRA_FAST.preset();
+    public static final Location INIT_LOCATION = Locations.DEFAULT.preset();
 
     public static final Render INIT_RENDER = Renders.MEDIUM.preset();
     public static final Shader INIT_SHADER = Shaders.LONG_RAINBOW.preset();
@@ -39,8 +32,8 @@ public final class Presets implements Selectable{
         INIT_SHADER.createShaderSettings(), 
         new VideoSettings(
             new DataSettings(2), 
-            new AnimationSettings(2, true, 1,Ease.LINEAR, 1), 
-            new ExportSettings(30,1,5000))
+            new AnimationSettings(2, true, 1, 1),
+            new ExportSettings(30,1,5000, VideoZoomingMethod.IMAGE))
         );
 
     private interface PresetElement<P extends Preset>{
@@ -75,6 +68,7 @@ public final class Presets implements Selectable{
 
     public enum Locations implements Selectable, PresetElement<Location>{
         DEFAULT(new LocationDefault()),
+        BILLION_PERIODS(new LocationBillionPeriod()),
         ;
     
     
@@ -120,7 +114,7 @@ public final class Presets implements Selectable{
     public enum Shaders implements Selectable, PresetElement<Shader>{
         CLASSIC_1(new ShaderClassic1()),
         CLASSIC_2(new ShaderClassic2()),
-        RAINBOW(new ThemeRainbow()),
+        RAINBOW(new ShaderRainbow()),
         LONG_RAINBOW_CLASSIC(new ShaderLongRainbowClassic()),
         LONG_RAINBOW(new ShaderLongRainbow()),
         CINEMATIC(new ShaderCinematic()),

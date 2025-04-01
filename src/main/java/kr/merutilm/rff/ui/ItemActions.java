@@ -12,11 +12,11 @@ import kr.merutilm.rff.selectable.Selectable;
 
 interface ItemActions extends Selectable{
     
-    static RFFRenderPanel getRenderer(RFF master) {
+    static RFFGLRenderPanel getRenderer(RFF master) {
         return master.getWindow().getRenderer();
     }
     @FunctionalInterface
-    static interface Initializer{
+    interface Initializer{
         JMenuItem init(RFF master, String name, String description, KeyStroke accelerator);
     }
 

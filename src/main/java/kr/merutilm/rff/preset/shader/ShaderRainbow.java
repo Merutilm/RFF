@@ -2,7 +2,7 @@ package kr.merutilm.rff.preset.shader;
 
 import kr.merutilm.rff.settings.*;
 
-public class ThemeRainbow implements Shader{
+public class ShaderRainbow implements Shader{
 
     @Override
     public String getName() {
@@ -35,7 +35,7 @@ public class ThemeRainbow implements Shader{
 
     @Override
     public FogSettings fogSettings() {
-        return new FogSettings(0.3, 0.05);
+        return new FogSettings(0.05, 0.4);
     }
 
     @Override

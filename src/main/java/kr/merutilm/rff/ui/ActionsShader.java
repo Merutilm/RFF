@@ -19,7 +19,7 @@ enum ActionsShader implements ItemActions {
         
         Consumer<UnaryOperator<ColorSettings.Builder>> applier = e -> {
             master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setColorSettings(e::apply)));
-            master.getWindow().getRenderer().refreshColor();
+            master.getWindow().getRenderer().requestColor();
         };
 
         panel.createTextInput("Color Pulse Interval", "Required iterations for the palette to cycle once", color.iterationInterval(), Double::parseDouble, e ->
@@ -40,7 +40,7 @@ enum ActionsShader implements ItemActions {
         
         Consumer<UnaryOperator<StripeSettings.Builder>> applier = e -> {
             master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setStripeSettings(e::apply)));
-            master.getWindow().getRenderer().refreshColor();
+            master.getWindow().getRenderer().requestColor();
         };
 
 
@@ -67,7 +67,7 @@ enum ActionsShader implements ItemActions {
         
         Consumer<UnaryOperator<SlopeSettings.Builder>> applier = e -> {
             master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setSlopeSettings(e::apply)));
-            master.getWindow().getRenderer().refreshColor();
+            master.getWindow().getRenderer().requestColor();
         };
 
         panel.createTextInput("Depth", "Slope depth", slope.depth(), Double::parseDouble, e ->
@@ -95,7 +95,7 @@ enum ActionsShader implements ItemActions {
         
             Consumer<UnaryOperator<ColorFilterSettings.Builder>> applier = e -> {
                 master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setColorFilterSettings(e::apply)));
-                master.getWindow().getRenderer().refreshColor();
+                master.getWindow().getRenderer().requestColor();
             };
     
             panel.createTextInput("Gamma", "Gamma value", colorFilter.gamma(), Double::parseDouble, e ->
@@ -121,7 +121,7 @@ enum ActionsShader implements ItemActions {
         
         Consumer<UnaryOperator<FogSettings.Builder>> applier = e -> {
             master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setFogSettings(e::apply)));
-            master.getWindow().getRenderer().refreshColor();
+            master.getWindow().getRenderer().requestColor();
         };
 
         panel.createTextInput("Radius", "Fog radius ratio in rendered image, fully blurred when the value is 1.", fog.radius(), Double::parseDouble, e ->
@@ -138,7 +138,7 @@ enum ActionsShader implements ItemActions {
     
         Consumer<UnaryOperator<BloomSettings.Builder>> applier = e -> {
             master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setBloomSettings(e::apply)));
-            master.getWindow().getRenderer().refreshColor();
+            master.getWindow().getRenderer().requestColor();
         };
 
         panel.createTextInput("Threshold", "Threshold to apply", bloom.threshold(), Double::parseDouble, e ->

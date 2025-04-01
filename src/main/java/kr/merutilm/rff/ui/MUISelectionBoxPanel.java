@@ -19,7 +19,7 @@ import java.awt.GridLayout;
 import java.util.function.Consumer;
 
 
-final class MUISelectionBoxPanel<S extends Enum<S> & Selectable> extends JPanel{
+final class MUISelectionBoxPanel<S extends Enum<S> & Selectable> extends RFFPanel{
 
     public MUISelectionBoxPanel(String name, String description, S defaultValue, S[] options, Consumer<S> enterFunction){
         super(new GridLayout(1, 2, 10, 0));

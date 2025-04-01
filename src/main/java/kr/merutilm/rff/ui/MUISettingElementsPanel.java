@@ -8,9 +8,8 @@ import java.awt.GridLayout;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.swing.JPanel;
 
-final class MUISettingElementsPanel extends JPanel{
+final class MUISettingElementsPanel extends RFFPanel{
     
 
     public MUISettingElementsPanel(){

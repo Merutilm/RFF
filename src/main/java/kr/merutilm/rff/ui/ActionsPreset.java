@@ -35,7 +35,7 @@ class ActionsPreset {
         for(Presets.Locations shader : Presets.Locations.values()){
             JMenuItem item = ItemActions.createItem(shader.toString(), "", null, () -> {
                 master.setPreset(shader.preset());
-                master.getWindow().getRenderer().recompute();
+                master.getWindow().getRenderer().requestRecompute();
             });
             ItemActions.addItem(menu, item);
         }
@@ -46,7 +46,7 @@ class ActionsPreset {
         for(Presets.Renders shader : Presets.Renders.values()){
             JMenuItem item = ItemActions.createItem(shader.toString(), "", null, () -> {
                 master.setPreset(shader.preset());
-                master.getWindow().getRenderer().recompute();
+                master.getWindow().getRenderer().requestRecompute();
             });
             ItemActions.addItem(menu, item);
         }
@@ -58,7 +58,7 @@ class ActionsPreset {
         for(Presets.Shaders shader : Presets.Shaders.values()){
             JMenuItem item = ItemActions.createItem(shader.toString(), "", null, () -> {
                 master.setPreset(shader.preset());
-                master.getWindow().getRenderer().refreshColor();
+                master.getWindow().getRenderer().requestColor();
             });
             ItemActions.addItem(menu, item);
         }

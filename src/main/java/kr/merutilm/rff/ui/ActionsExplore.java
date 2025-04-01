@@ -20,20 +20,20 @@ import kr.merutilm.rff.settings.Settings;
 enum ActionsExplore implements ItemActions {
     RECOMPUTE("Recompute", "Recompute using current Location.", KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_DOWN_MASK), 
     (master, name, description, accelerator) ->
-    ItemActions.createItem(name, description, accelerator, () -> ItemActions.getRenderer(master).recompute())
+    ItemActions.createItem(name, description, accelerator, () -> ItemActions.getRenderer(master).requestRecompute())
     ),
     REFRESH_COLOR("Refresh Color", "Refresh color using current Settings.", KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_DOWN_MASK), 
     (master, name, description, accelerator) ->
-    ItemActions.createItem(name, description, accelerator, () -> master.getWindow().getRenderer().refreshColor())),
+    ItemActions.createItem(name, description, accelerator, () -> master.getWindow().getRenderer().requestColor())),
     RESET("Reset", "Reset to Initial Location. It contains \"Recompute\" operation.", KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.ALT_DOWN_MASK), 
     (master, name, description, accelerator) ->
     ItemActions.createItem(name, description, accelerator, () -> {
-        RFFRenderPanel render = ItemActions.getRenderer(master);
+        RFFGLRenderPanel render = ItemActions.getRenderer(master);
         try {
             render.getState().cancel();
             Location def = Presets.Locations.DEFAULT.preset();
             master.setPreset(def);
-            ItemActions.getRenderer(master).recompute();
+            ItemActions.getRenderer(master).requestRecompute();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -50,39 +50,25 @@ enum ActionsExplore implements ItemActions {
     FIND_CENTER("Find Center", "Find the Minibrot center using current period.", KeyStroke.getKeyStroke(KeyEvent.VK_9, InputEvent.CTRL_DOWN_MASK), 
     (master, name, description, accelerator) ->
     ItemActions.createItem(name, description, accelerator, () -> {
-        RFFRenderPanel render = ItemActions.getRenderer(master);
+        RFFGLRenderPanel render = ItemActions.getRenderer(master);
         if (render.getCurrentPerturbator() == null) {
             return;
-        } 
-        try {
-            render.getState().createThread(id -> {
-                
-                try{
-                    LWBigComplex c = MandelbrotLocator.findCenter((MandelbrotPerturbator) render.getCurrentPerturbator());
-                
-                    if (c == null) {
-                        sendCenterNotFoundMessage();
-                    } else {
-                        Settings settings = master.getSettings().edit().setCalculationSettings(e1 -> e1.setCenter(c)).build();
-                        master.setSettings(settings);
-                        render.compute(settings, id);
-                    }
-                }catch (IllegalParallelRenderStateException e) {
-                    sendCenterNotFoundMessage();
-                    RFFLoggers.logCancelledMessage(name, id);
-                }
-                
-                
-            });
-                
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        }
+
+        LWBigComplex c = MandelbrotLocator.findCenter((MandelbrotPerturbator) render.getCurrentPerturbator());
+
+        if (c == null) {
+            sendCenterNotFoundMessage();
+        } else {
+            Settings settings = master.getSettings().edit().setCalculationSettings(e1 -> e1.setCenter(c)).build();
+            master.setSettings(settings);
+            render.requestRecompute();
         }
     })),
     LOCATE_MINIBROT("Locate Minibrot", "Locate the Minibrot using current period.", KeyStroke.getKeyStroke(KeyEvent.VK_0, InputEvent.CTRL_DOWN_MASK), 
     (master, name, description, accelerator) ->
     ItemActions.createItem(name, description, accelerator, () ->  {
-        RFFRenderPanel render = ItemActions.getRenderer(master);
+        RFFGLRenderPanel render = ItemActions.getRenderer(master);
         RFFStatusPanel panel = master.getWindow().getStatusPanel();
         Settings settings = master.getSettings();
         double logZoom = settings.calculationSettings().logZoom();
@@ -108,7 +94,7 @@ enum ActionsExplore implements ItemActions {
                     .setCenter(locator.center())
                     .setLogZoom(locator.logZoom())).build();
                     master.setSettings(modifiedSettings);
-                    render.compute(modifiedSettings, id);
+                    render.requestRecompute();
 
                 }catch (IllegalParallelRenderStateException e) {
                     sendCenterNotFoundMessage();

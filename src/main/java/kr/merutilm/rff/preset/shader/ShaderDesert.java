@@ -44,12 +44,12 @@ public class ShaderDesert implements Shader{
 
     @Override
     public ColorFilterSettings colorFilterSettings() {
-        return new ColorFilterSettings(1,0.1,-0.4,0.0,0.1);
+        return new ColorFilterSettings(1,0.1,0,0.0,0.1);
     }
 
     @Override
     public FogSettings fogSettings() {
-        return new FogSettings(0.3, 0.5);
+        return new FogSettings(0.05, 0.5);
     }
 
     @Override
