@@ -40,7 +40,7 @@ enum ActionsImage implements ItemActions {
         }
         new Thread(() -> {
             try {
-                RFFGLRenderPanel render = ItemActions.getRenderer(master);
+                RFFRenderPanel render = ItemActions.getRenderer(master);
                 render.requestCreateImage();
                 render.waitUntilCreateImage();
                 BitMap.export(render.getCurrentImage(), file);

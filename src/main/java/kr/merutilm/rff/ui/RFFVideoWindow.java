@@ -28,7 +28,6 @@ import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.Java2DFrameConverter;
 
-import kr.merutilm.rff.functions.FunctionEase;
 import kr.merutilm.rff.struct.DoubleMatrix;
 import kr.merutilm.rff.util.AdvancedMath;
 import kr.merutilm.rff.util.ConsoleUtils;
@@ -42,24 +41,18 @@ final class RFFVideoWindow extends JFrame{
 
     private static final int VIDEO_PREVIEW_WINDOW_MAX_LEN = 640;
     
-    private final RFFPanel panel;
+    private final RFFVideoWindowPanel panel;
     private final JProgressBar bar;
     private transient BufferedImage img;
 
-    private RFFVideoWindow(int imageWidth, int imageHeight){
+    private RFFVideoWindow(RFF master, int imageWidth, int imageHeight){
         super("Preview Video");
         setIconImage(IOUtilities.getApplicationIcon());
         setLayout(new BorderLayout());
 
         ParallelRenderState state = new ParallelRenderState();
 
-        this.panel = new RFFPanel(){
-            @Override
-            public void paint(Graphics g) {
-                super.paint(g);
-                g.drawImage(img, 0, 0, imageWidth, imageHeight, null);
-            }
-        };
+        this.panel = new RFFVideoWindowPanel(master);
         
         this.bar = new JProgressBar();
         bar.setLayout(null);
@@ -86,7 +79,7 @@ final class RFFVideoWindow extends JFrame{
         add(bar, BorderLayout.SOUTH);
 
         setPreferredSize(new Dimension(imageWidth, imageHeight + MUIConstants.UI_HEIGHT));
-        setWindowSize(imageWidth, imageHeight);
+        RFF.setWindowPanelSize(this, panel, imageWidth, imageHeight);
 
         setResizable(false);
         getContentPane().setBackground(Color.BLACK);
@@ -105,13 +98,6 @@ final class RFFVideoWindow extends JFrame{
         
         pack();
         setVisible(true);
-    }
-
-    public void setWindowSize(int w, int h){
-        pack(); //first-packing, it sets the height of statusPanel and menubar, and we will obtain the drawPanel size errors.
-        setPreferredSize(new Dimension(w * 2 - panel.getWidth(), h * 2 - panel.getHeight())); //adjust the panel size to fit the init size
-        pack(); //re-packing for resizing window
-
     }
 
     public static void createVideo(Settings settings, File dir, File out) {
@@ -138,41 +124,42 @@ final class RFFVideoWindow extends JFrame{
         imgHeight = targetMatrix.getHeight() * multiplier;
         
         new Thread(() -> {
-        
-            try(
-                FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(out, imgWidth, imgHeight);
-                Frame f = new Frame(imgWidth, imgHeight, Frame.DEPTH_BYTE, 4)
-            ){
-                RFFMap frame;
-                avutil.av_log_set_level(avutil.AV_LOG_QUIET);
-                int maxNumber = IOUtilities.generateFileNameNumber(dir, IOUtilities.Extension.MAP.toString()) - 1;
-                double minNumber = -animationSettings.overZoom();
-                double currentFrameNumber = maxNumber;
-                recorder.setFrameRate(fps);
-                recorder.setVideoQuality(0); // maximum quality  
-                recorder.setFormat("mp4");
-                recorder.setVideoBitrate(exportSettings.bitrate());
-                recorder.start(); 
-                double m = Math.min((double) VIDEO_PREVIEW_WINDOW_MAX_LEN / imgWidth, (double) VIDEO_PREVIEW_WINDOW_MAX_LEN / imgHeight);
-                double currentSec = 0;
-                int w = (int)(imgWidth * m);
-                int h = (int)(imgHeight * m);  
-                RFFVideoWindow window = new RFFVideoWindow(w, h);
-                long startMillis = System.currentTimeMillis();
-                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS");
-                sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 
-                while(currentFrameNumber > minNumber) {    
-                    currentFrameNumber -= frameInterval;
-                    currentSec += 1 / fps;
-
-                    frame = getFrame(state, currentID, dir, currentFrameNumber, dataSettings, multiplier);
-
-                    if(frame == null){
-                        break;
-                    }
+//            try(
+//                FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(out, imgWidth, imgHeight);
+//                Frame f = new Frame(imgWidth, imgHeight, Frame.DEPTH_BYTE, 4)
+//            ){
+//                RFFMap frame;
+//                avutil.av_log_set_level(avutil.AV_LOG_QUIET);
+//                int maxNumber = IOUtilities.generateFileNameNumber(dir, IOUtilities.Extension.MAP.toString()) - 1;
+//                double minNumber = -animationSettings.overZoom();
+//                double currentFrameNumber = maxNumber;
+//                recorder.setFrameRate(fps);
+//                recorder.setVideoQuality(0); // maximum quality
+//                recorder.setFormat("mp4");
+//                recorder.setVideoBitrate(exportSettings.bitrate());
+//                recorder.start();
+//                double m = Math.min((double) VIDEO_PREVIEW_WINDOW_MAX_LEN / imgWidth, (double) VIDEO_PREVIEW_WINDOW_MAX_LEN / imgHeight);
+//                double currentSec = 0;
+//                int w = (int)(imgWidth * m);
+//                int h = (int)(imgHeight * m);
+//                RFFVideoWindow window = new RFFVideoWindow(w, h);
+//                RFFRenderPanel renderPanel = ;
+//                long startMillis = System.currentTimeMillis();
+//                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS");
+//                sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+//
+//                while(currentFrameNumber > minNumber) {
+//                    currentFrameNumber -= frameInterval;
+//                    currentSec += 1 / fps;
+//
+//                    frame = getFrame(state, currentID, dir, currentFrameNumber, dataSettings, multiplier);
+//
+//                    if(frame == null){
+//                        break;
+//                    }
 //                    Settings settingsModified = modifyToVideoSettings(frame, settings, currentSec);
-//                    BufferedImage img = RFFShaderProcessor.createImage(state, currentID, frame, settingsModified);
+//                    BufferedImage img = RFFRenderPanel.createImage(state, currentID, frame, settingsModified);
 //                    if(animationSettings.showText()){
 //                        Graphics2D g = img.createGraphics();
 //                        int xg = 20;
@@ -201,18 +188,18 @@ final class RFFVideoWindow extends JFrame{
 //                    window.panel.repaint();
 //                    window.bar.setValue((int)(progressRatio * 10000));
 //                    window.bar.setString(String.format("Processing... %.2f", progressRatio * 100) + "% [" + sdf.format(new Date(remained)) + "]");
-                }
-                window.setVisible(false);
-                window.dispose();
-                JOptionPane.showMessageDialog(null, "Render Finished");
-
-            }catch(IOException e){
-                ConsoleUtils.logError(e);
-            }catch(IllegalParallelRenderStateException e){
-                //noop
-            }catch(InterruptedException e){
-                Thread.currentThread().interrupt();
-            }
+//                }
+//                window.setVisible(false);
+//                window.dispose();
+//                JOptionPane.showMessageDialog(null, "Render Finished");
+//
+//            }catch(IOException e){
+//                ConsoleUtils.logError(e);
+//            }catch(IllegalParallelRenderStateException e){
+//                //noop
+//            }catch(InterruptedException e){
+//                Thread.currentThread().interrupt();
+//            }
         }).start();
     }
 

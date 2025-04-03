@@ -11,7 +11,7 @@ import kr.merutilm.rff.util.DoubleExponentMath;
 public class DoubleExponent extends Number implements Comparable<DoubleExponent>{
 
     
-    public final int exp;
+    public final int exp2;
     public final long bits;
 
     public static final double EXP_DEADLINE = 290;
@@ -20,7 +20,6 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
 
     public static final long SIGNUM_BIT = 0x8000000000000000L;
     public static final long EXP0_BITS = 0x3ff0000000000000L;
-    public static final long EXP_BITS = 0x7ff0000000000000L;
     public static final long DECIMAL_SIGNUM_BITS = 0x800fffffffffffffL;
 
     public static final DoubleExponent ZERO = new DoubleExponent(Integer.MIN_VALUE, 0);
@@ -30,8 +29,8 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
     public static final DoubleExponent POSITIVE_INFINITY = new DoubleExponent(Integer.MAX_VALUE, 0x000fffffffffffffL);
     public static final DoubleExponent NEGATIVE_INFINITY = new DoubleExponent(Integer.MAX_VALUE, 0x800fffffffffffffL);
 
-    private DoubleExponent(int exp, long bits){
-        this.exp = exp;
+    private DoubleExponent(int exp2, long bits){
+        this.exp2 = exp2;
         this.bits = bits;
     }
 
@@ -83,21 +82,21 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
 
 
     public static DoubleExponent valueOf(int expBy2, double value){
+        if(value == 0){
+            return ZERO;
+        }
         if(Double.isInfinite(value)){
             return value > 0 ? POSITIVE_INFINITY : NEGATIVE_INFINITY;    
         }
         if(Double.isNaN(value)){
             return NAN;
         }
-        
-        return unsafeValueOf(expBy2, value);
+
+
+        return fastUnsafeValue(expBy2, value);
     }
 
-    private static DoubleExponent unsafeValueOf(int expBy2, double value){
-
-        if(value == 0){
-            return ZERO;
-        }
+    private static DoubleExponent fastUnsafeValue(int expBy2, double value){
 
         int exp2 = Math.getExponent(value);
         long val = decimalToLongBits(value);
@@ -117,7 +116,7 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
         if(isZero()){
             return POSITIVE_INFINITY;
         }
-        return valueOf(-exp, 1/longBitsToDecimal());
+        return fastUnsafeValue(-exp2, 1 / longBitsToDecimal());
     }
 
     public DoubleExponent negate(){
@@ -130,23 +129,23 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
         if(isZero()){
             return ZERO;
         }
-        return new DoubleExponent(exp, bits ^ SIGNUM_BIT);
+        return new DoubleExponent(exp2, bits ^ SIGNUM_BIT);
     }
 
     public DoubleExponent doubled(){
-        return new DoubleExponent(exp + 1, bits);
+        return new DoubleExponent(exp2 + 1, bits);
     }
 
     public DoubleExponent quadrupled(){
-        return new DoubleExponent(exp + 2, bits);
+        return new DoubleExponent(exp2 + 2, bits);
     }
 
     public DoubleExponent halved(){
-        return new DoubleExponent(exp - 1, bits);
+        return new DoubleExponent(exp2 - 1, bits);
     }
 
     public DoubleExponent quartered(){
-        return new DoubleExponent(exp - 2, bits);
+        return new DoubleExponent(exp2 - 2, bits);
     }
     public DoubleExponent add(double v){
         return add(valueOf(v));
@@ -170,21 +169,24 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
             return v;
         }
 
-        if(exp < v.exp){
-            long d = (long) v.exp - exp;
+        if(exp2 < v.exp2){
+            long d = (long) v.exp2 - exp2;
             if(d >= DOUBLE_PRECISION){
                 return v;
             }
-            return unsafeValueOf(v.exp, longBitsExpToDouble(bits, EXP0_BITS - (d << DOUBLE_PRECISION)) + v.longBitsToDecimal());        
+            double dec = longBitsExpToDouble(bits, EXP0_BITS - (d << DOUBLE_PRECISION)) + v.longBitsToDecimal();
+            return dec == 0 ? ZERO : fastUnsafeValue(v.exp2, dec);
         }
-        if(exp > v.exp){
-            long d = (long) exp - v.exp;
+        if(exp2 > v.exp2){
+            long d = (long) exp2 - v.exp2;
             if(d >= DOUBLE_PRECISION){
                 return this;
             }
-            return unsafeValueOf(exp, longBitsToDecimal() + longBitsExpToDouble(v.bits, EXP0_BITS - (d << DOUBLE_PRECISION)));
+            double dec = longBitsToDecimal() + longBitsExpToDouble(v.bits, EXP0_BITS - (d << DOUBLE_PRECISION));
+            return dec == 0 ? ZERO : fastUnsafeValue(exp2, dec);
         }
-        return unsafeValueOf(exp, longBitsToDecimal() + v.longBitsToDecimal());
+        double dec = longBitsToDecimal() + v.longBitsToDecimal();
+        return dec == 0 ? ZERO : fastUnsafeValue(exp2, dec);
     }
 
     public DoubleExponent subtract(double v){
@@ -210,30 +212,33 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
             return v.negate();
         }
 
-        if(exp < v.exp){
-            long d = (long)v.exp - exp;
+        if(exp2 < v.exp2){
+            long d = (long)v.exp2 - exp2;
             if(d >= DOUBLE_PRECISION){
                 return v.negate();
             }
-            return unsafeValueOf(v.exp, longBitsExpToDouble(bits, EXP0_BITS - (d << DOUBLE_PRECISION)) - v.longBitsToDecimal());        
+            double dec = longBitsExpToDouble(bits, EXP0_BITS - (d << DOUBLE_PRECISION)) - v.longBitsToDecimal();
+            return fastUnsafeValue(v.exp2, dec);
         }
-        if(exp > v.exp){
-            long d = (long)exp - v.exp;
+        if(exp2 > v.exp2){
+            long d = (long) exp2 - v.exp2;
             if(d >= DOUBLE_PRECISION){
                 return this;
             }
-            return unsafeValueOf(exp, longBitsToDecimal() - longBitsExpToDouble(v.bits, EXP0_BITS - (d << DOUBLE_PRECISION)));
+            double dec = longBitsToDecimal() - longBitsExpToDouble(v.bits, EXP0_BITS - (d << DOUBLE_PRECISION));
+            return fastUnsafeValue(exp2, dec);
         }
-        return unsafeValueOf(exp, longBitsToDecimal() - v.longBitsToDecimal());
+        double dec = longBitsToDecimal() - v.longBitsToDecimal();
+        return fastUnsafeValue(exp2, dec);
     }
 
 
     public boolean isZero(){ 
-        return ZERO.exp == exp && ZERO.bits == bits;
+        return ZERO.exp2 == exp2 && ZERO.bits == bits;
     }
 
     public boolean isNaN(){
-        return NAN.exp == exp && NAN.bits == bits;
+        return NAN.exp2 == exp2 && NAN.bits == bits;
     }
 
     public boolean signum(){
@@ -241,7 +246,7 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
     }
     
     public boolean isInfinite(){
-        return (POSITIVE_INFINITY.exp == exp && POSITIVE_INFINITY.bits == bits) || (NEGATIVE_INFINITY.exp == exp && NEGATIVE_INFINITY.bits == bits);
+        return (POSITIVE_INFINITY.exp2 == exp2 && POSITIVE_INFINITY.bits == bits) || (NEGATIVE_INFINITY.exp2 == exp2 && NEGATIVE_INFINITY.bits == bits);
     }
 
     public boolean isLargerThan(double v){
@@ -288,7 +293,7 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
         //   (a * 2 ^ b) ^ 2
         // = a ^ 2 * 2 ^ (2 * b)
         double d = longBitsToDecimal();
-        return DoubleExponent.valueOf(exp * 2, d * d);
+        return fastUnsafeValue(exp2 * 2, d * d);
     }
     public DoubleExponent sqrt(){
         if(isZero()){
@@ -303,11 +308,11 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
         //   sqrt(a * 2 ^ b)
         //   sqrt(a) * 2 ^ (b / 2)
 
-        int fl = (int) Math.floor(exp / 2.0);
-        double r = exp / 2.0 - fl;
+        int fl = (int) Math.floor(exp2 / 2.0);
+        double r = exp2 / 2.0 - fl;
 
 
-        return DoubleExponent.valueOf(fl, Math.sqrt(longBitsToDecimal()) * Math.pow(2, r));
+        return fastUnsafeValue(fl, Math.sqrt(longBitsToDecimal()) * Math.pow(2, r));
     }
     
 
@@ -329,7 +334,7 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
         //   a * 10 ^ b * c * 10 ^ d 
         // = a * c * 10 ^ b * 10 ^ d 
         // = a * c * 10 ^ (b + d)
-        return unsafeValueOf(exp + v.exp, longBitsToDecimal() * v.longBitsToDecimal());
+        return fastUnsafeValue(exp2 + v.exp2, longBitsToDecimal() * v.longBitsToDecimal());
     }
 
     public DoubleExponent divide(double v){
@@ -350,7 +355,7 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
         //   a * 2 ^ b / (c * 2 ^ d)
         // = a / c * 2 ^ b / 2 ^ d 
         // = a / c * 2 ^ (b - d)
-        return unsafeValueOf(exp - v.exp, longBitsToDecimal() / v.longBitsToDecimal());
+        return fastUnsafeValue(exp2 - v.exp2, longBitsToDecimal() / v.longBitsToDecimal());
     }
 
     public double log(){
@@ -363,7 +368,7 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
         if(isZero()){
             return Double.NEGATIVE_INFINITY;
         }
-        return exp * DoubleExponentMath.LN2 + Math.log(longBitsToDecimal());
+        return exp2 * DoubleExponentMath.LN2 + Math.log(longBitsToDecimal());
     }
     public double log10(){
         //   log10(a * 2 ^ b)
@@ -375,7 +380,7 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
         if(isZero()){
             return Double.NEGATIVE_INFINITY;
         }
-        return exp * DoubleExponentMath.LN2 / DoubleExponentMath.LN10 + Math.log10(longBitsToDecimal());
+        return exp2 * DoubleExponentMath.LN2 / DoubleExponentMath.LN10 + Math.log10(longBitsToDecimal());
     }
 
 
@@ -387,17 +392,17 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
             return null;
         }
         LWBigDecimal result = LWBigDecimal.valueOf(String.valueOf(longBitsToDecimal()), precision);
-        return result.multiplyExpOf2(exp);
+        return result.multiplyExpOf2(exp2);
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof DoubleExponent o && o.exp == exp && o.bits == bits;
+        return obj instanceof DoubleExponent o && o.exp2 == exp2 && o.bits == bits;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(exp, bits);
+        return Objects.hash(exp2, bits);
     }
     
     @Override
@@ -421,7 +426,7 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
             }
         }
         
-        return toLWBigDecimal(LWBigDecimal.exp2ToPrecision(exp - 15)).toString();
+        return toLWBigDecimal(LWBigDecimal.exp2ToPrecision(exp2 - 15)).toString();
     }
 
 
@@ -430,8 +435,8 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
         if(signum() != e.signum()){
             return signum() ? 1 : -1;
         }
-        if(exp != e.exp){
-            return exp > e.exp ? 1 : -1;
+        if(exp2 != e.exp2){
+            return exp2 > e.exp2 ? 1 : -1;
         }
         if(bits != e.bits){
             return bits > e.bits ? 1 : -1;
@@ -459,13 +464,13 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
         if(isNaN()){
             return Double.NaN;
         }
-        if(exp >= 1024 || isInfinite()){
+        if(exp2 >= 1024 || isInfinite()){
             return !signum() ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
         }
-        if(exp <= -1024){
+        if(exp2 <= -1024){
             return 0;
         }
-        long expBit = EXP0_BITS + ((long)exp << DOUBLE_PRECISION);
+        long expBit = EXP0_BITS + ((long) exp2 << DOUBLE_PRECISION);
         long bit = expBit | bits;
         return longBitsExpToDouble(bit, expBit);
     }

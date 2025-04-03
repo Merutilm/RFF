@@ -12,7 +12,7 @@ import kr.merutilm.rff.selectable.Selectable;
 
 interface ItemActions extends Selectable{
     
-    static RFFGLRenderPanel getRenderer(RFF master) {
+    static RFFRenderPanel getRenderer(RFF master) {
         return master.getWindow().getRenderer();
     }
     @FunctionalInterface

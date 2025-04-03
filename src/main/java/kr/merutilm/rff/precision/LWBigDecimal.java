@@ -1,5 +1,6 @@
 package kr.merutilm.rff.precision;
 
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -35,7 +36,7 @@ public class LWBigDecimal extends Number{
         if(exp2 < 0){
             r = d1.multiply(BD_TWO.pow(-exp2)).toBigInteger();
         }else{
-            r = d1.divide(BD_TWO.pow(exp2)).toBigInteger();    
+            r = d1.divide(BD_TWO.pow(exp2), RoundingMode.UNNECESSARY).toBigInteger();
         }
         
         return new LWBigDecimal(exp2, r);

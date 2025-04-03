@@ -36,7 +36,7 @@ void main() {
     double iteration = getIteration(coord);
     color = texture(inputTex, coord);
 
-    if(!use){
+    if(!use || iteration == 0){
         return;
     }
 

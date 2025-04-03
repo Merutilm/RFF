@@ -14,7 +14,7 @@ enum ActionsFile implements ItemActions {
     OPEN_MAP("Open Map", "Open RFF Map file(" + IOUtilities.Extension.MAP + ")", KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.CTRL_DOWN_MASK), 
     (master, name, description, accelerator) ->
     ItemActions.createItem(name, description, accelerator, () -> {
-        RFFGLRenderPanel renderer = master.getWindow().getRenderer();
+        RFFRenderPanel renderer = master.getWindow().getRenderer();
         File defOpen = new File(IOUtilities.getOriginalResource(), IOUtilities.DefaultDirectory.MAP.toString());
         File file = IOUtilities.openFile(name, defOpen, IOUtilities.Extension.MAP.toString(), "RFF Map");
         if (file == null) {

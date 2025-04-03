@@ -8,7 +8,8 @@ import java.awt.event.WindowEvent;
 import java.awt.geom.AffineTransform;
 import java.util.*;
 
-import javax.swing.JFrame;
+import javax.swing.*;
+
 import kr.merutilm.rff.util.IOUtilities;
 import org.lwjgl.opengl.awt.GLData;
 
@@ -16,7 +17,7 @@ import org.lwjgl.opengl.awt.GLData;
 final class RFFRenderWindow extends JFrame {
 
     private final RFFStatusPanel statusPanel;
-    private final RFFGLRenderPanel glRenderPanel;
+    private final RFFRenderPanel renderPanel;
     private RFFSettingsWindow currentSettingsWindow;
     public static final double SCALE_MULTIPLIER;
     static {
@@ -33,12 +34,8 @@ final class RFFRenderWindow extends JFrame {
         setLayout(new BorderLayout(0, 0));
 
         RFFMenuBar menuBar = new RFFMenuBar();
-        GLData data = new GLData();
-        data.majorVersion = 3;
-        data.minorVersion = 3;
-        data.profile = GLData.Profile.CORE;
-        data.samples = 4;
-        glRenderPanel = new RFFGLRenderPanel(master, data);
+
+        renderPanel = new RFFRenderPanel(master);
         statusPanel = new RFFStatusPanel();
         Arrays.stream(RFFSettingsMenu.values()).map(e -> e.getMenu(master)).forEach(menuBar::add);
         setMinimumSize(new Dimension(300, 300));
@@ -48,8 +45,8 @@ final class RFFRenderWindow extends JFrame {
             public void componentResized(ComponentEvent e) {
                 super.componentResized(e);
                 if (e.getComponent().isShowing()) {
-                    glRenderPanel.requestResize();
-                    glRenderPanel.requestRecompute();
+                    renderPanel.requestResize();
+                    renderPanel.requestRecompute();
                 }
             }
         });
@@ -66,24 +63,17 @@ final class RFFRenderWindow extends JFrame {
 
         add(menuBar, BorderLayout.NORTH);
         add(statusPanel, BorderLayout.SOUTH);
-        add(glRenderPanel, BorderLayout.CENTER);
+        add(renderPanel, BorderLayout.CENTER);
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setWindowSize(w, h);
+        RFF.setWindowPanelSize(this, renderPanel, w, h);
 
         setLocationRelativeTo(null);
         setVisible(true);
 
-        glRenderPanel.renderLoop();
+        renderPanel.renderLoop();
     }
 
-    public void setWindowSize(int w, int h){
-        setPreferredSize(new Dimension(RFFPanel.toLogicalLength(w), RFFPanel.toLogicalLength(h)));
-        pack(); //first-packing, it sets the height of statusPanel and menubar, and we will obtain the drawPanel size errors. 
-        setPreferredSize(new Dimension(RFFPanel.toLogicalLength(2 * w) - glRenderPanel.getWidth(), RFFPanel.toLogicalLength(2 * h) - glRenderPanel.getHeight())); //adjust the panel size to fit the init size
-        pack(); //re-packing for resizing window
-
-    }
 
     public void setCurrentSettingsWindow(RFFSettingsWindow currentSettingsWindow) {
         this.currentSettingsWindow = currentSettingsWindow;
@@ -94,8 +84,8 @@ final class RFFRenderWindow extends JFrame {
     }
 
 
-    public RFFGLRenderPanel getRenderer() {
-        return glRenderPanel;
+    public RFFRenderPanel getRenderer() {
+        return renderPanel;
     }
 
 }

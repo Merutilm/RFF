@@ -28,7 +28,7 @@ enum ActionsExplore implements ItemActions {
     RESET("Reset", "Reset to Initial Location. It contains \"Recompute\" operation.", KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.ALT_DOWN_MASK), 
     (master, name, description, accelerator) ->
     ItemActions.createItem(name, description, accelerator, () -> {
-        RFFGLRenderPanel render = ItemActions.getRenderer(master);
+        RFFRenderPanel render = ItemActions.getRenderer(master);
         try {
             render.getState().cancel();
             Location def = Presets.Locations.DEFAULT.preset();
@@ -50,7 +50,7 @@ enum ActionsExplore implements ItemActions {
     FIND_CENTER("Find Center", "Find the Minibrot center using current period.", KeyStroke.getKeyStroke(KeyEvent.VK_9, InputEvent.CTRL_DOWN_MASK), 
     (master, name, description, accelerator) ->
     ItemActions.createItem(name, description, accelerator, () -> {
-        RFFGLRenderPanel render = ItemActions.getRenderer(master);
+        RFFRenderPanel render = ItemActions.getRenderer(master);
         if (render.getCurrentPerturbator() == null) {
             return;
         }
@@ -68,7 +68,7 @@ enum ActionsExplore implements ItemActions {
     LOCATE_MINIBROT("Locate Minibrot", "Locate the Minibrot using current period.", KeyStroke.getKeyStroke(KeyEvent.VK_0, InputEvent.CTRL_DOWN_MASK), 
     (master, name, description, accelerator) ->
     ItemActions.createItem(name, description, accelerator, () ->  {
-        RFFGLRenderPanel render = ItemActions.getRenderer(master);
+        RFFRenderPanel render = ItemActions.getRenderer(master);
         RFFStatusPanel panel = master.getWindow().getStatusPanel();
         Settings settings = master.getSettings();
         double logZoom = settings.calculationSettings().logZoom();

@@ -22,14 +22,15 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
     private final DoubleExponent offR;
     private final DoubleExponent offI;
 
-    public DeepMandelbrotPerturbator(ParallelRenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException{
+    public DeepMandelbrotPerturbator(ParallelRenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
         this(state, currentID, calc, dcMax, precision, period, actionPerRefCalcIteration, actionPerCreatingTableIteration, false);
     }
+
     public DeepMandelbrotPerturbator(ParallelRenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, BiConsumer<Integer, Double> actionPerCreatingTableIteration, boolean arbitraryPrecisionFPGBn) throws IllegalParallelRenderStateException {
         this(state, currentID, calc, dcMax, precision, period, actionPerRefCalcIteration, actionPerCreatingTableIteration, arbitraryPrecisionFPGBn, null, null, DoubleExponent.ZERO, DoubleExponent.ZERO);
     }
 
-    public DeepMandelbrotPerturbator(ParallelRenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, BiConsumer<Integer, Double> actionPerCreatingTableIteration, boolean arbitraryPrecisionFPGBn, DeepMandelbrotReference reusedReference, DeepR3ATable reusedTable, @Nonnull DoubleExponent offR, @Nonnull DoubleExponent offI) throws IllegalParallelRenderStateException{
+    public DeepMandelbrotPerturbator(ParallelRenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, BiConsumer<Integer, Double> actionPerCreatingTableIteration, boolean arbitraryPrecisionFPGBn, DeepMandelbrotReference reusedReference, DeepR3ATable reusedTable, @Nonnull DoubleExponent offR, @Nonnull DoubleExponent offI) throws IllegalParallelRenderStateException {
         super(state, currentID, calc, arbitraryPrecisionFPGBn);
         this.dcMax = dcMax;
         this.offR = offR;
@@ -42,10 +43,10 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
     // Performs the corresponding action on all pixels
     @Override
     public double iterate(DoubleExponent dcr, DoubleExponent dci) throws IllegalParallelRenderStateException {
-        
+
         dcr = dcr.add(offR);
         dci = dci.add(offI);
-        
+
         long iteration = 0;
         int refIteration = 0;
         int absIteration = 0;
@@ -58,19 +59,19 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
         DoubleExponent zi;
 
         DoubleExponent cd = DoubleExponent.ZERO;
-        DoubleExponent pd = cd;
+        DoubleExponent pd = DoubleExponent.ZERO;
 
         while (iteration < maxIteration) {
 
-            if(table != null){
+            if (table != null) {
                 DeepR3A r3a = table.lookup(refIteration, dzr, dzi);
                 if (r3a != null) {
                     DoubleExponent dzr1 = r3a.anr().multiply(dzr).subtract(r3a.ani().multiply(dzi)).add(r3a.bnr().multiply(dcr)).subtract(r3a.bni().multiply(dci));
                     DoubleExponent dzi1 = r3a.anr().multiply(dzi).add(r3a.ani().multiply(dzr)).add(r3a.bnr().multiply(dci)).add(r3a.bni().multiply(dcr));
-    
+
                     dzr = dzr1;
                     dzi = dzi1;
-    
+
                     iteration += r3a.skip();
                     refIteration += r3a.skip();
                     if (iteration >= maxIteration) {
@@ -79,7 +80,7 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
                     continue;
                 }
             }
-            if(refIteration != maxRefIteration){
+            if (refIteration != maxRefIteration) {
                 DoubleExponent zr1 = reference.real(refIteration).doubled().add(dzr);
                 DoubleExponent zi1 = reference.imag(refIteration).doubled().add(dzi);
 
@@ -98,9 +99,9 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
             zi = reference.imag(refIteration).add(dzi);
 
             pd = cd;
-            cd = DoubleExponentMath.hypotApproximate(zr, zi);
+            cd = DoubleExponentMath.hypot(zr, zi);
 
-            if (refIteration == maxRefIteration || cd.isSmallerThan(DoubleExponentMath.hypotApproximate(dzr, dzi))) {
+            if (refIteration == maxRefIteration || cd.isSmallerThan(DoubleExponentMath.hypot(dzr, dzi))) {
                 refIteration = 0;
                 dzr = zr;
                 dzi = zi;
@@ -114,8 +115,8 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
             state.tryBreak(currentID);
 
         }
-        
-        if(calc.absoluteIterationMode()){
+
+        if (calc.absoluteIterationMode()) {
             return absIteration;
         }
 
@@ -124,17 +125,18 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
         }
 
 
-
         return getDoubleValueIteration(iteration, pd.doubleValue(), cd.doubleValue());
 
     }
 
     @Override
-    public DeepMandelbrotPerturbator reuse(ParallelRenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision) throws IllegalParallelRenderStateException{
+    public DeepMandelbrotPerturbator reuse(ParallelRenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision) throws IllegalParallelRenderStateException {
         LWBigComplex centerOffset = calc.center().subtract(reference.refCenter(), precision);
         DoubleExponent offR = DoubleExponent.valueOf(centerOffset.re());
         DoubleExponent offI = DoubleExponent.valueOf(centerOffset.im());
-        return new DeepMandelbrotPerturbator(state, currentID, calc, dcMax, precision, reference.longestPeriod(), _ -> {}, (_, _) -> {}, strictFPGBn, reference, table, offR, offI);
+        return new DeepMandelbrotPerturbator(state, currentID, calc, dcMax, precision, reference.longestPeriod(), _ -> {
+        }, (_, _) -> {
+        }, strictFPGBn, reference, table, offR, offI);
     }
 
     @Override
@@ -147,7 +149,7 @@ public class DeepMandelbrotPerturbator extends MandelbrotPerturbator {
         return table;
     }
 
-    public DoubleExponent dcMax(){
+    public DoubleExponent dcMax() {
         return dcMax;
     }
 
