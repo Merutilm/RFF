@@ -4,7 +4,6 @@ import kr.merutilm.rff.preset.calc.*;
 import kr.merutilm.rff.preset.location.*;
 import kr.merutilm.rff.preset.render.*;
 import kr.merutilm.rff.preset.shader.*;
-import kr.merutilm.rff.selectable.Ease;
 import kr.merutilm.rff.selectable.Selectable;
 import kr.merutilm.rff.settings.*;
 
@@ -15,7 +14,7 @@ public final class Presets implements Selectable{
     public static final Location INIT_LOCATION = Locations.DEFAULT.preset();
 
     public static final Render INIT_RENDER = Renders.MEDIUM.preset();
-    public static final Shader INIT_SHADER = Shaders.LONG_RAINBOW.preset();
+    public static final Shader INIT_SHADER = Shaders.LONG_RAINBOW_FILTERED.preset();
 
     public static final Settings INIT_SETTINGS = new Settings(
         new CalculationSettings(
@@ -69,6 +68,7 @@ public final class Presets implements Selectable{
     public enum Locations implements Selectable, PresetElement<Location>{
         DEFAULT(new LocationDefault()),
         BILLION_PERIODS(new LocationBillionPeriod()),
+        MINIBROT1(new LocationLittleMinibrot1())
         ;
     
     
@@ -114,9 +114,11 @@ public final class Presets implements Selectable{
     public enum Shaders implements Selectable, PresetElement<Shader>{
         CLASSIC_1(new ShaderClassic1()),
         CLASSIC_2(new ShaderClassic2()),
+        CLASSIC_1_FILTERED(new ShaderClassicFiltered1()),
+        CLASSIC_2_FILTERED(new ShaderClassicFiltered2()),
         RAINBOW(new ShaderRainbow()),
-        LONG_RAINBOW_CLASSIC(new ShaderLongRainbowClassic()),
         LONG_RAINBOW(new ShaderLongRainbow()),
+        LONG_RAINBOW_FILTERED(new ShaderLongRainbowFiltered()),
         CINEMATIC(new ShaderCinematic()),
         AZURE(new ShaderAzure()),
         FLAME(new ShaderFlame()),

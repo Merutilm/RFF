@@ -1,26 +1,22 @@
 package kr.merutilm.rff.preset.shader;
 
-import kr.merutilm.rff.settings.BloomSettings;
-import kr.merutilm.rff.settings.ColorFilterSettings;
-import kr.merutilm.rff.settings.FogSettings;
-import kr.merutilm.rff.settings.SlopeSettings;
-import kr.merutilm.rff.settings.StripeSettings;
+import kr.merutilm.rff.settings.*;
 
 public class ShaderLongRainbow implements LongRainbowShader {
 
     @Override
     public String getName(){
-        return "Shaded Long Rainbow";
+        return "Long Rainbow";
     }
 
     @Override
     public StripeSettings stripeSettings() {
-        return new StripeSettings(true, 10, 50, 1, 0, 0.5);
+        return new StripeSettings(false, 10, 50, 1, 0, 0.5);
     }
-    
+
     @Override
     public SlopeSettings slopeSettings() {
-        return new SlopeSettings(300, 0.5, 1, 60, 135);
+        return new SlopeSettings(0, 0.5, 1, 60, 135);
     }
 
     @Override
@@ -30,11 +26,11 @@ public class ShaderLongRainbow implements LongRainbowShader {
 
     @Override
     public FogSettings fogSettings() {
-        return new FogSettings(0.1, 0.5);
+        return new FogSettings(0, 0);
     }
 
     @Override
     public BloomSettings bloomSettings() {
-        return new BloomSettings(0, 0.1, 0, 1);
+        return new BloomSettings(0, 0.05, 0, 0);
     }
 }
