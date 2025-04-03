@@ -7,8 +7,7 @@ import kr.merutilm.rff.struct.StructBuilder;
 public record AnimationSettings(
     double overZoom,
     boolean showText,
-    double mps,
-    double stripeAnimationSpeed 
+    double mps
     ) implements Struct<AnimationSettings>{
     
     @Override
@@ -16,15 +15,13 @@ public record AnimationSettings(
         return new Builder()
         .setOverZoom(overZoom)
         .setShowText(showText)
-        .setMps(mps)
-        .setStripeAnimationSpeed(stripeAnimationSpeed);
+        .setMps(mps);
     }
 
     public static final class Builder implements StructBuilder<AnimationSettings>{
         private double overZoom;
         private boolean showText;
         private double mps;
-        private double stripeAnimationSpeed;
 
         public Builder setOverZoom(double overZoomValue) {
             this.overZoom = overZoomValue;
@@ -41,15 +38,11 @@ public record AnimationSettings(
             return this;
         }
 
-        public Builder setStripeAnimationSpeed(double stripeAnimationSpeed) {
-            this.stripeAnimationSpeed = stripeAnimationSpeed;
-            return this;
-        }
           
 
         @Override
         public AnimationSettings build() {
-            return new AnimationSettings(overZoom, showText, mps, stripeAnimationSpeed);
+            return new AnimationSettings(overZoom, showText, mps);
         }
 
     }

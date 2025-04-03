@@ -20,7 +20,7 @@ public class ShaderRainbow implements Shader{
 
     @Override
     public StripeSettings stripeSettings() {
-        return new StripeSettings(false, 10, 50, 1, 0);
+        return new StripeSettings(false, 10, 50, 1, 0, 0.5);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class ShaderRainbow implements Shader{
 
     @Override
     public FogSettings fogSettings() {
-        return new FogSettings(0.05, 0.4);
+        return new FogSettings(0.3, 0.05);
     }
 
     @Override

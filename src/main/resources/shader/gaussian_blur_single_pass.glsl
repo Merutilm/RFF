@@ -9,17 +9,13 @@ in vec4 fColor;
 out vec4 color;
 
 
-float weight(float distance){
-    return exp(-2 * distance * distance / (radius * radius));
-}
-
 void main() {
 
     vec2 coord = gl_FragCoord.xy / resolution;
 
     float x = coord.x;
     float y = coord.y;
-    float i = 0.002;
+    float i = 1.0 / resolution.y;
 
     if(radius <= 0){
         color = texture(inputTex, coord);
@@ -35,21 +31,17 @@ void main() {
     }
 
     vec3 sum = vec3(0, 0, 0);
-    int counts = int(2 * radius / i);
-    float weightSum = 0;
+    int count = 0;
 
-    float x1 = x - radius;
-    float y1 = y - radius;
-
-    for (int j = 0; j < counts; j++){
-        float w = weight(x - x1);
-        sum += texture(inputTex, vec2(x1, y)).rgb * w;
-        sum += texture(inputTex, vec2(x, y1)).rgb * w;
-        x1 += i;
-        y1 += i;
-        weightSum += 2 * w;
+    for (float x1 = max(0, x - radius); x1 <= min(1, x + radius); x1 += i){
+        sum += texture(inputTex, vec2(x1, y)).rgb;
+        count++;
+    }
+    for (float y1 = max(0, y - radius); y1 <= min(1, y + radius); y1 += i){
+        sum += texture(inputTex, vec2(x, y1)).rgb;
+        count++;
     }
 
 
-    color = vec4(sum / weightSum, 1);
+    color = vec4(sum / count, 1);
 }

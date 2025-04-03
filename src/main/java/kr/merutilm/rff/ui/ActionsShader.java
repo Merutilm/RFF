@@ -59,6 +59,9 @@ enum ActionsShader implements ItemActions {
         panel.createTextInput(IOUtilities.Constants.OFFSET_RATIO.toString(), "Stripe offset ratio", color.offset(), Double::parseDouble, e ->
             applier.accept(f -> f.setOffset(e))
         );
+        panel.createTextInput("Animation Speed", "Stripe Animation Speed, The stripes' offset(iterations) per second.", color.stripeAnimationSpeed(), Double::parseDouble, e ->
+                applier.accept(f -> f.setStripeAnimationSpeed(e))
+        );
     }))),
     SLOPE("Slope","Shader:Slope", null, 
     (master, name, description, accelerator) -> 

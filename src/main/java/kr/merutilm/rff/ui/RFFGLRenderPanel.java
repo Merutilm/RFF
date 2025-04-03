@@ -5,6 +5,7 @@ import kr.merutilm.rff.formula.DeepMandelbrotPerturbator;
 import kr.merutilm.rff.formula.LightMandelbrotPerturbator;
 import kr.merutilm.rff.formula.MandelbrotPerturbator;
 import kr.merutilm.rff.formula.Perturbator;
+import kr.merutilm.rff.io.BitMap;
 import kr.merutilm.rff.io.RFFMap;
 import kr.merutilm.rff.locater.MandelbrotLocator;
 import kr.merutilm.rff.opengl.*;
@@ -18,6 +19,7 @@ import kr.merutilm.rff.struct.DoubleExponent;
 import kr.merutilm.rff.struct.DoubleMatrix;
 import kr.merutilm.rff.util.DoubleExponentMath;
 import kr.merutilm.rff.util.TextFormatter;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.awt.AWTGLCanvas;
 import org.lwjgl.opengl.awt.GLData;
 
@@ -27,8 +29,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
+import java.nio.ByteBuffer;
+import java.util.*;
+import java.util.List;
 import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.IntConsumer;
@@ -54,12 +58,18 @@ final class RFFGLRenderPanel extends AWTGLCanvas {
 
     private transient RFFMap currentMap;
     private transient Perturbator currentPerturbator;
-    private boolean recomputeRequested = false;
-    private boolean resizeRequested = false;
-    private boolean colorRequested = false;
+
+    private volatile boolean recomputeRequested = false;
+    private volatile boolean resizeRequested = false;
+    private volatile boolean colorRequested = false;
+    private volatile boolean openMapRequested = false;
+    private volatile boolean canBeDisplayed = false;
+    private volatile boolean createImageRequested = false;
+
+    private volatile boolean isRendering = false;
+    private volatile boolean isImageCreating = false;
 
     private int period = 1;
-    private boolean isRenderPreparing = false;
 
 
     public RFFGLRenderPanel(RFF master, GLData data) {
@@ -117,53 +127,98 @@ final class RFFGLRenderPanel extends AWTGLCanvas {
         renderer.addRenderer(rendererBloom);
         renderer.addRenderer(interpolation);
 
-        requestRecompute();
         requestResize();
+        requestColor();
+        requestRecompute();
 
     }
 
 
     @Override
     public void paintGL() {
+        renderer.setTime(GLTimeRenderer.getTime());
 
-
-        if(!isRenderPreparing){
+        if(canBeDisplayed){
             glClear(GL_COLOR_BUFFER_BIT);
             renderer.update();
         }
 
+        if(openMapRequested){
+            openMapRequested = false;
+            applyCurrentMap();
+        }
+
         if(resizeRequested){
             resizeRequested = false;
-            renderer.reloadSize(getFramebufferWidth(), getFramebufferHeight());
+            applyResize();
+
         }
 
         if(colorRequested){
             colorRequested = false;
-            applySettings();
+            applyColor();
         }
 
+
         if(recomputeRequested){
+            isRendering = true;
             recomputeRequested = false;
-            applySettings();
+            applyComputationalSettings();
             recompute();
+        }
+
+        if(createImageRequested){
+            isImageCreating = true;
+            createImageRequested = false;
+            applyCreateImage();
         }
 
         swapBuffers();
 
     }
 
-    private void applySettings(){
+    private void applyCurrentMap(){
+        DoubleMatrix iterations = currentMap.iterations();
+        rendererIteration.reloadIterationBuffer(iterations.getWidth(), iterations.getHeight(), currentMap.maxIteration());
+        rendererIteration.setAllIterations(iterations.getCanvas());
+    }
+
+    private void applyComputationalSettings(){
         if (master.getSettings().calculationSettings().autoIteration()) {
             master.setSettings(e -> e.setCalculationSettings(e1 -> e1.setMaxIteration(Math.max(Perturbator.MINIMUM_ITERATION, period * Perturbator.AUTOMATIC_ITERATION_MULTIPLIER))));
         }
         Settings settings = master.getSettings();
+        rendererIteration.reloadIterationBuffer(getImgWidth(settings), getImgHeight(settings), settings.calculationSettings().maxIteration());
+    }
+
+    private void applyResize(){
+        renderer.reloadSize(getFramebufferWidth(), getFramebufferHeight());
+    }
+
+    private void applyColor(){
+        Settings settings = master.getSettings();
         rendererIteration.setColorSettings(settings.shaderSettings().colorSettings());
         rendererStripe.setStripeSettings(settings.shaderSettings().stripeSettings());
-        rendererStripe.setAnimationSettings(settings.videoSettings().animationSettings());
         rendererSlope.setSlopeSettings(settings.shaderSettings().slopeSettings());
         rendererColorFilter.setColorFilterSettings(settings.shaderSettings().colorFilterSettings());
         rendererFog.setFogSettings(settings.shaderSettings().fogSettings());
         rendererBloom.setBloomSettings(settings.shaderSettings().bloomSettings());
+    }
+
+    private void applyCreateImage(){
+        renderer.setTime(0);
+        glClear(GL_COLOR_BUFFER_BIT);
+        renderer.update();
+        swapBuffers();
+        int w = getFramebufferWidth();
+        int h = getFramebufferHeight();
+        ByteBuffer buffer = BufferUtils.createByteBuffer(w * h * 4);
+        glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+        currentImage = BitMap.getImage(w, h, buffer);
+        isImageCreating = false;
+        synchronized (this){
+            notifyAll();
+        }
     }
 
     private void addListeners() {
@@ -302,14 +357,17 @@ final class RFFGLRenderPanel extends AWTGLCanvas {
     }
 
     private void recompute() {
-        Settings settings = master.getSettings();
-        rendererIteration.reloadIterationBuffer(getImgWidth(settings), getImgHeight(settings), settings.calculationSettings().maxIteration());
         try {
             state.createThread(id -> {
                 try {
                     compute(id);
                 } catch (IllegalParallelRenderStateException e) {
                     RFFLoggers.logCancelledMessage("Recompute", id);
+                } finally {
+                    isRendering = false;
+                    synchronized (this){
+                        notifyAll();
+                    }
                 }
             });
         } catch (InterruptedException e) {
@@ -318,22 +376,41 @@ final class RFFGLRenderPanel extends AWTGLCanvas {
 
     }
 
-    public void requestResize(){
+    public synchronized void requestOpenMap(RFFMap currentMap) {
+        this.currentMap = currentMap;
+        openMapRequested = true;
+    }
+
+    public synchronized void requestResize(){
         resizeRequested = true;
     }
 
-    public void requestRecompute(){
-        isRenderPreparing = true;
+    public synchronized void requestRecompute(){
+        canBeDisplayed = false;
         recomputeRequested = true;
     }
 
-    public void requestColor(){
+    public synchronized void requestColor(){
         colorRequested = true;
     }
 
+    public synchronized void requestCreateImage(){
+        createImageRequested = true;
+    }
 
-    //this method can only be thread-safe when called via recompute()
-    public void compute(int currentID) throws IllegalParallelRenderStateException {
+    public synchronized void waitUntilComputeFinished() throws InterruptedException{
+        while(recomputeRequested || isRendering){
+            wait();
+        }
+    }
+
+    public synchronized void waitUntilCreateImage() throws InterruptedException{
+        while(createImageRequested || isImageCreating){
+            wait();
+        }
+    }
+
+    private void compute(int currentID) throws IllegalParallelRenderStateException {
         compute0(master.getSettings(), currentID);
     }
 
@@ -423,8 +500,8 @@ final class RFFGLRenderPanel extends AWTGLCanvas {
             double iteration = currentPerturbator.iterate(dc[0], dc[1]);
             rendererIteration.setIteration(x, y, xr, iteration);
 
-            if(x == 0 && y == 1){
-                isRenderPreparing = false;
+            if(x == xr - 1){
+                canBeDisplayed = true;
             }
             return iteration;
         });
@@ -458,10 +535,6 @@ final class RFFGLRenderPanel extends AWTGLCanvas {
 
     public ParallelRenderState getState() {
         return state;
-    }
-
-    public void setCurrentMap(RFFMap currentMap) {
-        this.currentMap = currentMap;
     }
 
     public Perturbator getCurrentPerturbator() {

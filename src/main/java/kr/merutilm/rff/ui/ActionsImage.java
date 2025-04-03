@@ -34,15 +34,22 @@ enum ActionsImage implements ItemActions {
     (master, name, description, accelerator) ->
     ItemActions.createItem(name, description, accelerator, () -> {
         File defSave = new File(IOUtilities.getOriginalResource(), IOUtilities.DefaultDirectory.IMAGE.toString());
-        File file = IOUtilities.saveFile(name, defSave, IOUtilities.Extension.IMAGE.toString(), "Save Image");
+        File file = IOUtilities.saveFile(name, defSave, IOUtilities.Extension.IMAGE.toString(), name);
         if(file == null){
             return;
         }
-        try {
-            BitMap.export(ItemActions.getRenderer(master).getCurrentImage(), file);
-        } catch (IOException e) {
-            throw new IllegalStateException();
-        }
+        new Thread(() -> {
+            try {
+                RFFGLRenderPanel render = ItemActions.getRenderer(master);
+                render.requestCreateImage();
+                render.waitUntilCreateImage();
+                BitMap.export(render.getCurrentImage(), file);
+            } catch (IOException e) {
+                throw new IllegalStateException();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }).start();
     })),
     ;
 

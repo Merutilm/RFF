@@ -45,9 +45,6 @@ enum ActionsVideo implements ItemActions {
                         panel.createTextInput("MPS", "Map per second, Number of video data used per second in video", animation.mps(), Double::parseDouble, e ->
                                 applier.accept(f -> f.setMps(e))
                         );
-                        panel.createTextInput("Animation Speed", "Stripe Animation Speed, The stripes' offset(iterations) per second.", animation.stripeAnimationSpeed(), Double::parseDouble, e ->
-                                applier.accept(f -> f.setStripeAnimationSpeed(e))
-                        );
                     }))),
 
     EXPORT_SETTINGS("Export Settings", "Open the video export settings. You can set the quality of the video to export.", null,
@@ -83,24 +80,24 @@ enum ActionsVideo implements ItemActions {
                             return;
                         }
 
-                        try {
+                        new Thread(() -> {
+                            int id = render.getState().currentID();
+                            try {
+                                int count = 0;
 
-                            render.getState().createThread(id -> {
-                                try {
-
-                                    while (master.getSettings().calculationSettings().logZoom() > CalculationSettings.MINIMUM_ZOOM) {
-                                        render.compute(id);
-                                        render.getCurrentMap().exportAsVideoData(dir);
-                                        master.setSettings(e -> e.setCalculationSettings(
-                                                e1 -> e1.zoomOut(Math.log10(dataSettings.defaultZoomIncrement()))));
-                                    }
-                                } catch (IllegalParallelRenderStateException e) {
-                                    RFFLoggers.logCancelledMessage(name, id);
+                                while (master.getSettings().calculationSettings().logZoom() > CalculationSettings.MINIMUM_ZOOM) {
+                                    render.getState().tryBreak(id + count++);
+                                    render.requestRecompute();
+                                    render.waitUntilComputeFinished();
+                                    render.getCurrentMap().exportAsVideoData(dir);
+                                    master.setSettings(e -> e.setCalculationSettings(
+                                            e1 -> e1.zoomOut(Math.log10(dataSettings.defaultZoomIncrement()))));
                                 }
-                            });
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                        }
+                            } catch (IllegalParallelRenderStateException | InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                                RFFLoggers.logCancelledMessage(name, id);
+                            }
+                        }).start();
 
                     })),
     EXPORT_ZOOMING_VIDEO("Export Zooming Video", "Export zooming video using generated video data files.", null,

@@ -5,6 +5,7 @@ import java.util.List;
 
 public class GLMultiPassRenderer {
     private final List<GLRenderer> renderers;
+    private float time;
 
     public GLMultiPassRenderer() {
         this.renderers = new ArrayList<>();
@@ -18,6 +19,10 @@ public class GLMultiPassRenderer {
         renderers.forEach(r -> r.reloadSize(w, h));
     }
 
+    public void setTime(float time) {
+        this.time = time;
+    }
+
     public void update(){
         int iterationTextureID = 0;
         for (int i = 0; i < renderers.size(); i++) {
@@ -27,6 +32,9 @@ public class GLMultiPassRenderer {
             }
             if(renderer instanceof GLIterationTextureRenderer r){
                 r.setIterationTextureID(iterationTextureID);
+            }
+            if(renderer instanceof GLTimeRenderer t){
+                t.setTime(time);
             }
             if(i >= 1){
                 GLShader prevShader = renderers.get(i - 1).getShader();

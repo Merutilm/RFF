@@ -22,6 +22,7 @@ public class GLRendererIteration extends GLRenderer implements GLIterationTextur
     private int iterationTextureID;
     private IntBuffer iterationBuffer;
 
+
     public GLRendererIteration() {
         super(new GLShader(GLRenderer.DEFAULT_VERTEX_PATH, "iteration"));
     }
@@ -43,14 +44,6 @@ public class GLRendererIteration extends GLRenderer implements GLIterationTextur
         this.maxIteration = maxIteration;
     }
 
-
-
-    public void setIterationAll(double[] iterations, int w, int h) {
-        synchronized (shader) {
-            reloadSize(w, h);
-            this.iterationBuffer = putAllIteration(iterations, w, h);
-        }
-    }
 
     public void setColorSettings(ColorSettings settings) {
 
@@ -77,14 +70,12 @@ public class GLRendererIteration extends GLRenderer implements GLIterationTextur
 
         shader.upload2i("resolution", w, h);
         shader.uploadTexture2D("iterations", GL_TEXTURE0, iterationTextureID, iterationBuffer, iterWidth, iterHeight, GLShader.TextureFormat.INT2);
-
         shader.uploadLong("maxIteration", maxIteration);
 
         shader.uploadTexture1D("palette",  GL_TEXTURE1, paletteTextureID, paletteBuffer, colorSettings.colors().length, GLShader.TextureFormat.FLOAT4);
-
         shader.uploadFloat("paletteOffset", (float) colorSettings.offsetRatio());
         shader.uploadFloat("paletteInterval", (float) colorSettings.iterationInterval());
-
+        shader.uploadInt("smoothing", colorSettings.colorSmoothing().ordinal());
     }
 
     private static int[] doubleToTwoIntBits(double v) {
@@ -100,12 +91,11 @@ public class GLRendererIteration extends GLRenderer implements GLIterationTextur
     }
 
 
-    private IntBuffer putAllIteration(double[] iterations, int w, int h) {
-        for (int i = 0; i < w * h; i++) {
+    public void setAllIterations(double[] iterations) {
+        for (int i = 0; i < iterWidth * iterHeight; i++) {
             iterationBuffer.put(doubleToTwoIntBits(iterations[i]));
         }
         iterationBuffer.flip();
-        return iterationBuffer;
     }
 
     private static FloatBuffer createPaletteBuffer(ColorSettings colorSettings) {

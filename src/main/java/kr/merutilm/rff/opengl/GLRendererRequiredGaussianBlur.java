@@ -7,6 +7,8 @@ public abstract class GLRendererRequiredGaussianBlur extends GLRenderer{
 
     private final GLRendererGaussianBlurSinglePass[] gaussianBlurs;
 
+    private static final int MAX_SIZE = 200;
+
     protected GLRendererRequiredGaussianBlur(GLShader shader, String blurName, int blurTimes){
         super(shader);
         this.gaussianBlurs = new GLRendererGaussianBlurSinglePass[blurTimes];
@@ -17,10 +19,12 @@ public abstract class GLRendererRequiredGaussianBlur extends GLRenderer{
 
     @Override
     public void reloadSize(int w, int h) {
+        double aspectRatio = (double) w / h;
         for (GLRendererGaussianBlurSinglePass gaussianBlur : this.gaussianBlurs) {
-            gaussianBlur.reloadSize(w, h);
+            gaussianBlur.reloadSize((int) Math.min(MAX_SIZE * aspectRatio, w), Math.min(MAX_SIZE, h));
         }
         super.reloadSize(w, h);
+
     }
 
     public void setAdditionalBlurParams(Consumer<GLShader> additionalBlurParams){

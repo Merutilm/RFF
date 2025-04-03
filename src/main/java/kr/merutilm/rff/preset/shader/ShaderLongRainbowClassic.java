@@ -11,7 +11,7 @@ public class ShaderLongRainbowClassic implements LongRainbowShader {
 
     @Override
     public StripeSettings stripeSettings() {
-        return new StripeSettings(false, 10, 50, 1, 0);
+        return new StripeSettings(false, 10, 50, 1, 0, 0.5);
     }
 
     @Override

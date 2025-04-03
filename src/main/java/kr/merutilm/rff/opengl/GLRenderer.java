@@ -10,11 +10,6 @@ public abstract class GLRenderer {
 
     protected int previousFBOTextureID;
 
-    private static final long INIT_TIME = System.currentTimeMillis();
-
-    public static float getTime(){
-        return (float) ((System.currentTimeMillis() - INIT_TIME) / 1000.0);
-    }
 
     protected GLRenderer(GLShader shader) {
         this.shader = shader;

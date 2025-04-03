@@ -20,12 +20,20 @@ void main() {
     if (x >= 1 || y >= 1){
         discard;
     }
-    float singlePixel = 1 / resolution.x;
-    vec4 c1 = texture(inputTex, coord + vec2(singlePixel, 0));
-    vec4 c2 = texture(inputTex, coord + vec2(0, singlePixel));
-    vec4 c3 = texture(inputTex, coord + vec2(-singlePixel, 0));
-    vec4 c4 = texture(inputTex, coord + vec2(0, -singlePixel));
-    vec4 c5 = texture(inputTex, coord);
-    color = (c1 + c2 + c3 + c4 + c5) / 5;
+    float ix = 1.0 / resolution.x;
+    float iy = 1.0 / resolution.y;
+    vec4 c1 = texture(inputTex, coord + vec2(ix, 0));
+    vec4 c2 = texture(inputTex, coord + vec2(0, iy));
+    vec4 c3 = texture(inputTex, coord + vec2(-ix, 0));
+    vec4 c4 = texture(inputTex, coord + vec2(0, -iy));
+    vec4 c5 = texture(inputTex, coord + vec2(ix, iy));
+    vec4 c6 = texture(inputTex, coord + vec2(ix, -iy));
+    vec4 c7 = texture(inputTex, coord + vec2(-ix, iy));
+    vec4 c8 = texture(inputTex, coord + vec2(-ix, -iy));
+    vec4 center = texture(inputTex, coord) * 9;
+    vec4 near = (c1 + c2 + c3 + c4) * 3;
+    vec4 diagonal = (c5 + c6 + c7 + c8);
+
+    color = (center + near + diagonal) / 25;
 
 }

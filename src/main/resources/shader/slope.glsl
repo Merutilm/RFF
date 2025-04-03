@@ -42,16 +42,17 @@ void main() {
 
     float aRad = radians(azimuth);
     float zRad = radians(zenith);
-    float i = 0.002;
+    float ix = 1.0 / resolution.x;
+    float iy = 1.0 / resolution.y;
 
-    double ld = getIteration(vec2(x - i, y - i));
-    double d = getIteration(vec2(x, y - i));
-    double rd = getIteration(vec2(x + i, y - i));
-    double l = getIteration(vec2(x - i, y));
-    double r = getIteration(vec2(x + i, y));
-    double lu = getIteration(vec2(x - i, y + i));
-    double u = getIteration(vec2(x, y + i));
-    double ru = getIteration(vec2(x + i, y + i));
+    double ld = getIteration(vec2(x - ix, y - iy));
+    double d = getIteration(vec2(x, y - iy));
+    double rd = getIteration(vec2(x + ix, y - iy));
+    double l = getIteration(vec2(x - ix, y));
+    double r = getIteration(vec2(x + ix, y));
+    double lu = getIteration(vec2(x - ix, y + iy));
+    double u = getIteration(vec2(x, y + iy));
+    double ru = getIteration(vec2(x + ix, y + iy));
 
     float dzDx = float((rd + 2 * r + ru) - (ld + 2 * l + lu)) * depth;
     float dzDy = float((lu + 2 * u + ru) - (ld + 2 * d + rd)) * depth;

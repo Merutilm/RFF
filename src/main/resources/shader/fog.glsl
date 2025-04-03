@@ -10,7 +10,7 @@ in vec4 fColor;
 out vec4 color;
 
 float grayScale(vec3 c){
-    return c.r * 0.3 + c.g + 0.59 + c.b * 0.11;
+    return c.r * 0.3 + c.g * 0.59 + c.b * 0.11;
 }
 
 void main() {

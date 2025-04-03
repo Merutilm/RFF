@@ -33,7 +33,7 @@ public class ShaderCinematic implements Shader {
     
     @Override
     public StripeSettings stripeSettings() {
-        return new StripeSettings(false, 10, 50, 1, 0);
+        return new StripeSettings(false, 10, 50, 1, 0, 0.5);
     }
     
     @Override
@@ -48,11 +48,11 @@ public class ShaderCinematic implements Shader {
     
     @Override
     public FogSettings fogSettings() {
-        return new FogSettings(0.03, 1);
+        return new FogSettings(0.08, 1);
     }
 
     @Override
     public BloomSettings bloomSettings() {
-        return new BloomSettings(0.03, 0.1, 0, 1);
+        return new BloomSettings(0.03, 0.125, 0, 1);
     }
 }

@@ -1,16 +1,16 @@
 package kr.merutilm.rff.opengl;
 
-import kr.merutilm.rff.settings.AnimationSettings;
 import kr.merutilm.rff.settings.StripeSettings;
 
+import static kr.merutilm.rff.opengl.GLTimeRenderer.getTime;
 import static org.lwjgl.opengl.GL45.*;
 
-public class GLRendererStripe extends GLRenderer implements GLIterationTextureRenderer{
+public class GLRendererStripe extends GLRenderer implements GLIterationTextureRenderer, GLTimeRenderer{
 
 
     private int iterationTextureID;
     private StripeSettings stripeSettings;
-    private AnimationSettings animationSettings;
+    private float time;
 
     public GLRendererStripe() {
         super(new GLShader(DEFAULT_VERTEX_PATH, "stripe"));
@@ -25,8 +25,9 @@ public class GLRendererStripe extends GLRenderer implements GLIterationTextureRe
         this.stripeSettings = stripeSettings;
     }
 
-    public void setAnimationSettings(AnimationSettings animationSettings) {
-        this.animationSettings = animationSettings;
+    @Override
+    public void setTime(float time) {
+        this.time = time;
     }
 
     @Override
@@ -40,7 +41,7 @@ public class GLRendererStripe extends GLRenderer implements GLIterationTextureRe
         shader.uploadFloat("firstInterval", (float) stripeSettings.firstInterval());
         shader.uploadFloat("secondInterval", (float) stripeSettings.secondInterval());
         shader.uploadFloat("opacity", (float) stripeSettings.opacity());
-        shader.uploadFloat("offset", (float) (stripeSettings.offset() + animationSettings.stripeAnimationSpeed() * getTime()));
+        shader.uploadFloat("offset", (float) (stripeSettings.offset() + stripeSettings.stripeAnimationSpeed() * time));
 
     }
 }

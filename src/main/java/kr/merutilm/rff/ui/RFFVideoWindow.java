@@ -22,6 +22,7 @@ import javax.swing.WindowConstants;
 import javax.swing.border.LineBorder;
 import javax.swing.plaf.metal.MetalProgressBarUI;
 
+import kr.merutilm.rff.settings.*;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
@@ -36,10 +37,6 @@ import kr.merutilm.rff.io.RFFMap;
 import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.parallel.ParallelDoubleArrayDispatcher;
 import kr.merutilm.rff.parallel.ParallelRenderState;
-import kr.merutilm.rff.settings.Settings;
-import kr.merutilm.rff.settings.AnimationSettings;
-import kr.merutilm.rff.settings.DataSettings;
-import kr.merutilm.rff.settings.ExportSettings;
 
 final class RFFVideoWindow extends JFrame{
 
@@ -220,7 +217,7 @@ final class RFFVideoWindow extends JFrame{
     }
 
     private static Settings modifyToVideoSettings(RFFMap frame, Settings settings, double currentSec) {
-        AnimationSettings animation = settings.videoSettings().animationSettings();
+        StripeSettings animation = settings.shaderSettings().stripeSettings();
         double sof = currentSec * animation.stripeAnimationSpeed();
 
         return frame.modifyToMapSettings(settings).edit()

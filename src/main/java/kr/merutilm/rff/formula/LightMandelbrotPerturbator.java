@@ -50,7 +50,7 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
         int absIteration = 0;
         int maxRefIteration = reference.longestPeriod();
 
-//        double minRad = 0;
+//        double minRad = Double.MAX_VALUE;
         double dzr = 0; // delta z
         double dzi = 0;
         double zr; // z
@@ -139,12 +139,8 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
                 refIteration = 0;
                 dzr = zr;
                 dzi = zi;
-
-//                if(minRad / 100 > cd){
-//                    return isAbs ? absIteration : maxIteration;
-//                }
-//                minRad = cd;
             }
+
 
             if (cd > bailout * bailout) {
                 break;
@@ -153,7 +149,7 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
             state.tryBreak(currentID);
 
         }
-        
+
         if(isAbs){
             return absIteration;
         }

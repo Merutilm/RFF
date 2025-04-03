@@ -4,29 +4,32 @@ import kr.merutilm.rff.struct.Struct;
 import kr.merutilm.rff.struct.StructBuilder;
 
 public record StripeSettings(
-    boolean use,
-    double firstInterval,
-    double secondInterval,
-    double opacity,
-    double offset
-    ) implements Struct<StripeSettings> {
+        boolean use,
+        double firstInterval,
+        double secondInterval,
+        double opacity,
+        double offset,
+        double stripeAnimationSpeed
+) implements Struct<StripeSettings> {
 
-        @Override
-        public Builder edit() {
-            return new Builder()
-            .setUse(use)
-            .setFirstInterval(firstInterval)
-            .setSecondInterval(secondInterval)
-            .setOpacity(opacity)
-            .setOffset(offset);
-        }
-    
-    public static final class Builder implements StructBuilder<StripeSettings>{
+    @Override
+    public Builder edit() {
+        return new Builder()
+                .setUse(use)
+                .setFirstInterval(firstInterval)
+                .setSecondInterval(secondInterval)
+                .setOpacity(opacity)
+                .setOffset(offset)
+                .setStripeAnimationSpeed(stripeAnimationSpeed);
+    }
+
+    public static final class Builder implements StructBuilder<StripeSettings> {
         private boolean use;
         private double firstInterval;
         private double secondInterval;
         private double opacity;
         private double offset;
+        private double stripeAnimationSpeed;
 
         public Builder setUse(boolean use) {
             this.use = use;
@@ -52,9 +55,15 @@ public record StripeSettings(
             this.offset = offset;
             return this;
         }
+
+        public Builder setStripeAnimationSpeed(double stripeAnimationSpeed) {
+            this.stripeAnimationSpeed = stripeAnimationSpeed;
+            return this;
+        }
+
         @Override
         public StripeSettings build() {
-            return new StripeSettings(use, firstInterval, secondInterval, opacity, offset);
+            return new StripeSettings(use, firstInterval, secondInterval, opacity, offset, stripeAnimationSpeed);
         }
     }
 }

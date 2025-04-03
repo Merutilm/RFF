@@ -21,7 +21,7 @@ enum ActionsFile implements ItemActions {
             return;
         }
         RFFMap map = RFFMap.read(file);
-        renderer.setCurrentMap(map);
+        renderer.requestOpenMap(map);
         master.getWindow().getStatusPanel().setPeriodText(map.period(), 0, 0);
         master.getWindow().getStatusPanel().setZoomText(map.zoom());
         master.getWindow().getRenderer().requestColor();

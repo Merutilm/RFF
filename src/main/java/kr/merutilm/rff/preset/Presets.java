@@ -32,7 +32,7 @@ public final class Presets implements Selectable{
         INIT_SHADER.createShaderSettings(), 
         new VideoSettings(
             new DataSettings(2), 
-            new AnimationSettings(2, true, 1, 1),
+            new AnimationSettings(2, true, 1),
             new ExportSettings(30,1,5000, VideoZoomingMethod.IMAGE))
         );
 

@@ -1,5 +1,9 @@
 #version 450
 #extension GL_ARB_gpu_shader_int64 : enable
+#define NONE 0
+#define NORMAL 1
+#define REVERSED 2
+
 
 uniform ivec2 resolution;
 
@@ -9,6 +13,8 @@ uniform int[2] maxIteration;
 uniform sampler1D palette;
 uniform float paletteOffset;
 uniform float paletteInterval;
+
+uniform int smoothing;
 
 out vec4 color;
 
@@ -24,10 +30,22 @@ double getIteration(vec2 coord){
     return packDouble2x32(it);
 }
 
+
 vec4 getColor(double iteration, int64_t max){
-    if(iteration == 0 || iteration >= max){
+    if (iteration == 0 || iteration >= max){
         return vec4(0, 0, 0, 1);
     }
+    switch (smoothing){
+        case NONE :
+        iteration = int64_t(iteration);
+        break;
+        case NORMAL :
+        break;
+        case REVERSED :
+        iteration = 2 * int64_t(iteration) + 1 - iteration;
+        break;
+    }
+
     return texture(palette, mod(float(iteration / paletteInterval + paletteOffset), 1));
 }
 
