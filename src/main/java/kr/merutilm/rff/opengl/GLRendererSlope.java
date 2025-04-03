@@ -11,7 +11,7 @@ public class GLRendererSlope extends GLRenderer implements GLIterationTextureRen
     private SlopeSettings slopeSettings;
 
     public GLRendererSlope(){
-        super(new GLShader(DEFAULT_VERTEX_PATH, "slope"));
+        super(new GLShaderLoader(DEFAULT_VERTEX_PATH, "slope"));
     }
 
     @Override

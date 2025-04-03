@@ -7,13 +7,13 @@ import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 public class GLRendererGaussianBlurSinglePass extends GLRenderer {
 
 
-    private Consumer<GLShader> additionalParams = _ -> {};
+    private Consumer<GLShaderLoader> additionalParams = _ -> {};
 
     public GLRendererGaussianBlurSinglePass(String name){
-        super(new GLShader(DEFAULT_VERTEX_PATH, name));
+        super(new GLShaderLoader(DEFAULT_VERTEX_PATH, name));
     }
 
-    public void setAdditionalParams(Consumer<GLShader> additionalParams) {
+    public void setAdditionalParams(Consumer<GLShaderLoader> additionalParams) {
         this.additionalParams = additionalParams;
     }
 

@@ -341,25 +341,25 @@ final class RFFRenderPanel extends RFFGLPanel {
 
     }
 
-    public synchronized void requestOpenMap(RFFMap currentMap) {
+    public void requestOpenMap(RFFMap currentMap) {
         this.currentMap = currentMap;
         openMapRequested = true;
     }
 
-    public synchronized void requestResize(){
+    public void requestResize(){
         resizeRequested = true;
     }
 
-    public synchronized void requestRecompute(){
+    public void requestRecompute(){
         canBeDisplayed = false;
         recomputeRequested = true;
     }
 
-    public synchronized void requestColor(){
+    public void requestColor(){
         colorRequested = true;
     }
 
-    public synchronized void requestCreateImage(){
+    public void requestCreateImage(){
         createImageRequested = true;
     }
 

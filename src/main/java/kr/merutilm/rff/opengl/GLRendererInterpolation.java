@@ -5,7 +5,7 @@ import static org.lwjgl.opengl.GL45.GL_TEXTURE0;
 public class GLRendererInterpolation extends GLRenderer{
 
     public GLRendererInterpolation() {
-        super(new GLShader(DEFAULT_VERTEX_PATH, "interpolation"));
+        super(new GLShaderLoader(DEFAULT_VERTEX_PATH, "interpolation"));
     }
 
     @Override

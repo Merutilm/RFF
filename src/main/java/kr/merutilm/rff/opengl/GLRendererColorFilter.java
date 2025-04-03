@@ -9,7 +9,7 @@ public class GLRendererColorFilter extends GLRenderer{
     private ColorFilterSettings colorFilterSettings;
 
     public GLRendererColorFilter(){
-        super(new GLShader(DEFAULT_VERTEX_PATH, "color_filter"));
+        super(new GLShaderLoader(DEFAULT_VERTEX_PATH, "color_filter"));
     }
 
 

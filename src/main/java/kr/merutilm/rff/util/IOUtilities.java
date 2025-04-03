@@ -2,6 +2,7 @@ package kr.merutilm.rff.util;
 
 import java.awt.*;
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 
 import javax.swing.JFileChooser;
@@ -150,6 +151,10 @@ public final class IOUtilities {
 
     public static URL getResource(String file) {
         return IOUtilities.class.getResource(file);
+    }
+
+    public static InputStream getResourceAsStream(String file) {
+        return IOUtilities.class.getResourceAsStream(file);
     }
 
 

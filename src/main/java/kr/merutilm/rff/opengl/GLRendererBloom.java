@@ -9,7 +9,7 @@ public class GLRendererBloom extends GLRendererRequiredGaussianBlur{
     private BloomSettings bloomSettings;
 
     public GLRendererBloom(){
-        super(new GLShader(DEFAULT_VERTEX_PATH, "bloom"), "gaussian_blur_for_bloom_single_pass", 3);
+        super(new GLShaderLoader(DEFAULT_VERTEX_PATH, "bloom"), "gaussian_blur_for_bloom_single_pass", 3);
     }
 
 

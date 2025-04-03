@@ -4,14 +4,14 @@ package kr.merutilm.rff.opengl;
 import static org.lwjgl.opengl.GL45.*;
 
 public abstract class GLRenderer {
-    protected final GLShader shader;
+    protected final GLShaderLoader shader;
     protected int w;
     protected int h;
 
     protected int previousFBOTextureID;
 
 
-    protected GLRenderer(GLShader shader) {
+    protected GLRenderer(GLShaderLoader shader) {
         this.shader = shader;
         previousFBOTextureID = 0;
     }
@@ -22,7 +22,7 @@ public abstract class GLRenderer {
 
     public static final String DEFAULT_VERTEX_PATH = "default_vertex";
 
-    public GLShader getShader() {
+    public GLShaderLoader getShader() {
         return shader;
     }
 

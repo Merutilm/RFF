@@ -2,7 +2,6 @@ package kr.merutilm.rff.opengl;
 
 import kr.merutilm.rff.settings.StripeSettings;
 
-import static kr.merutilm.rff.opengl.GLTimeRenderer.getTime;
 import static org.lwjgl.opengl.GL45.*;
 
 public class GLRendererStripe extends GLRenderer implements GLIterationTextureRenderer, GLTimeRenderer{
@@ -13,7 +12,7 @@ public class GLRendererStripe extends GLRenderer implements GLIterationTextureRe
     private float time;
 
     public GLRendererStripe() {
-        super(new GLShader(DEFAULT_VERTEX_PATH, "stripe"));
+        super(new GLShaderLoader(DEFAULT_VERTEX_PATH, "stripe"));
     }
 
     @Override

@@ -37,7 +37,7 @@ public class GLMultiPassRenderer {
                 t.setTime(time);
             }
             if(i >= 1){
-                GLShader prevShader = renderers.get(i - 1).getShader();
+                GLShaderLoader prevShader = renderers.get(i - 1).getShader();
                 renderer.setPreviousFBOTextureID(prevShader.getFboTextureID());
             }
             if(i == renderers.size() - 1){

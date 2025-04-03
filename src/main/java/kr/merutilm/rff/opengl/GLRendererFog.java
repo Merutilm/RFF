@@ -10,7 +10,7 @@ public class GLRendererFog extends GLRendererRequiredGaussianBlur{
     private FogSettings fogSettings;
 
     public GLRendererFog(){
-        super(new GLShader(DEFAULT_VERTEX_PATH, "fog"), "gaussian_blur_single_pass", 3);
+        super(new GLShaderLoader(DEFAULT_VERTEX_PATH, "fog"), "gaussian_blur_single_pass", 3);
     }
 
 
