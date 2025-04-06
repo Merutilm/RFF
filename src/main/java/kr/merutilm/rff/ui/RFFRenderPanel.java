@@ -20,7 +20,6 @@ import kr.merutilm.rff.struct.DoubleMatrix;
 import kr.merutilm.rff.util.DoubleExponentMath;
 import kr.merutilm.rff.util.TextFormatter;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.awt.GLData;
 
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
@@ -40,7 +39,7 @@ final class RFFRenderPanel extends RFFGLPanel {
 
     private final transient ParallelRenderState state = new ParallelRenderState();
 
-    private static final int FPS = 30;
+    private static final int FPS = 60;
 
     private transient RFFMap currentMap;
     private transient Perturbator currentPerturbator;
@@ -73,13 +72,16 @@ final class RFFRenderPanel extends RFFGLPanel {
                     SwingUtilities.invokeLater(this);
                     return;
                 }
-
+                
+                long ms = System.currentTimeMillis();
+                render();
+                ms = System.currentTimeMillis() - ms;
                 new Timer().schedule(new TimerTask() {
                     @Override
                     public void run() {
                         SwingUtilities.invokeLater(RFFRenderPanel.this::render);
                     }
-                }, 0, (int) (1000.0 / FPS));
+                }, 0, (int) Math.max(ms, 1000.0 / FPS));
 
             }
         };
@@ -107,24 +109,23 @@ final class RFFRenderPanel extends RFFGLPanel {
             glClear(GL_COLOR_BUFFER_BIT);
             renderer.update();
         }
-
+        
         if(openMapRequested){
             openMapRequested = false;
             applyCurrentMap();
         }
-
+        
         if(resizeRequested){
             resizeRequested = false;
             applyResize();
-
         }
-
+        
         if(colorRequested){
             colorRequested = false;
             applyColor();
         }
-
-
+        
+        
         if(recomputeRequested){
             isRendering = true;
             recomputeRequested = false;
@@ -455,7 +456,7 @@ final class RFFRenderPanel extends RFFGLPanel {
         int length = currentPerturbator.getReference().length();
         currentMap = new RFFMap(calc.logZoom(), period, calc.maxIteration(), iterations);
 
-        panel.setPeriodText(period, length - 1, currentPerturbator.getR3ATable().length());
+        panel.setPeriodText(period, length - 1, currentPerturbator.getReference().longestPeriod());
         panel.setProcess("Preparing...");
 
         state.tryBreak(currentID);

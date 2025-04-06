@@ -10,7 +10,10 @@ uniform ivec2 resolution;
 uniform isampler2D iterations;
 uniform int[2] maxIteration;
 
-uniform sampler1D palette;
+uniform sampler2D palette;
+uniform int paletteWidth;
+uniform int paletteHeight;
+uniform int paletteLength;
 uniform float paletteOffset;
 uniform float paletteInterval;
 
@@ -45,8 +48,18 @@ vec4 getColor(double iteration, int64_t max){
         iteration = 2 * int64_t(iteration) + 1 - iteration;
         break;
     }
+   
+    
+    float hSquare = paletteHeight - 1;
+    float hRemainder = (paletteLength - paletteWidth * hSquare) / paletteWidth;
+    float hLength = hSquare + hRemainder;
 
-    return texture(palette, mod(float(iteration / paletteInterval + paletteOffset), 1));
+    float offset = mod(float(iteration / paletteInterval + paletteOffset), 1) * hLength;
+    
+    float ox = mod(offset, 1);
+    float oy = (floor(offset) + 0.5) / paletteHeight;
+    
+    return texture(palette, vec2(ox ,oy));
 }
 
 void main(){

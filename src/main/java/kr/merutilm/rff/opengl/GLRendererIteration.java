@@ -15,8 +15,11 @@ public class GLRendererIteration extends GLRenderer implements GLIterationTextur
     private int iterWidth;
     private int iterHeight;
     private long maxIteration;
-
+    
     private int paletteTextureID;
+    private int paletteWidth;
+    private int paletteHeight;
+    private int paletteLength;
     private FloatBuffer paletteBuffer;
 
     private int iterationTextureID;
@@ -48,8 +51,11 @@ public class GLRendererIteration extends GLRenderer implements GLIterationTextur
     public void setColorSettings(ColorSettings settings) {
 
         this.colorSettings = settings;
-        this.paletteBuffer = createPaletteBuffer(colorSettings);
-        this.paletteTextureID = shader.recreateTexture1D(paletteTextureID, colorSettings.colors().length, GLShaderLoader.TextureFormat.FLOAT4);
+        this.paletteLength = colorSettings.colors().length;
+        this.paletteWidth = Math.min(glGetInteger(GL_MAX_TEXTURE_SIZE), paletteLength);
+        this.paletteHeight = (paletteLength - 1) / paletteWidth + 1;
+        this.paletteBuffer = createPaletteBuffer(colorSettings, paletteWidth, paletteHeight);
+        this.paletteTextureID = shader.recreateTexture2D(paletteTextureID, paletteWidth, paletteHeight, GLShaderLoader.TextureFormat.FLOAT4);
     }
 
     @Override
@@ -72,7 +78,10 @@ public class GLRendererIteration extends GLRenderer implements GLIterationTextur
         shader.uploadTexture2D("iterations", GL_TEXTURE0, iterationTextureID, iterationBuffer, iterWidth, iterHeight, GLShaderLoader.TextureFormat.INT2);
         shader.uploadLong("maxIteration", maxIteration);
 
-        shader.uploadTexture1D("palette",  GL_TEXTURE1, paletteTextureID, paletteBuffer, colorSettings.colors().length, GLShaderLoader.TextureFormat.FLOAT4);
+        shader.uploadTexture2D("palette",  GL_TEXTURE1, paletteTextureID, paletteBuffer, paletteWidth, paletteHeight, GLShaderLoader.TextureFormat.FLOAT4);
+        shader.uploadInt("paletteWidth", paletteWidth);
+        shader.uploadInt("paletteHeight", paletteHeight);
+        shader.uploadInt("paletteLength", paletteLength);
         shader.uploadFloat("paletteOffset", (float) colorSettings.offsetRatio());
         shader.uploadFloat("paletteInterval", (float) colorSettings.iterationInterval());
         shader.uploadInt("smoothing", colorSettings.colorSmoothing().ordinal());
@@ -98,9 +107,10 @@ public class GLRendererIteration extends GLRenderer implements GLIterationTextur
         iterationBuffer.flip();
     }
 
-    private static FloatBuffer createPaletteBuffer(ColorSettings colorSettings) {
+    private static FloatBuffer createPaletteBuffer(ColorSettings colorSettings, int paletteWidth, int paletteHeight) {
         HexColor[] colors = colorSettings.colors();
-        FloatBuffer buffer = BufferUtils.createFloatBuffer(colors.length * 4);
+
+        FloatBuffer buffer = BufferUtils.createFloatBuffer(paletteWidth * paletteHeight * 4);
         for (HexColor color : colors) {
             buffer.put((float) color.r() / HexColor.MAX);
             buffer.put((float) color.g() / HexColor.MAX);

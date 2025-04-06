@@ -1,6 +1,5 @@
 package kr.merutilm.rff.formula;
 
-
 import kr.merutilm.rff.approx.R3ATable;
 import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.parallel.ParallelRenderState;
@@ -26,7 +25,6 @@ public abstract class MandelbrotPerturbator extends Perturbator {
     @Override
     public abstract MandelbrotPerturbator reuse(ParallelRenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision) throws IllegalParallelRenderStateException;
     
-    @Override
     public abstract R3ATable getR3ATable();
 
     @Override

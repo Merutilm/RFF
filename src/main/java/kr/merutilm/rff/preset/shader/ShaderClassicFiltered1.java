@@ -1,7 +1,6 @@
 package kr.merutilm.rff.preset.shader;
 
 import kr.merutilm.rff.settings.*;
-import kr.merutilm.rff.struct.HexColor;
 
 public class ShaderClassicFiltered1 implements Classic1Shader{
 

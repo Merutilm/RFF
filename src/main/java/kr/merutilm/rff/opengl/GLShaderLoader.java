@@ -4,14 +4,11 @@ import org.lwjgl.BufferUtils;
 
 import kr.merutilm.rff.util.ConsoleUtils;
 import kr.merutilm.rff.util.IOUtilities;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.nio.file.Files;
 
 import static org.lwjgl.opengl.GL45.*;
 import static org.lwjgl.opengl.GL45.glBindVertexArray;
@@ -164,15 +161,22 @@ public class GLShaderLoader {
     public synchronized int recreateTexture1D(int textureID, int length, TextureFormat textureFormat) {
 
         glBindTexture(GL_TEXTURE_1D, textureID);
+
         switch (textureFormat.type){
             case GL_INT -> glTexImage1D(GL_TEXTURE_1D, 0, textureFormat.internal, length, 0, textureFormat.format, textureFormat.type, (IntBuffer) null);
             case GL_FLOAT -> glTexImage1D(GL_TEXTURE_1D, 0, textureFormat.internal, length, 0, textureFormat.format, textureFormat.type, (FloatBuffer) null);
             default -> throw new IllegalArgumentException(TEXTURE_FORMAT_ERROR_MESSAGE);
         }
+
         glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        if(textureFormat.type == GL_FLOAT){
+            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        }else{
+            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        }
         return textureID;
     }
     public synchronized int recreateTexture2D(int textureID, int width, int height, TextureFormat textureFormat) {
@@ -189,8 +193,13 @@ public class GLShaderLoader {
         }
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        if(textureFormat.type == GL_FLOAT){
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        }else{
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        }
         return textureID;
     }
 
@@ -222,7 +231,6 @@ public class GLShaderLoader {
     public synchronized void uploadTexture1D(String varName, int textureUnit, int textureID, Buffer buffer, int length, TextureFormat textureFormat){
         glActiveTexture(textureUnit);
         glBindTexture(GL_TEXTURE_1D, textureID);
-
 
         switch (buffer){
             case IntBuffer b ->  glTexSubImage1D(GL_TEXTURE_1D, 0, 0, length, textureFormat.format, textureFormat.type, b);

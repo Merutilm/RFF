@@ -6,15 +6,15 @@ import java.util.List;
 
 import kr.merutilm.rff.formula.MandelbrotReference;
 import kr.merutilm.rff.functions.ArrayCompressionTool;
-import kr.merutilm.rff.functions.ReferenceCompressor;
+import kr.merutilm.rff.functions.ArrayCompressor;
 import kr.merutilm.rff.settings.R3ACompressionMethod;
 import kr.merutilm.rff.settings.R3ASettings;
 import kr.merutilm.rff.util.ArrayFunction;
 
-public abstract class R3ATable<R extends R3A> {
+public abstract class R3ATable {
 
     protected final R3ASettings settings;
-    protected final ReferenceCompressor<R> pulledR3ACompressor;
+    protected final ArrayCompressor pulledR3ACompressor;
     protected final Period r3aPeriod;
     
     protected R3ATable(MandelbrotReference reference, R3ASettings r3aSettings){
@@ -31,7 +31,7 @@ public abstract class R3ATable<R extends R3A> {
 
         R3ACompressionMethod compressionMethod = r3aSettings.r3aCompressionMethod();
         Period r3aPeriod = R3ATable.Period.create(referencePeriod, r3aSettings);
-        ReferenceCompressor<R> pulledR3ACompressor = compressionMethod == R3ACompressionMethod.STRONGEST ? createPulledR3ACompressor(r3aPeriod, reference.referenceCompressor()) : null;
+        ArrayCompressor pulledR3ACompressor = compressionMethod == R3ACompressionMethod.STRONGEST ? createPulledR3ACompressor(r3aPeriod, reference.referenceCompressor()) : null;
         
         this.settings = r3aSettings;
         this.r3aPeriod = r3aPeriod;
@@ -41,11 +41,10 @@ public abstract class R3ATable<R extends R3A> {
 
     public abstract int length();
 
-    private static <R extends R3A> ReferenceCompressor<R> createPulledR3ACompressor(Period r3aPeriod, ReferenceCompressor<R> refCompressor){
+    private static ArrayCompressor createPulledR3ACompressor(Period r3aPeriod, ArrayCompressor refCompressor){
 
         List<ArrayCompressionTool> refCompTools = refCompressor.tools();
         List<ArrayCompressionTool> r3aTools = new ArrayList<>();
-        List<R> matchingR3A = new ArrayList<>();
         int[] tablePeriod = r3aPeriod.tablePeriod;
         int[] tablePeriodElements = r3aPeriod.tableElements;
         int[] requiredPerturbation = r3aPeriod.requiredPerturbation;
@@ -65,7 +64,7 @@ public abstract class R3ATable<R extends R3A> {
                 //matchingR3A.add(refCompressor.getMatchingR3A(i));
             }
         }
-        return new ReferenceCompressor<>(r3aTools, matchingR3A);
+        return new ArrayCompressor(r3aTools);
     }
 
     protected static int iterationToPulledTableIndex(Period r3aPeriod, int iteration){

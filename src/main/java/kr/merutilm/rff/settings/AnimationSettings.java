@@ -1,6 +1,5 @@
 package kr.merutilm.rff.settings;
 
-import kr.merutilm.rff.selectable.Ease;
 import kr.merutilm.rff.struct.Struct;
 import kr.merutilm.rff.struct.StructBuilder;
 

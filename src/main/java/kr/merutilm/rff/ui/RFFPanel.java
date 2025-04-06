@@ -1,11 +1,7 @@
 package kr.merutilm.rff.ui;
 
-import kr.merutilm.rff.settings.ImageSettings;
-import kr.merutilm.rff.settings.Settings;
-
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
 
 class RFFPanel extends JPanel {
 

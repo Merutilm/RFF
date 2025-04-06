@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-public class DeepR3ATable extends R3ATable<DeepR3A>{
+public class DeepR3ATable extends R3ATable{
 
     private final List<List<DeepR3A>> table;
 

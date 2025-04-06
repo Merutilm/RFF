@@ -11,7 +11,6 @@ import java.util.*;
 import javax.swing.*;
 
 import kr.merutilm.rff.util.IOUtilities;
-import org.lwjgl.opengl.awt.GLData;
 
 
 final class RFFRenderWindow extends JFrame {

@@ -12,7 +12,7 @@ public interface LongRainbowShader extends Shader{
     @Override
     default ColorSettings colorSettings(){
         return initColorSettings();
-    };
+    }
 
     static ColorSettings initColorSettings() {
         ColorSettings.Builder p = new ColorSettings.Builder();
@@ -22,7 +22,7 @@ public interface LongRainbowShader extends Shader{
 
         ColorSettings p1 = p.build();
         p.setColors(new ArrayList<>());
-        double r2 = 0.011;
+        double r2 = 0.01;
 
         for (int i = 0; i < p1.colors().length / r2; i++) {
 
@@ -33,7 +33,7 @@ public interface LongRainbowShader extends Shader{
 
         ColorSettings p2 = p.build();
         p.setColors(new ArrayList<>());
-        double r1 = 0.02;
+        double r1 = 0.01;
 
         for (int i = 0; i < p2.colors().length / r1; i++) {
             double t = r1 * i;
@@ -47,7 +47,7 @@ public interface LongRainbowShader extends Shader{
 
 
 
-        p.setIterationInterval(1000000);
+        p.setIterationInterval(2000000);
         p.setOffsetRatio(0.55);
         return p.build();
     }

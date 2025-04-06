@@ -7,8 +7,6 @@ import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.IntConsumer;
 
-import kr.merutilm.rff.approx.LightR3A;
-import kr.merutilm.rff.functions.ReferenceCompressor;
 import kr.merutilm.rff.settings.CalculationSettings;
 import kr.merutilm.rff.util.AdvancedMath;
 import kr.merutilm.rff.util.ArrayFunction;
@@ -22,7 +20,7 @@ import kr.merutilm.rff.settings.ReferenceCompressionSettings;
 import kr.merutilm.rff.precision.LWBigComplex;
 
 public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, double[] refReal, double[] refImag,
-                                       ReferenceCompressor<LightR3A> referenceCompressor, boolean hasCompressor,
+                                       ArrayCompressor referenceCompressor, boolean hasCompressor,
                                        int[] period,
                                        LWBigComplex lastReference,
                                        LWBigComplex fpgBn) implements MandelbrotReference {
@@ -54,7 +52,7 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
         int reuseIndex = 0;
 
         List<ArrayCompressionTool> tools = new ArrayList<>();
-        List<LightR3A> mergeR3A = new ArrayList<>();
+        // List<LightR3A> mergeR3A = new ArrayList<>();
         int compressed = 0;
         double bailout = calc.bailout();
         long maxIteration = calc.maxIteration();
@@ -227,7 +225,7 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
         ri = Arrays.copyOfRange(ri, 0, period - compressed + 1);
         periodArray = periodArrayLength == 0 ? new int[]{period} : Arrays.copyOfRange(periodArray, 0, periodArrayLength);
 
-        return new LightMandelbrotReference(formula, center, rr, ri, new ReferenceCompressor<>(tools, mergeR3A), !tools.isEmpty(), periodArray, z, fpgBn);
+        return new LightMandelbrotReference(formula, center, rr, ri, new ArrayCompressor(tools), !tools.isEmpty(), periodArray, z, fpgBn);
     }
 
     public double real(int iteration) {
@@ -255,7 +253,7 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
     @Override
     public boolean equals(Object o) {
         return o instanceof LightMandelbrotReference(
-                Formula f, LWBigComplex c, double[] rr, double[] ri, ReferenceCompressor<LightR3A> rc, boolean hc,
+                Formula f, LWBigComplex c, double[] rr, double[] ri, ArrayCompressor rc, boolean hc,
                 int[] p, LWBigComplex l,
                 LWBigComplex bn
         ) &&

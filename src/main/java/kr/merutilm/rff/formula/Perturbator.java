@@ -1,6 +1,5 @@
 package kr.merutilm.rff.formula;
 
-import kr.merutilm.rff.approx.R3ATable;
 import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.parallel.ParallelRenderState;
 import kr.merutilm.rff.settings.CalculationSettings;
@@ -92,8 +91,6 @@ public abstract class Perturbator {
     public abstract DoubleExponent getDcMaxByDoubleExponent();
 
     public abstract Reference getReference();
-    
-    public abstract R3ATable<?> getR3ATable();
 
     public abstract Perturbator reuse(ParallelRenderState state, int currentID, CalculationSettings calc, DoubleExponent dcMax, int precision) throws IllegalParallelRenderStateException;
 

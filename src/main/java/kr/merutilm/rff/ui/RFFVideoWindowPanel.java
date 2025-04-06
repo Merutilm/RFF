@@ -1,7 +1,5 @@
 package kr.merutilm.rff.ui;
 
-import org.lwjgl.opengl.awt.AWTGLCanvas;
-import org.lwjgl.opengl.awt.GLData;
 
 class RFFVideoWindowPanel extends RFFGLPanel {
 
@@ -9,13 +7,13 @@ class RFFVideoWindowPanel extends RFFGLPanel {
         super(master);
     }
 
-    @Override
-    public void initGL() {
-        super.initGL();
-    }
+    // @Override
+    // public void initGL() {
+    //     super.initGL();
+    // }
 
-    @Override
-    public void paintGL() {
-        super.paintGL();
-    }
+    // @Override
+    // public void paintGL() {
+    //     super.paintGL();
+    // }
 }

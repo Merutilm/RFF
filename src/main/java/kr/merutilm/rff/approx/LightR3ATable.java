@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-public class LightR3ATable extends R3ATable<LightR3A>{
+public class LightR3ATable extends R3ATable{
 
     private final List<List<LightR3A>> table;
 
