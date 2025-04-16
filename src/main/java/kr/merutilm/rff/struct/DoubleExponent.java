@@ -58,26 +58,18 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
 
     public static DoubleExponent valueOf(LWBigDecimal v){
         
-        BigInteger bi = v.getValue();
-        byte[] bt = bi.abs().toByteArray();
+        BigInteger value = v.getValue();
+        int len = value.abs().bitLength();
+        int shift = len - DoubleExponent.DOUBLE_PRECISION - 1;
+        byte[] ba = value.abs().shiftRight(shift).toByteArray();
         long bits = 0;
-        int len = bi.bitLength();
-        int dExp2 = len - DOUBLE_PRECISION;
-        for (int i = 0; i < Math.min(bt.length, 8); i++) {
-            bits = (bits << 8) | (bt[i] & 0xff);
+        for (byte b : ba) {
+            bits = (bits << 8) | (b & 0xff);
         }
-
-        //exp : 52, 51, 50, ....
-        //double : 0, -1, -2, -3, ....
-        int shift = Long.bitCount((Long.highestOneBit(bits) - 1) << 1) - DOUBLE_PRECISION;
-        if(shift > 0){
-            bits >>>= shift;
-        }else{
-            bits <<= -shift;
-        }
-
-        long sig = bi.signum() == 1 ? 0 : 0x8000000000000000L;
-        return new DoubleExponent(v.getExp2() + DOUBLE_PRECISION + dExp2 - 1, sig | bits & DECIMAL_SIGNUM_BITS);
+        bits = (bits) & DoubleExponent.DECIMAL_SIGNUM_BITS;
+        int fExp2 = v.getExp2() + shift + DoubleExponent.DOUBLE_PRECISION;
+        long sig = value.signum() == 1 ? 0 : DoubleExponent.SIGNUM_BIT;
+        return new DoubleExponent(fExp2, sig | bits);
     }
 
 
@@ -426,7 +418,7 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
             }
         }
         
-        return toLWBigDecimal(LWBigDecimal.exp2ToPrecision(exp2 - 15)).toString();
+        return toLWBigDecimal(LWBigDecimal.exp2ToPrecision(exp2 - DOUBLE_PRECISION)).toString();
     }
 
 

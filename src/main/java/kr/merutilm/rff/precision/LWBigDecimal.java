@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 
+import kr.merutilm.rff.struct.DoubleExponent;
+
 public class LWBigDecimal extends Number{
 
     private final int exp2;
@@ -17,7 +19,7 @@ public class LWBigDecimal extends Number{
         this.exp2 = exp2;
         this.value = value;
     }
-
+   
     public static LWBigDecimal zero(int precision){
         return new LWBigDecimal(precisionToExp2(precision), BigInteger.ZERO);
     }
@@ -169,7 +171,18 @@ public class LWBigDecimal extends Number{
 
     @Override
     public double doubleValue(){
-        return value.doubleValue() * Math.pow(2, exp2);
+        int len = value.abs().bitLength();
+        int shift = len - DoubleExponent.DOUBLE_PRECISION - 1;
+        byte[] ba = value.abs().shiftRight(shift).toByteArray();
+        long bits = 0;
+        for (byte b : ba) {
+            bits = (bits << 8) | (b & 0xff);
+        }
+        bits = (bits) & DoubleExponent.DECIMAL_SIGNUM_BITS;
+        int fExp2 = exp2 + shift + DoubleExponent.DOUBLE_PRECISION;
+        long expBit = DoubleExponent.EXP0_BITS + ((long) fExp2 << DoubleExponent.DOUBLE_PRECISION);
+        long sig = value.signum() == 1 ? 0 : DoubleExponent.SIGNUM_BIT;
+        return Double.longBitsToDouble(sig | expBit | bits);
     }
 
     @Override
