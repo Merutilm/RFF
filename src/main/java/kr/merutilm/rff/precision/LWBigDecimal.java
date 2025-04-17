@@ -19,6 +19,9 @@ public class LWBigDecimal extends Number{
         this.exp2 = exp2;
         this.value = value;
     }
+    public static void main(String[] args) {
+        System.out.println(valueOf("1.77e308", -1280).doubleValue());
+    }
    
     public static LWBigDecimal zero(int precision){
         return new LWBigDecimal(precisionToExp2(precision), BigInteger.ZERO);
@@ -171,18 +174,31 @@ public class LWBigDecimal extends Number{
 
     @Override
     public double doubleValue(){
+        int signum = value.signum();
+        if(signum == 0){
+            return 0;
+        }
         int len = value.abs().bitLength();
         int shift = len - DoubleExponent.DOUBLE_PRECISION - 1;
         byte[] ba = value.abs().shiftRight(shift).toByteArray();
-        long bits = 0;
+        long mantissa = 0;
         for (byte b : ba) {
-            bits = (bits << 8) | (b & 0xff);
+            mantissa = (mantissa << 8) | (b & 0xff);
         }
-        bits = (bits) & DoubleExponent.DECIMAL_SIGNUM_BITS;
+       
         int fExp2 = exp2 + shift + DoubleExponent.DOUBLE_PRECISION;
-        long expBit = DoubleExponent.EXP0_BITS + ((long) fExp2 << DoubleExponent.DOUBLE_PRECISION);
-        long sig = value.signum() == 1 ? 0 : DoubleExponent.SIGNUM_BIT;
-        return Double.longBitsToDouble(sig | expBit | bits);
+        //0100 0000 0000 : 2^1
+        //0000 0000 0000 : 2^-1023
+        //0111 1111 1111 : 2^1024
+        if(fExp2 > 0x03ff){
+            return signum == 1 ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY;
+        }
+        int mantissaShift = fExp2 <= -0x03ff ? -0x03ff - fExp2 + 1 : 0;
+        mantissa = (mantissa >> mantissaShift) & DoubleExponent.DECIMAL_SIGNUM_BITS;
+
+        long exponent =  fExp2 <= -0x03ff ? 0 : DoubleExponent.EXP0_BITS + ((long) fExp2 << DoubleExponent.DOUBLE_PRECISION);
+        long sig = signum == 1 ? 0 : DoubleExponent.SIGNUM_BIT;
+        return Double.longBitsToDouble(sig | exponent | mantissa);
     }
 
     @Override
