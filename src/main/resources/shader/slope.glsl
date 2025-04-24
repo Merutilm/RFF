@@ -24,7 +24,7 @@ void main() {
 
     ivec2 coord = ivec2(gl_FragCoord.xy);
 
-    if(depth <= 0 || reflectionRatio >= 1){
+    if(reflectionRatio >= 1){
         color = texelFetch(inputTex, coord, 0);
         return;
     }

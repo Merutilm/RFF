@@ -1,5 +1,6 @@
 package kr.merutilm.rff.ui;
 
+import kr.merutilm.rff.preset.resolution.Resolution;
 import kr.merutilm.rff.preset.shader.Shader;
 import kr.merutilm.rff.preset.Preset;
 import kr.merutilm.rff.preset.Presets;
@@ -27,7 +28,7 @@ final class RFF {
 
     private Settings settings = Presets.INIT_SETTINGS;
 
-    public RFF() throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException{
+    public RFF() throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         this.window = new RFFRenderWindow(this, INIT_WIDTH, INIT_HEIGHT);
     }
@@ -39,28 +40,25 @@ final class RFF {
     public Settings getSettings() {
         return settings;
     }
-    
-    public void setPreset(Preset preset){
+
+    public void setPreset(Preset preset) {
         switch (preset) {
-            case Calculation p -> {
-                setSettings(e -> e.setCalculationSettings(e2 -> e2.setR3ASettings(p.r3aSettings()).setReferenceCompressionSettings(p.referenceCompressionSettings())));
-            }
-            case Location p -> {
-                setSettings(e -> e.setCalculationSettings(e2 -> e2.setCenter(p.createCenter()).setLogZoom(p.logZoom()).setMaxIteration(p.maxIteration())));
-            }
-            case Render p -> {
-                setSettings(e -> e.setImageSettings(p.createImageSettings()));
-            }
-            case Shader p -> {
-                setSettings(e -> e.setShaderSettings(p.createShaderSettings()));
-            }
+            case Calculation p ->
+                    setSettings(e -> e.setCalculationSettings(e2 -> e2.setR3ASettings(p.r3aSettings()).setReferenceCompressionSettings(p.referenceCompressionSettings())));
+            case Location p ->
+                    setSettings(e -> e.setCalculationSettings(e2 -> e2.setCenter(p.createCenter()).setLogZoom(p.logZoom()).setMaxIteration(p.maxIteration())));
+            case Render p -> setSettings(e -> e.setImageSettings(p.createImageSettings()));
+
+            case Shader p -> setSettings(e -> e.setShaderSettings(p.createShaderSettings()));
+            case Resolution p ->
+                    setWindowPanelSize(window, window.getRenderer(), p.getResolution().width, p.getResolution().height);
             default -> {
                 //noop
             }
         }
     }
 
-    public static void setWindowPanelSize(JFrame frame, Component targetPanel, int w, int h){
+    public static void setWindowPanelSize(JFrame frame, Component targetPanel, int w, int h) {
         frame.setPreferredSize(new Dimension(RFFPanel.toLogicalLength(w), RFFPanel.toLogicalLength(h)));
         frame.pack(); //first-packing, it sets the height of statusPanel and menubar, and we will obtain the drawPanel size errors.
 
@@ -73,10 +71,11 @@ final class RFF {
     public void setSettings(Settings settings) {
         this.settings = settings;
     }
+
     public void setSettings(UnaryOperator<Settings.Builder> changes) {
         this.settings = changes.apply(settings.edit()).build();
     }
-    
+
 
     public static void main(String[] args) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         new RFF();

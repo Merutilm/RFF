@@ -22,7 +22,7 @@ class RFFVideoWindowPanel extends RFFGLPanel {
     private transient BufferedImage image;
     private transient RFFMap normal;
     private transient RFFMap zoomed;
-    private transient double currentFrame;
+    private transient float currentFrame;
     private transient GLMultiPassRenderer renderer;
     private transient GLRendererIterationFrom2Map rendererIterationFrom2Map;
     private transient GLRendererIteration rendererIteration;
@@ -44,7 +44,7 @@ class RFFVideoWindowPanel extends RFFGLPanel {
     public void applyCurrentMap(){
 
         DoubleMatrix normalI = normal.iterations();
-        rendererIterationFrom2Map.setCurrentFrame((float) currentFrame);
+        rendererIterationFrom2Map.setCurrentFrame(currentFrame);
         if(currentFrame < 1){
             long maxIteration = normal.maxIteration();
             rendererIterationFrom2Map.reloadIterationBuffer(normalI.getWidth(), normalI.getHeight(), maxIteration);
@@ -130,7 +130,7 @@ class RFFVideoWindowPanel extends RFFGLPanel {
         return renderer;
     }
 
-    public void setMap(double currentFrame, RFFMap normal, RFFMap zoomed){
+    public void setMap(float currentFrame, RFFMap normal, RFFMap zoomed){
         this.normal = normal;
         this.zoomed = zoomed;
         this.currentFrame = currentFrame;

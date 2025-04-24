@@ -89,9 +89,8 @@ final class RFFVideoWindow extends JFrame{
         AnimationSettings animationSettings = settings.videoSettings().animationSettings();
         ExportSettings exportSettings = settings.videoSettings().exportSettings();
         double fps = exportSettings.fps();
-        double frameInterval = animationSettings.mps() / fps;
+        float frameInterval = (float) (animationSettings.mps() / fps);
         ParallelRenderState state = new ParallelRenderState();
-        int currentID = state.currentID();
         RFFMap targetMap = RFFMap.readByID(dir, 1);
         if(targetMap == null){
             JOptionPane.showMessageDialog(null, "Cannot create video. There is no samples in the directory : Videos", "Export video", JOptionPane.ERROR_MESSAGE);
@@ -116,7 +115,7 @@ final class RFFVideoWindow extends JFrame{
                 avutil.av_log_set_level(avutil.AV_LOG_QUIET);
                 int maxNumber = IOUtilities.generateFileNameNumber(dir, IOUtilities.Extension.MAP.toString()) - 1;
                 double minNumber = -animationSettings.overZoom();
-                double currentFrameNumber = maxNumber;
+                float currentFrameNumber = maxNumber;
                 FFmpegLogCallback.set();
                 recorder.setFrameRate(fps);
                 recorder.setVideoQuality(0); // maximum quality

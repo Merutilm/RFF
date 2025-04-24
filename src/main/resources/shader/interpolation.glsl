@@ -1,39 +1,30 @@
 #version 450
 
 uniform sampler2D inputTex;
-uniform ivec2 resolution;
 
 in vec4 fColor;
 out vec4 color;
 
+#define INV_SQRT_OF_2PI 0.39894228040143267793994605993439
+#define INV_PI 0.31830988618379067153776752674503
 
 void main() {
 
-    vec2 coord = gl_FragCoord.xy / resolution;
 
-    float x = coord.x;
-    float y = coord.y;
+        ivec2 coord = ivec2(gl_FragCoord.xy);
 
-    if (x < 0 || y < 0){
-        discard;
-    }
-    if (x >= 1 || y >= 1){
-        discard;
-    }
-    float ix = 1.0 / resolution.x;
-    float iy = 1.0 / resolution.y;
-    vec4 c1 = texture(inputTex, coord + vec2(ix, 0));
-    vec4 c2 = texture(inputTex, coord + vec2(0, iy));
-    vec4 c3 = texture(inputTex, coord + vec2(-ix, 0));
-    vec4 c4 = texture(inputTex, coord + vec2(0, -iy));
-    vec4 c5 = texture(inputTex, coord + vec2(ix, iy));
-    vec4 c6 = texture(inputTex, coord + vec2(ix, -iy));
-    vec4 c7 = texture(inputTex, coord + vec2(-ix, iy));
-    vec4 c8 = texture(inputTex, coord + vec2(-ix, -iy));
-    vec4 center = texture(inputTex, coord) * 9;
-    vec4 near = (c1 + c2 + c3 + c4) * 3;
-    vec4 diagonal = (c5 + c6 + c7 + c8);
+        vec4 c1 = texelFetch(inputTex, coord + ivec2(1, 0), 0);
+        vec4 c2 = texelFetch(inputTex, coord + ivec2(0, 1), 0);
+        vec4 c3 = texelFetch(inputTex, coord + ivec2(-1, 0), 0);
+        vec4 c4 = texelFetch(inputTex, coord + ivec2(0, -1), 0);
+        vec4 c5 = texelFetch(inputTex, coord + ivec2(1, 1), 0);
+        vec4 c6 = texelFetch(inputTex, coord + ivec2(1, -1), 0);
+        vec4 c7 = texelFetch(inputTex, coord + ivec2(-1, 1), 0);
+        vec4 c8 = texelFetch(inputTex, coord + ivec2(-1, -1), 0);
+        vec4 center = texelFetch(inputTex, coord, 0) * 9;
+        vec4 near = (c1 + c2 + c3 + c4) * 3;
+        vec4 diagonal = (c5 + c6 + c7 + c8);
 
-    color = (center + near + diagonal) / 25;
+        color = (center + near + diagonal) / 25;
 
 }

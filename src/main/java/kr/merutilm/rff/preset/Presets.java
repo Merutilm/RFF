@@ -3,6 +3,7 @@ package kr.merutilm.rff.preset;
 import kr.merutilm.rff.preset.calc.*;
 import kr.merutilm.rff.preset.location.*;
 import kr.merutilm.rff.preset.render.*;
+import kr.merutilm.rff.preset.resolution.*;
 import kr.merutilm.rff.preset.shader.*;
 import kr.merutilm.rff.selectable.Selectable;
 import kr.merutilm.rff.settings.*;
@@ -141,5 +142,31 @@ public final class Presets implements Selectable{
             return preset.getName();
         }
     
+    }
+
+    public enum Resolutions implements Selectable, PresetElement<Resolution>{
+        L1(new ResolutionL1()),
+        L2(new ResolutionL2()),
+        L3(new ResolutionL3()),
+        L4(new ResolutionL4()),
+        L5(new ResolutionL5()),
+        L6(new ResolutionL6()),
+        ;
+
+        private final Resolution preset;
+
+        Resolutions(Resolution generator) {
+            this.preset = generator;
+        }
+
+        @Override
+        public Resolution preset() {
+            return preset;
+        }
+
+        @Override
+        public String toString() {
+            return preset.getName();
+        }
     }
 }

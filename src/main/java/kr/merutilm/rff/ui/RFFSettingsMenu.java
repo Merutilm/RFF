@@ -70,7 +70,13 @@ enum RFFSettingsMenu {
                 }));
             }
         });
-
+        menuBuilder.createMenu("Resolution", e -> {
+            for(Presets.Resolutions a : Presets.Resolutions.values()){
+                e.createItem(ItemActions.createItem(a.toString(), "", null, () -> {
+                    master.setPreset(a.preset());
+                }));
+            }
+        });
         return (JMenu) menuBuilder.build().createUI();
     }),
     VIDEO(master -> {

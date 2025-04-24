@@ -12,7 +12,6 @@ public class GLRendererInterpolation extends GLRenderer{
     protected void update() {
 
         shader.uploadTexture2D("inputTex", GL_TEXTURE0, previousFBOTextureID);
-        shader.upload2i("resolution", w, h);
 
     }
 }
