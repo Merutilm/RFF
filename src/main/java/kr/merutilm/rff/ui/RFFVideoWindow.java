@@ -1,16 +1,10 @@
 package kr.merutilm.rff.ui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -22,11 +16,9 @@ import javax.swing.WindowConstants;
 import javax.swing.border.LineBorder;
 import javax.swing.plaf.metal.MetalProgressBarUI;
 
+import kr.merutilm.rff.io.BitMap;
+import kr.merutilm.rff.selectable.Selectable;
 import kr.merutilm.rff.settings.*;
-import org.bytedeco.ffmpeg.global.avutil;
-import org.bytedeco.javacv.FFmpegFrameRecorder;
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.Java2DFrameConverter;
 
 import kr.merutilm.rff.struct.DoubleMatrix;
 import kr.merutilm.rff.util.AdvancedMath;
@@ -36,23 +28,24 @@ import kr.merutilm.rff.io.RFFMap;
 import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.parallel.ParallelDoubleArrayDispatcher;
 import kr.merutilm.rff.parallel.ParallelRenderState;
+import org.bytedeco.ffmpeg.global.avutil;
+import org.bytedeco.javacv.FFmpegFrameRecorder;
+import org.bytedeco.javacv.FFmpegLogCallback;
+import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.Java2DFrameConverter;
 
 final class RFFVideoWindow extends JFrame{
 
-    private static final int VIDEO_PREVIEW_WINDOW_MAX_LEN = 640;
-    
     private final RFFVideoWindowPanel panel;
     private final JProgressBar bar;
     private transient BufferedImage img;
 
-    private RFFVideoWindow(RFF master, int imageWidth, int imageHeight){
+    private RFFVideoWindow(int imageWidth, int imageHeight){
         super("Preview Video");
         setIconImage(IOUtilities.getApplicationIcon());
         setLayout(new BorderLayout());
 
-        ParallelRenderState state = new ParallelRenderState();
-
-        this.panel = new RFFVideoWindowPanel(master);
+        this.panel = new RFFVideoWindowPanel();
         
         this.bar = new JProgressBar();
         bar.setLayout(null);
@@ -85,16 +78,6 @@ final class RFFVideoWindow extends JFrame{
         getContentPane().setBackground(Color.BLACK);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        addWindowListener(new WindowAdapter(){
-            @Override
-            public void windowClosing(WindowEvent e){
-                try{
-                    state.cancel();
-                }catch(InterruptedException f){
-                    Thread.currentThread().interrupt();
-                }
-            }
-        });
         
         pack();
         setVisible(true);
@@ -125,103 +108,106 @@ final class RFFVideoWindow extends JFrame{
         
         new Thread(() -> {
 
-//            try(
-//                FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(out, imgWidth, imgHeight);
-//                Frame f = new Frame(imgWidth, imgHeight, Frame.DEPTH_BYTE, 4)
-//            ){
-//                RFFMap frame;
-//                avutil.av_log_set_level(avutil.AV_LOG_QUIET);
-//                int maxNumber = IOUtilities.generateFileNameNumber(dir, IOUtilities.Extension.MAP.toString()) - 1;
-//                double minNumber = -animationSettings.overZoom();
-//                double currentFrameNumber = maxNumber;
-//                recorder.setFrameRate(fps);
-//                recorder.setVideoQuality(0); // maximum quality
-//                recorder.setFormat("mp4");
-//                recorder.setVideoBitrate(exportSettings.bitrate());
-//                recorder.start();
-//                double m = Math.min((double) VIDEO_PREVIEW_WINDOW_MAX_LEN / imgWidth, (double) VIDEO_PREVIEW_WINDOW_MAX_LEN / imgHeight);
-//                double currentSec = 0;
-//                int w = (int)(imgWidth * m);
-//                int h = (int)(imgHeight * m);
-//                RFFVideoWindow window = new RFFVideoWindow(w, h);
-//                RFFRenderPanel renderPanel = ;
-//                long startMillis = System.currentTimeMillis();
-//                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS");
-//                sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-//
-//                while(currentFrameNumber > minNumber) {
-//                    currentFrameNumber -= frameInterval;
-//                    currentSec += 1 / fps;
-//
-//                    frame = getFrame(state, currentID, dir, currentFrameNumber, dataSettings, multiplier);
-//
-//                    if(frame == null){
-//                        break;
-//                    }
-//                    Settings settingsModified = modifyToVideoSettings(frame, settings, currentSec);
-//                    BufferedImage img = RFFRenderPanel.createImage(state, currentID, frame, settingsModified);
-//                    if(animationSettings.showText()){
-//                        Graphics2D g = img.createGraphics();
-//                        int xg = 20;
-//                        int yg = 10;
-//                        int size = imgWidth / 40;
-//                        int off = size / 15;
-//                        g.setFont(new Font(Font.SERIF, Font.BOLD, size));
-//                        String zoomStr = String.format("Zoom : E%.3f", frame.zoom());
-//                        g.setColor(new Color(0,0,0,128));
-//                        g.drawString(zoomStr, xg + off, size + yg + off);
-//                        g.setColor(new Color(255,255,255,128));
-//                        g.drawString(zoomStr, xg, size + yg);
-//
-//                    }
-//                    if(!window.isDisplayable()){
-//                        break;
-//                    }
-//                    window.setImage(img);
-//
-//                    Java2DFrameConverter.copy(window.img, f);
-//                    recorder.record(f, avutil.AV_PIX_FMT_ABGR);
-//                    double progressRatio = (maxNumber - currentFrameNumber) / (maxNumber + animationSettings.overZoom());
-//                    long spent = System.currentTimeMillis() - startMillis;
-//                    long remained = (long)((1 - progressRatio) / progressRatio * spent);
-//
-//                    window.panel.repaint();
-//                    window.bar.setValue((int)(progressRatio * 10000));
-//                    window.bar.setString(String.format("Processing... %.2f", progressRatio * 100) + "% [" + sdf.format(new Date(remained)) + "]");
-//                }
-//                window.setVisible(false);
-//                window.dispose();
-//                JOptionPane.showMessageDialog(null, "Render Finished");
-//
-//            }catch(IOException e){
-//                ConsoleUtils.logError(e);
-//            }catch(IllegalParallelRenderStateException e){
-//                //noop
-//            }catch(InterruptedException e){
-//                Thread.currentThread().interrupt();
-//            }
+            try(
+                    FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(out, imgWidth, imgHeight);
+                    Frame f = new Frame(imgWidth, imgHeight, Frame.DEPTH_BYTE, 4)
+            ){
+
+                avutil.av_log_set_level(avutil.AV_LOG_QUIET);
+                int maxNumber = IOUtilities.generateFileNameNumber(dir, IOUtilities.Extension.MAP.toString()) - 1;
+                double minNumber = -animationSettings.overZoom();
+                double currentFrameNumber = maxNumber;
+                FFmpegLogCallback.set();
+                recorder.setFrameRate(fps);
+                recorder.setVideoQuality(0); // maximum quality
+                recorder.setFormat("mp4");
+                recorder.setVideoBitrate(exportSettings.bitrate());
+                recorder.start();
+                double currentSec = 0;
+                RFFVideoWindow window = new RFFVideoWindow(imgWidth, imgHeight);
+                long startMillis = System.currentTimeMillis();
+                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS");
+                sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+                RFFGLPanel.LOCKER.lock();
+                window.panel.init();
+                window.panel.getRenderer().reloadSize(imgWidth, imgHeight);
+                RFFGLPanel.LOCKER.unlock();
+
+                while(currentFrameNumber > minNumber) {
+                    currentFrameNumber -= frameInterval;
+                    currentSec += 1 / fps;
+                    RFFMap zoomed;
+                    RFFMap normal;
+                    if(currentFrameNumber < 1){
+                        normal = RFFMap.readByID(dir, 1);
+                        zoomed = null;
+                    }else{
+                        int f1 = (int) currentFrameNumber;
+                        int f2 = f1 + 1;
+                        zoomed = RFFMap.readByID(dir, f1);
+                        normal = RFFMap.readByID(dir, f2);
+                    }
+
+
+                    RFFGLPanel.LOCKER.lock();
+                    if(!window.isVisible()){
+                        RFFGLPanel.LOCKER.unlock();
+                        break;
+                    }
+                    window.panel.makeCurrent();
+                    window.panel.setMap(currentFrameNumber, normal, zoomed);
+                    window.panel.applyCurrentMap();
+                    window.panel.applyColor(settings);
+                    window.panel.getRenderer().setTime((float) currentSec);
+                    double zoom = window.panel.calculateZoom(dataSettings.defaultZoomIncrement());
+                    window.panel.render();
+
+                    RFFGLPanel.LOCKER.unlock();
+                    if(animationSettings.showText()){
+                        Graphics2D g = window.panel.getImage().createGraphics();
+                        int xg = 20;
+                        int yg = 10;
+                        int size = imgWidth / 40;
+                        int off = size / 15;
+                        g.setFont(new Font(Font.SERIF, Font.BOLD, size));
+                        String zoomStr = String.format("Zoom : %.6fE%d", Math.pow(10, zoom % 1), (int) zoom);
+                        g.setColor(new Color(0,0,0,128));
+                        g.drawString(zoomStr, xg + off, size + yg + off);
+                        g.setColor(new Color(255,255,255,128));
+                        g.drawString(zoomStr, xg, size + yg);
+
+                    }
+
+                    window.setImage(window.panel.getImage());
+
+                    Java2DFrameConverter.copy(window.img, f);
+                    recorder.record(f, avutil.AV_PIX_FMT_ABGR);
+                    double progressRatio = (maxNumber - currentFrameNumber) / (maxNumber + animationSettings.overZoom());
+                    long spent = System.currentTimeMillis() - startMillis;
+                    long remained = (long)((1 - progressRatio) / progressRatio * spent);
+
+                    window.panel.repaint();
+                    window.bar.setValue((int)(progressRatio * 10000));
+                    window.bar.setString(String.format("Processing... %.2f", progressRatio * 100) + "% [" + sdf.format(new Date(remained)) + "]");
+                }
+                if(window.isVisible()){
+                    window.setVisible(false);
+                    window.dispose();
+                }
+                JOptionPane.showMessageDialog(null, "Render Finished");
+
+            }catch(IOException e){
+                ConsoleUtils.logError(e);
+            }
         }).start();
-    }
-
-    private static Settings modifyToVideoSettings(RFFMap frame, Settings settings, double currentSec) {
-        StripeSettings animation = settings.shaderSettings().stripeSettings();
-        double sof = currentSec * animation.stripeAnimationSpeed();
-
-        return frame.modifyToMapSettings(settings).edit()
-                .setShaderSettings(e -> e
-                        .setStripeSettings(e1 -> e1
-                                .setOffset(sof))
-                        )
-                .build();
     }
 
     private void setImage(BufferedImage img){
         this.img = img;
     }
 
+    private static RFFMap getFrame(ParallelRenderState state, int currentID, File dir, double frame, DataSettings vds, VideoZoomingMethod videoZoomingMethod, int multiplier) throws IllegalParallelRenderStateException, InterruptedException{
 
-    private static RFFMap getFrame(ParallelRenderState state, int currentID, File dir, double frame, DataSettings vds, int multiplier) throws IllegalParallelRenderStateException, InterruptedException{
-        
         if (frame < 1) {
 
             double r = 1 - frame;
@@ -237,12 +223,12 @@ final class RFFVideoWindow extends JFrame{
             int h = m1.getHeight();
 
             long im = im1.maxIteration();
-            
+
             double z1 = im1.zoom();
             double zc = AdvancedMath.ratioDivide(z1, z1 + Math.log10(vds.defaultZoomIncrement()), r);
             double lsr = Math.pow(vds.defaultZoomIncrement(), r);
-            
-            DoubleMatrix result = new DoubleMatrix((int) (w * multiplier), (int) (h * multiplier));
+
+            DoubleMatrix result = new DoubleMatrix(w * multiplier, h * multiplier);
 
             ParallelDoubleArrayDispatcher dispatcher = new ParallelDoubleArrayDispatcher(state, currentID, result);
             dispatcher.createRenderer((_, _, _, _, rx, ry, _, _, _) -> {
@@ -251,59 +237,87 @@ final class RFFVideoWindow extends JFrame{
                 double dy = h * (ry - 0.5);
                 double x1 = w / 2.0 + dx / lsr;
                 double y1 = h / 2.0 + dy / lsr;
-                return m1.pipetteAdvanced(x1, y1);
+                return switch (videoZoomingMethod){
+                    case IMAGE_INTERPOLATION -> m1.pipetteAdvanced((int)x1, (int)y1);
+                    case ITERATION_INTERPOLATION -> m1.pipetteAdvanced(x1, y1);
+                };
             });
             dispatcher.dispatch();
             return new RFFMap(zc, im1.period(), im, result);
 
         } else {
             int f1 = (int) frame; // it is smaller
-            int f2 = f1 + 1; 
+            int f2 = f1 + 1;
             //frame size : f1 = 1x, f2 = 2x
             double r = f2 - frame;
-    
+
             RFFMap im1 = RFFMap.readByID(dir, f1);
             RFFMap im2 = RFFMap.readByID(dir, f2);
-    
+
             if(im1 == null || im2 == null){
                 return null;
             }
             DoubleMatrix m1 = im1.iterations();
             DoubleMatrix m2 = im2.iterations();
-    
+
             int w = m1.getWidth();
             int h = m1.getHeight();
-    
+
             long i1 = im1.maxIteration();
             long i2 = im2.maxIteration();
             long im = Math.min(i1, i2);
-    
+
             double z1 = im1.zoom();
             double z2 = im2.zoom();
             double zg = Math.pow(10, z1 - z2);
             double zc = AdvancedMath.ratioDivide(z2, z1, r);
             double ssr = Math.pow(zg, r - 1);
             double lsr = ssr * zg;
-            
-            DoubleMatrix result = new DoubleMatrix((int)(w * multiplier), (int)(h * multiplier));
-            
+
+            DoubleMatrix result = new DoubleMatrix(w * multiplier, h * multiplier);
+
             ParallelDoubleArrayDispatcher dispatcher = new ParallelDoubleArrayDispatcher(state, currentID, result);
             dispatcher.createRenderer((_, _, _, _, rx, ry, _, _, _) -> {
-                
+
                 double dx = w * (rx - 0.5);
                 double dy = h * (ry - 0.5);
                 double x1 = w / 2.0 + dx / ssr;
                 double y1 = h / 2.0 + dy / ssr;
                 double x2 = w / 2.0 + dx / lsr;
                 double y2 = h / 2.0 + dy / lsr;
-    
+
                 if(x1 < 0 || x1 >= w || y1 < 0 || y1 >= h){
-                    return m2.pipetteAdvanced(x2, y2);
+                    return switch (videoZoomingMethod){
+                        case IMAGE_INTERPOLATION -> m2.pipetteAdvanced((int)x2, (int)y2);
+                        case ITERATION_INTERPOLATION -> m2.pipetteAdvanced(x2, y2);
+                    };
                 }
-                return m1.pipetteAdvanced(x1, y1);
+                return switch (videoZoomingMethod){
+                    case IMAGE_INTERPOLATION -> m1.pipetteAdvanced((int)x1, (int)y1);
+                    case ITERATION_INTERPOLATION -> m1.pipetteAdvanced(x1, y1);
+                };
             });
             dispatcher.dispatch();
             return new RFFMap(zc, im1.period(), im, result);
+        }
+    }
+
+    enum VideoZoomingMethod implements Selectable {
+
+        IMAGE_INTERPOLATION("Image Interpolation"),
+
+        ITERATION_INTERPOLATION("Iteration Interpolation"),
+        ;
+
+        private final String name;
+
+        @Override
+        public String toString() {
+            return name;
+        }
+
+        VideoZoomingMethod(String name){
+            this.name = name;
         }
     }
 }

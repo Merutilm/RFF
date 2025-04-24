@@ -220,7 +220,9 @@ public final class AdvancedMath {
     public static double hypot(double x, double y) {
         return Math.sqrt(x * x + y * y);
     }
-
+    public static int abs(int v) {
+        return v < 0 ? -v : v;
+    }
     public static double abs(double v) {
         return v < 0 ? -v : v;
     }

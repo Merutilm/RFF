@@ -18,7 +18,7 @@ enum ActionsShader implements ItemActions {
         ColorSettings color = getShaderSettings(master).colorSettings();
         
         Consumer<UnaryOperator<ColorSettings.Builder>> applier = e -> {
-            master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setColorSettings(e::apply)));
+            master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setColorSettings(e)));
             master.getWindow().getRenderer().requestColor();
         };
 
@@ -28,9 +28,13 @@ enum ActionsShader implements ItemActions {
         panel.createTextInput(IOUtilities.Constants.OFFSET_RATIO.toString(), "Start offset ratio of cycling palette", color.offsetRatio(), Double::parseDouble, e ->
             applier.accept(f -> f.setOffsetRatio(e))
         );
+        panel.createTextInput("Animation Speed", "Color Animation Speed, The colors' offset(iterations) per second.", color.animationSpeed(), Double::parseDouble, e ->
+                applier.accept(f -> f.setAnimationSpeed(e))
+        );
         panel.createSelectInput("Color Smoothing", "Color Smoothing method", color.colorSmoothing(), ColorSmoothingSettings.values(), e ->
             applier.accept(f -> f.setColorSmoothing(e)), false
         );
+
     }))),
 
     STRIPE("Stripe", "Shader:Stripe", null, 
@@ -39,7 +43,7 @@ enum ActionsShader implements ItemActions {
         StripeSettings color = getShaderSettings(master).stripeSettings();
         
         Consumer<UnaryOperator<StripeSettings.Builder>> applier = e -> {
-            master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setStripeSettings(e::apply)));
+            master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setStripeSettings(e)));
             master.getWindow().getRenderer().requestColor();
         };
 
@@ -59,8 +63,8 @@ enum ActionsShader implements ItemActions {
         panel.createTextInput(IOUtilities.Constants.OFFSET_RATIO.toString(), "Stripe offset ratio", color.offset(), Double::parseDouble, e ->
             applier.accept(f -> f.setOffset(e))
         );
-        panel.createTextInput("Animation Speed", "Stripe Animation Speed, The stripes' offset(iterations) per second.", color.stripeAnimationSpeed(), Double::parseDouble, e ->
-                applier.accept(f -> f.setStripeAnimationSpeed(e))
+        panel.createTextInput("Animation Speed", "Stripe Animation Speed, The stripes' offset(iterations) per second.", color.animationSpeed(), Double::parseDouble, e ->
+                applier.accept(f -> f.setAnimationSpeed(e))
         );
     }))),
     SLOPE("Slope","Shader:Slope", null, 
@@ -69,7 +73,7 @@ enum ActionsShader implements ItemActions {
         SlopeSettings slope = getShaderSettings(master).slopeSettings();
         
         Consumer<UnaryOperator<SlopeSettings.Builder>> applier = e -> {
-            master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setSlopeSettings(e::apply)));
+            master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setSlopeSettings(e)));
             master.getWindow().getRenderer().requestColor();
         };
 
@@ -97,7 +101,7 @@ enum ActionsShader implements ItemActions {
             ColorFilterSettings colorFilter = getShaderSettings(master).colorFilterSettings();
         
             Consumer<UnaryOperator<ColorFilterSettings.Builder>> applier = e -> {
-                master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setColorFilterSettings(e::apply)));
+                master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setColorFilterSettings(e)));
                 master.getWindow().getRenderer().requestColor();
             };
     
@@ -123,7 +127,7 @@ enum ActionsShader implements ItemActions {
         FogSettings fog = getShaderSettings(master).fogSettings();
         
         Consumer<UnaryOperator<FogSettings.Builder>> applier = e -> {
-            master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setFogSettings(e::apply)));
+            master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setFogSettings(e)));
             master.getWindow().getRenderer().requestColor();
         };
 
@@ -140,7 +144,7 @@ enum ActionsShader implements ItemActions {
         BloomSettings bloom = getShaderSettings(master).bloomSettings();
     
         Consumer<UnaryOperator<BloomSettings.Builder>> applier = e -> {
-            master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setBloomSettings(e::apply)));
+            master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setBloomSettings(e)));
             master.getWindow().getRenderer().requestColor();
         };
 

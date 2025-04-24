@@ -14,7 +14,8 @@ public record ColorSettings(
         HexColor[] colors,
         ColorSmoothingSettings colorSmoothing,
         double iterationInterval,
-        double offsetRatio
+        double offsetRatio,
+        double animationSpeed
 ) implements Struct<ColorSettings> {
 
     @Override
@@ -23,7 +24,8 @@ public record ColorSettings(
                 .setColors(List.of(colors))
                 .setColorSmoothing(colorSmoothing)
                 .setIterationInterval(iterationInterval)
-                .setOffsetRatio(offsetRatio);
+                .setOffsetRatio(offsetRatio)
+                .setAnimationSpeed(animationSpeed);
     }
 
     public static final class Builder implements StructBuilder<ColorSettings> {
@@ -32,6 +34,7 @@ public record ColorSettings(
         private ColorSmoothingSettings colorSmoothing = ColorSmoothingSettings.NORMAL;
         private double iterationInterval = 150;
         private double offsetRatio = 0;
+        private double animationSpeed;
 
         public Builder add(int index, HexColor c) {
             colors.add(index, c);
@@ -97,9 +100,14 @@ public record ColorSettings(
             return this;
         }
 
+        public Builder setAnimationSpeed(double animationSpeed) {
+            this.animationSpeed = animationSpeed;
+            return this;
+        }
+
         @Override
         public ColorSettings build() {
-            return new ColorSettings(colors.toArray(HexColor[]::new), colorSmoothing, iterationInterval, offsetRatio);
+            return new ColorSettings(colors.toArray(HexColor[]::new), colorSmoothing, iterationInterval, offsetRatio, animationSpeed);
         }
     }
 
@@ -127,12 +135,13 @@ public record ColorSettings(
                && Arrays.equals(c.colors, colors)
                && c.colorSmoothing == colorSmoothing
                && c.iterationInterval == iterationInterval
-               && c.offsetRatio == offsetRatio;
+               && c.offsetRatio == offsetRatio
+               && c.animationSpeed == animationSpeed;
     }
 
     @Override
     public String toString() {
-        return Arrays.toString(colors) + ", " + colorSmoothing + ", " + iterationInterval + ", " + offsetRatio;
+        return Arrays.toString(colors) + ", " + colorSmoothing + ", " + iterationInterval + ", " + offsetRatio + ", " + animationSpeed;
     }
 
 }

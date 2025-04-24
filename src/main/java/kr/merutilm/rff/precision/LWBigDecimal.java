@@ -19,9 +19,6 @@ public class LWBigDecimal extends Number{
         this.exp2 = exp2;
         this.value = value;
     }
-    public static void main(String[] args) {
-        System.out.println(valueOf("1.77e308", -1280).doubleValue());
-    }
    
     public static LWBigDecimal zero(int precision){
         return new LWBigDecimal(precisionToExp2(precision), BigInteger.ZERO);

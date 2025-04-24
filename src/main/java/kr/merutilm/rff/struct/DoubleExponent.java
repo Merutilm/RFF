@@ -148,11 +148,7 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
             return NAN;
         }
         if(isInfinite() && v.isInfinite()){
-            if(signum() == v.signum()){
-                return NAN;
-            }else{
-                return this;
-            }
+            return signum() == v.signum() ? NAN : this;
         }
         if(isInfinite() || v.isZero()){
             return this;
@@ -162,7 +158,7 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
         }
 
         if(exp2 < v.exp2){
-            long d = (long) v.exp2 - exp2;
+            long d = v.exp2 - exp2;
             if(d >= DOUBLE_PRECISION){
                 return v;
             }
@@ -170,7 +166,7 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
             return dec == 0 ? ZERO : fastUnsafeValue(v.exp2, dec);
         }
         if(exp2 > v.exp2){
-            long d = (long) exp2 - v.exp2;
+            long d = exp2 - v.exp2;
             if(d >= DOUBLE_PRECISION){
                 return this;
             }
@@ -190,11 +186,7 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
             return NAN;
         }
         if(isInfinite() && v.isInfinite()){
-            if(signum() == v.signum()){
-                return this;
-            }else{
-                return NAN;
-            }
+            return signum() == v.signum() ? this : NAN;
         }
 
         if(isInfinite() || v.isZero()){
@@ -205,7 +197,7 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
         }
 
         if(exp2 < v.exp2){
-            long d = (long)v.exp2 - exp2;
+            long d = v.exp2 - exp2;
             if(d >= DOUBLE_PRECISION){
                 return v.negate();
             }
@@ -213,7 +205,7 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
             return fastUnsafeValue(v.exp2, dec);
         }
         if(exp2 > v.exp2){
-            long d = (long) exp2 - v.exp2;
+            long d = exp2 - v.exp2;
             if(d >= DOUBLE_PRECISION){
                 return this;
             }
@@ -226,11 +218,11 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
 
 
     public boolean isZero(){ 
-        return ZERO.exp2 == exp2 && ZERO.bits == bits;
+        return this == ZERO;
     }
 
     public boolean isNaN(){
-        return NAN.exp2 == exp2 && NAN.bits == bits;
+        return this == NAN;
     }
 
     public boolean signum(){
@@ -238,7 +230,7 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
     }
     
     public boolean isInfinite(){
-        return (POSITIVE_INFINITY.exp2 == exp2 && POSITIVE_INFINITY.bits == bits) || (NEGATIVE_INFINITY.exp2 == exp2 && NEGATIVE_INFINITY.bits == bits);
+        return this == POSITIVE_INFINITY || this == NEGATIVE_INFINITY;
     }
 
     public boolean isLargerThan(double v){

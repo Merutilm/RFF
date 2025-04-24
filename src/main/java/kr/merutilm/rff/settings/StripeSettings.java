@@ -9,7 +9,7 @@ public record StripeSettings(
         double secondInterval,
         double opacity,
         double offset,
-        double stripeAnimationSpeed
+        double animationSpeed
 ) implements Struct<StripeSettings> {
 
     @Override
@@ -20,7 +20,7 @@ public record StripeSettings(
                 .setSecondInterval(secondInterval)
                 .setOpacity(opacity)
                 .setOffset(offset)
-                .setStripeAnimationSpeed(stripeAnimationSpeed);
+                .setAnimationSpeed(animationSpeed);
     }
 
     public static final class Builder implements StructBuilder<StripeSettings> {
@@ -29,7 +29,7 @@ public record StripeSettings(
         private double secondInterval;
         private double opacity;
         private double offset;
-        private double stripeAnimationSpeed;
+        private double animationSpeed;
 
         public Builder setUse(boolean use) {
             this.use = use;
@@ -56,14 +56,14 @@ public record StripeSettings(
             return this;
         }
 
-        public Builder setStripeAnimationSpeed(double stripeAnimationSpeed) {
-            this.stripeAnimationSpeed = stripeAnimationSpeed;
+        public Builder setAnimationSpeed(double animationSpeed) {
+            this.animationSpeed = animationSpeed;
             return this;
         }
 
         @Override
         public StripeSettings build() {
-            return new StripeSettings(use, firstInterval, secondInterval, opacity, offset, stripeAnimationSpeed);
+            return new StripeSettings(use, firstInterval, secondInterval, opacity, offset, animationSpeed);
         }
     }
 }

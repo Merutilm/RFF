@@ -15,10 +15,10 @@ class RFFPanel extends JPanel {
     }
 
     public static int toRealLength(int k){
-        return (int) (k * RFFRenderWindow.SCALE_MULTIPLIER);
+        return (int) Math.ceil(k * RFFRenderWindow.SCALE_MULTIPLIER);
     }
     public static int toLogicalLength(int k){
-        return (int) (k / RFFRenderWindow.SCALE_MULTIPLIER);
+        return (int) Math.ceil(k / RFFRenderWindow.SCALE_MULTIPLIER);
     }
     public static Dimension toRealResolution(Dimension d){
         int width = toRealLength(d.width);

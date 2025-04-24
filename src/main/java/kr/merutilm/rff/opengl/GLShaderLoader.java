@@ -131,7 +131,7 @@ public class GLShaderLoader {
         if(fbo == 0){
             return;
         }
-        fboTextureID = recreateTexture2D(fboTextureID, panelWidth, panelHeight, GLShaderLoader.TextureFormat.FLOAT4);
+        fboTextureID = recreateTexture2D(fboTextureID, panelWidth, panelHeight, GLShaderLoader.TextureFormat.FLOAT4, false);
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTextureID, 0);
         glViewport(0, 0, panelWidth, panelHeight);
@@ -158,28 +158,7 @@ public class GLShaderLoader {
         }
     }
 
-    public synchronized int recreateTexture1D(int textureID, int length, TextureFormat textureFormat) {
-
-        glBindTexture(GL_TEXTURE_1D, textureID);
-
-        switch (textureFormat.type){
-            case GL_INT -> glTexImage1D(GL_TEXTURE_1D, 0, textureFormat.internal, length, 0, textureFormat.format, textureFormat.type, (IntBuffer) null);
-            case GL_FLOAT -> glTexImage1D(GL_TEXTURE_1D, 0, textureFormat.internal, length, 0, textureFormat.format, textureFormat.type, (FloatBuffer) null);
-            default -> throw new IllegalArgumentException(TEXTURE_FORMAT_ERROR_MESSAGE);
-        }
-
-        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        if(textureFormat.type == GL_FLOAT){
-            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        }else{
-            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        }
-        return textureID;
-    }
-    public synchronized int recreateTexture2D(int textureID, int width, int height, TextureFormat textureFormat) {
+    public synchronized int recreateTexture2D(int textureID, int width, int height, TextureFormat textureFormat, boolean linearInterpolation) {
         if(glIsTexture(textureID)){
             glDeleteTextures(textureID);
         }
@@ -193,7 +172,7 @@ public class GLShaderLoader {
         }
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        if(textureFormat.type == GL_FLOAT){
+        if(linearInterpolation){
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         }else{
@@ -209,6 +188,7 @@ public class GLShaderLoader {
         glBindVertexArray(vaoID);
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
+
     }
 
     public synchronized void draw() {
@@ -228,18 +208,6 @@ public class GLShaderLoader {
         uploadInt(varName, textureUnitToIndex(textureUnit));
     }
 
-    public synchronized void uploadTexture1D(String varName, int textureUnit, int textureID, Buffer buffer, int length, TextureFormat textureFormat){
-        glActiveTexture(textureUnit);
-        glBindTexture(GL_TEXTURE_1D, textureID);
-
-        switch (buffer){
-            case IntBuffer b ->  glTexSubImage1D(GL_TEXTURE_1D, 0, 0, length, textureFormat.format, textureFormat.type, b);
-            case FloatBuffer b ->  glTexSubImage1D(GL_TEXTURE_1D, 0, 0, length, textureFormat.format, textureFormat.type, b);
-            default -> throw new IllegalArgumentException(TEXTURE_FORMAT_ERROR_MESSAGE);
-        }
-        uploadInt(varName, textureUnitToIndex(textureUnit));
-    }
-
     public synchronized void uploadTexture2D(String varName, int textureUnit, int textureID, Buffer buffer, int w, int h, TextureFormat textureFormat){
         glActiveTexture(textureUnit);
         glBindTexture(GL_TEXTURE_2D, textureID);
@@ -248,6 +216,7 @@ public class GLShaderLoader {
             case FloatBuffer b ->  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, textureFormat.format, textureFormat.type, b);
             default -> throw new IllegalArgumentException(TEXTURE_FORMAT_ERROR_MESSAGE);
         }
+
 
         uploadInt(varName, textureUnitToIndex(textureUnit));
     }

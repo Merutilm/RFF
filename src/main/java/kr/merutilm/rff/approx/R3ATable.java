@@ -49,7 +49,6 @@ public abstract class R3ATable {
         int[] tablePeriodElements = r3aPeriod.tableElements;
         int[] requiredPerturbation = r3aPeriod.requiredPerturbation;
 
-
         for (int i = 0; i < refCompTools.size(); i++) {
             ArrayCompressionTool tool = refCompTools.get(i);
             int start = tool.start();
@@ -59,7 +58,6 @@ public abstract class R3ATable {
             if(index >= 0 && requiredPerturbation[index] == Period.getRequiredPerturbationCount(false)){
                 int tableIndex = iterationToPulledTableIndex(r3aPeriod, start);
                 int periodElements = tablePeriodElements[index];
-
                 r3aTools.add(new ArrayCompressionTool(1, tableIndex + 1, tableIndex + periodElements - 1));
                 //matchingR3A.add(refCompressor.getMatchingR3A(i));
             }

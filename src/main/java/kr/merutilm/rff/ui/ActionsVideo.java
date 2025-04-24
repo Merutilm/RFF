@@ -16,7 +16,7 @@ enum ActionsVideo implements ItemActions {
                         DataSettings data = getVideoSettings(master).dataSettings();
 
                         Consumer<UnaryOperator<DataSettings.Builder>> applier = e ->
-                                master.setSettings(e1 -> e1.setVideoSettings(e2 -> e2.setDataSettings(e::apply)));
+                                master.setSettings(e1 -> e1.setVideoSettings(e2 -> e2.setDataSettings(e)));
 
                         panel.createTextInput("Default Zoom Increment", "Set the log-Zoom interval between two adjacent video data.", data.defaultZoomIncrement(), Double::parseDouble, e ->
                                 applier.accept(f -> f.setDefaultZoomIncrement(e))
@@ -29,7 +29,7 @@ enum ActionsVideo implements ItemActions {
                         AnimationSettings animation = getVideoSettings(master).animationSettings();
 
                         Consumer<UnaryOperator<AnimationSettings.Builder>> applier = e ->
-                                master.setSettings(e1 -> e1.setVideoSettings(e2 -> e2.setAnimationSettings(e::apply)));
+                                master.setSettings(e1 -> e1.setVideoSettings(e2 -> e2.setAnimationSettings(e)));
 
                         panel.createTextInput("Over Zoom", "Zoom the final video data.", animation.overZoom(), Double::parseDouble, e ->
                                 applier.accept(f -> f.setOverZoom(e))
@@ -48,7 +48,7 @@ enum ActionsVideo implements ItemActions {
                         ExportSettings export = getVideoSettings(master).exportSettings();
 
                         Consumer<UnaryOperator<ExportSettings.Builder>> applier = e ->
-                                master.setSettings(e1 -> e1.setVideoSettings(e2 -> e2.setExportSettings(e::apply)));
+                                master.setSettings(e1 -> e1.setVideoSettings(e2 -> e2.setExportSettings(e)));
 
                         panel.createTextInput("FPS", "Frame per second of the video to export", export.fps(), Double::parseDouble, e ->
                                 applier.accept(f -> f.setFps(e))
@@ -59,9 +59,6 @@ enum ActionsVideo implements ItemActions {
                         panel.createTextInput("Bitrate", "The Bitrate of the video to export", export.bitrate(), Integer::parseInt, e ->
                                 applier.accept(f -> f.setBitrate(e))
                         );
-                        panel.createSelectInput("Zooming Method", "Sets how to render the image using two iterations data.", export.videoZoomingMethod(), VideoZoomingMethod.values(), e ->
-                                applier.accept(f -> f.setVideoZoomingMethod(e)
-                                ), false);
 
                     }))),
     GENERATE_VIDEO_DATA("Generate Video Data", "Generate the video data to directory.", null,

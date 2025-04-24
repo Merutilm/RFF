@@ -3,6 +3,7 @@ package kr.merutilm.rff.opengl;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class GLMultiPassRenderer {
     private final List<GLRenderer> renderers;
     private float time;
@@ -25,9 +26,11 @@ public class GLMultiPassRenderer {
 
     public void update(){
         int iterationTextureID = 0;
+
         for (int i = 0; i < renderers.size(); i++) {
             GLRenderer renderer = renderers.get(i);
-            if(renderer instanceof GLIterationTextureProvider p){
+
+            if(renderer instanceof GLIterationTextureProvider p && iterationTextureID == 0){
                 iterationTextureID = p.getIterationTextureID();
             }
             if(renderer instanceof GLIterationTextureRenderer r){

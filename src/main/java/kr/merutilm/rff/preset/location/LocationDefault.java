@@ -17,7 +17,7 @@ public class LocationDefault implements Location{
 
     @Override
     public long maxIteration() {
-        return 100;
+        return 3000;
     }
 
     @Override

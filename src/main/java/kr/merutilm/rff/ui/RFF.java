@@ -63,8 +63,10 @@ final class RFF {
     public static void setWindowPanelSize(JFrame frame, Component targetPanel, int w, int h){
         frame.setPreferredSize(new Dimension(RFFPanel.toLogicalLength(w), RFFPanel.toLogicalLength(h)));
         frame.pack(); //first-packing, it sets the height of statusPanel and menubar, and we will obtain the drawPanel size errors.
+
         frame.setPreferredSize(new Dimension(RFFPanel.toLogicalLength(2 * w) - targetPanel.getWidth(), RFFPanel.toLogicalLength(2 * h) - targetPanel.getHeight())); //adjust the panel size to fit the init size
         frame.pack(); //re-packing for resizing window
+
 
     }
 

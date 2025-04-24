@@ -1,8 +1,7 @@
 #version 450
 
 uniform sampler2D inputTex;
-uniform isampler2D iterations;
-uniform ivec2 resolution;
+uniform sampler2D iterations;
 
 uniform bool use;
 uniform float firstInterval;
@@ -14,27 +13,17 @@ in vec4 fColor;
 out vec4 color;
 
 
-double getIteration(vec2 coord){
-    ivec4 iteration = texture(iterations, coord);
-    uvec2 it = uvec2(iteration.y, iteration.x);
+double getIteration(ivec2 coord){
+    vec4 iteration = texelFetch(iterations, coord, 0);
+    uvec2 it = uvec2(floatBitsToUint(iteration.y), floatBitsToUint(iteration.x));
     return packDouble2x32(it);
 }
 
 void main() {
-    vec2 coord = gl_FragCoord.xy / resolution;
-
-    float x = coord.x;
-    float y = coord.y;
-
-    if (x < 0 || y < 0){
-        discard;
-    }
-    if (x >= 1 || y >= 1){
-        discard;
-    }
+    ivec2 coord = ivec2(gl_FragCoord.xy);
 
     double iteration = getIteration(coord);
-    color = texture(inputTex, coord);
+    color = texelFetch(inputTex, coord, 0);
 
     if(!use || iteration == 0){
         return;

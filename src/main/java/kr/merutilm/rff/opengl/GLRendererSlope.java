@@ -27,7 +27,6 @@ public class GLRendererSlope extends GLRenderer implements GLIterationTextureRen
     protected void update() {
         shader.uploadTexture2D("inputTex", GL_TEXTURE0, previousFBOTextureID);
         shader.uploadTexture2D("iterations", GL_TEXTURE1, iterationTextureID);
-        shader.upload2i("resolution", w, h);
         shader.uploadFloat("depth", (float) slopeSettings.depth());
         shader.uploadFloat("reflectionRatio", (float) slopeSettings.reflectionRatio());
         shader.uploadFloat("opacity", (float) slopeSettings.opacity());

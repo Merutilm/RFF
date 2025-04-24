@@ -33,15 +33,24 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.IntConsumer;
 
+import static org.lwjgl.opengl.GL.createCapabilities;
 import static org.lwjgl.opengl.GL11.*;
 
 final class RFFRenderPanel extends RFFGLPanel {
 
-    private final transient ParallelRenderState state = new ParallelRenderState();
-
-    private static final int FPS = 60;
-
+    private final transient RFF master;
     private transient RFFMap currentMap;
+    private final transient ParallelRenderState state = new ParallelRenderState();
+    private transient GLMultiPassRenderer renderer;
+    private transient GLRendererIteration rendererIteration;
+    private transient GLRendererStripe rendererStripe;
+    private transient GLRendererSlope rendererSlope;
+    private transient GLRendererColorFilter rendererColorFilter;
+    private transient GLRendererFog rendererFog;
+    private transient GLRendererBloom rendererBloom;
+
+    private static final int FPS = 30;
+
     private transient Perturbator currentPerturbator;
 
     private volatile boolean recomputeRequested = false;
@@ -58,56 +67,71 @@ final class RFFRenderPanel extends RFFGLPanel {
 
 
     public RFFRenderPanel(RFF master) {
-        super(master);
+        super();
+        this.master = master;
         addListeners();
 
     }
 
 
     public void renderLoop(){
-        Runnable renderLoop = new Runnable() {
+        Runnable renderLoop = () -> new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                if (!isValid()) {
-                    SwingUtilities.invokeLater(this);
-                    return;
-                }
-                
-                long ms = System.currentTimeMillis();
                 render();
-                ms = System.currentTimeMillis() - ms;
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        SwingUtilities.invokeLater(RFFRenderPanel.this::render);
-                    }
-                }, 0, (int) Math.max(ms, 1000.0 / FPS));
-
             }
-        };
-        SwingUtilities.invokeLater(renderLoop);
+        }, 0, (int) (1000.0 / FPS));
+        renderLoop.run();
     }
 
 
     @Override
     public void initGL() {
-        super.initGL();
+        createCapabilities();
 
+        renderer = new GLMultiPassRenderer();
+
+        rendererIteration = new GLRendererIteration();
+        rendererStripe = new GLRendererStripe();
+        rendererSlope = new GLRendererSlope();
+        rendererColorFilter = new GLRendererColorFilter();
+        rendererFog = new GLRendererFog();
+        rendererBloom = new GLRendererBloom();
+        GLRendererInterpolation interpolation = new GLRendererInterpolation();
+
+
+        renderer.addRenderer(rendererIteration);
+        renderer.addRenderer(rendererStripe);
+        renderer.addRenderer(rendererSlope);
+        renderer.addRenderer(rendererColorFilter);
+        renderer.addRenderer(rendererFog);
+        renderer.addRenderer(rendererBloom);
+        renderer.addRenderer(interpolation);
         requestResize();
         requestColor();
         requestRecompute();
 
     }
 
+    @Override
+    public void applyColor(Settings settings){
+        rendererIteration.setColorSettings(settings.shaderSettings().colorSettings());
+        rendererStripe.setStripeSettings(settings.shaderSettings().stripeSettings());
+        rendererSlope.setSlopeSettings(settings.shaderSettings().slopeSettings());
+        rendererColorFilter.setColorFilterSettings(settings.shaderSettings().colorFilterSettings());
+        rendererFog.setFogSettings(settings.shaderSettings().fogSettings());
+        rendererBloom.setBloomSettings(settings.shaderSettings().bloomSettings());
+    }
+
 
     @Override
     public void paintGL() {
-        super.paintGL();
         renderer.setTime(GLTimeRenderer.getTime());
 
         if(canBeDisplayed){
             glClear(GL_COLOR_BUFFER_BIT);
             renderer.update();
+            swapBuffers();
         }
         
         if(openMapRequested){
@@ -122,7 +146,7 @@ final class RFFRenderPanel extends RFFGLPanel {
         
         if(colorRequested){
             colorRequested = false;
-            applyColor();
+            applyColor(master.getSettings());
         }
         
         
@@ -139,15 +163,8 @@ final class RFFRenderPanel extends RFFGLPanel {
             applyCreateImage();
         }
 
-        swapBuffers();
-
     }
 
-    private void applyCurrentMap(){
-        DoubleMatrix iterations = currentMap.iterations();
-        rendererIteration.reloadIterationBuffer(iterations.getWidth(), iterations.getHeight(), currentMap.maxIteration());
-        rendererIteration.setAllIterations(iterations.getCanvas());
-    }
 
     private void applyComputationalSettings(){
         if (master.getSettings().calculationSettings().autoIteration()) {
@@ -157,25 +174,23 @@ final class RFFRenderPanel extends RFFGLPanel {
         rendererIteration.reloadIterationBuffer(getImgWidth(settings), getImgHeight(settings), settings.calculationSettings().maxIteration());
     }
 
+    @Override
+    public int getFramebufferWidth() {
+        return (int)Math.ceil(super.getFramebufferWidth() / 10.0) * 10;
+    }
+
+    @Override
+    public int getFramebufferHeight() {
+        return (int)Math.ceil(super.getFramebufferHeight() / 10.0) * 10;
+    }
+
     private void applyResize(){
         renderer.reloadSize(getFramebufferWidth(), getFramebufferHeight());
     }
 
-    private void applyColor(){
-        Settings settings = master.getSettings();
-        rendererIteration.setColorSettings(settings.shaderSettings().colorSettings());
-        rendererStripe.setStripeSettings(settings.shaderSettings().stripeSettings());
-        rendererSlope.setSlopeSettings(settings.shaderSettings().slopeSettings());
-        rendererColorFilter.setColorFilterSettings(settings.shaderSettings().colorFilterSettings());
-        rendererFog.setFogSettings(settings.shaderSettings().fogSettings());
-        rendererBloom.setBloomSettings(settings.shaderSettings().bloomSettings());
-    }
+
 
     private void applyCreateImage(){
-        renderer.setTime(0);
-        glClear(GL_COLOR_BUFFER_BIT);
-        renderer.update();
-        swapBuffers();
         int w = getFramebufferWidth();
         int h = getFramebufferHeight();
         ByteBuffer buffer = BufferUtils.createByteBuffer(w * h * 4);
@@ -185,6 +200,12 @@ final class RFFRenderPanel extends RFFGLPanel {
         synchronized (this){
             notifyAll();
         }
+    }
+    @Override
+    public void applyCurrentMap(){
+        DoubleMatrix iterations = currentMap.iterations();
+        rendererIteration.reloadIterationBuffer(iterations.getWidth(), iterations.getHeight(), currentMap.maxIteration());
+        rendererIteration.setAllIterations(iterations.getCanvas());
     }
 
     private void addListeners() {

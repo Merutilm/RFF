@@ -7,7 +7,7 @@
 
 uniform ivec2 resolution;
 
-uniform isampler2D iterations;
+uniform sampler2D iterations;
 uniform int[2] maxIteration;
 
 uniform sampler2D palette;
@@ -27,9 +27,9 @@ int64_t getMaxIteration(){
 }
 
 
-double getIteration(vec2 coord){
-    ivec4 iteration = texture(iterations, coord);
-    uvec2 it = uvec2(iteration.y, iteration.x);
+double getIteration(ivec2 coord){
+    vec4 iteration = texelFetch(iterations, coord, 0);
+    uvec2 it = uvec2(floatBitsToUint(iteration.y), floatBitsToUint(iteration.x));
     return packDouble2x32(it);
 }
 
@@ -64,25 +64,19 @@ vec4 getColor(double iteration, int64_t max){
 
 void main(){
 
-    vec2 coord = gl_FragCoord.xy / resolution;
+    ivec2 coord = ivec2(gl_FragCoord.xy);
 
-    float x = coord.x;
-    float y = coord.y;
-
-    if (x < 0 || y < 0){
-        discard;
-    }
-    if (x >= 1 || y >= 1){
-        discard;
-    }
+    int x = coord.x;
+    int y = coord.y;
 
     double iteration = getIteration(coord);
     int64_t max = getMaxIteration();
 
     if (iteration == 0){
+
         double it2 = 0;
         while (coord.y > 0){
-            coord.y -= 1.0 / resolution.y;
+            coord.y -= 1;
             it2 = getIteration(coord);
             if (it2 > 0){
                 break;
