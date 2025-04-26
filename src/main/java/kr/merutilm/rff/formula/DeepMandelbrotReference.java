@@ -8,12 +8,12 @@ import java.util.function.BiConsumer;
 import java.util.function.IntConsumer;
 
 import kr.merutilm.rff.settings.CalculationSettings;
-import kr.merutilm.rff.approx.DeepR3ATable;
+import kr.merutilm.rff.approx.DeepMPATable;
 import kr.merutilm.rff.functions.ArrayCompressor;
 import kr.merutilm.rff.functions.ArrayCompressionTool;
 import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.parallel.ParallelRenderState;
-import kr.merutilm.rff.settings.R3ASettings;
+import kr.merutilm.rff.settings.MPASettings;
 import kr.merutilm.rff.settings.ReferenceCompressionSettings;
 import kr.merutilm.rff.struct.DoubleExponent;
 import kr.merutilm.rff.precision.LWBigComplex;
@@ -162,8 +162,8 @@ public record DeepMandelbrotReference(Formula formula, LWBigComplex refCenter, D
         return refImag[referenceCompressor.compress(iteration)];
     }
 
-    public DeepR3ATable generateR3A(ParallelRenderState state, int renderID, R3ASettings r3aSettings, DoubleExponent dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
-        return new DeepR3ATable(state, renderID, this, r3aSettings, dcMax, actionPerCreatingTableIteration);
+    public DeepMPATable generateMPA(ParallelRenderState state, int renderID, MPASettings MPASettings, DoubleExponent dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
+        return new DeepMPATable(state, renderID, this, MPASettings, dcMax, actionPerCreatingTableIteration);
     }
 
     @Override

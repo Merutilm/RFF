@@ -2,6 +2,7 @@ package kr.merutilm.rff.formula;
 
 import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.parallel.ParallelRenderState;
+import kr.merutilm.rff.preset.Presets;
 import kr.merutilm.rff.settings.CalculationSettings;
 import kr.merutilm.rff.struct.DoubleExponent;
 import kr.merutilm.rff.precision.LWBigComplex;
@@ -9,7 +10,7 @@ import kr.merutilm.rff.precision.LWBigComplex;
 
 public abstract class Perturbator {
     private static final int PRECISION_ADDITION = 18;
-    public static final long MINIMUM_ITERATION = 300;
+    public static final long MINIMUM_ITERATION = Presets.INIT_LOCATION.maxIteration();
     public static final long AUTOMATIC_ITERATION_MULTIPLIER = 50;
     private static final double LN2 = Math.log(2);
     protected final ParallelRenderState state;

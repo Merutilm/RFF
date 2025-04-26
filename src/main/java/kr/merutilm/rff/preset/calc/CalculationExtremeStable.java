@@ -1,8 +1,8 @@
 package kr.merutilm.rff.preset.calc;
 
-import kr.merutilm.rff.settings.R3ACompressionMethod;
-import kr.merutilm.rff.settings.R3ASelectionMethod;
-import kr.merutilm.rff.settings.R3ASettings;
+import kr.merutilm.rff.settings.MPACompressionMethod;
+import kr.merutilm.rff.settings.MPASelectionMethod;
+import kr.merutilm.rff.settings.MPASettings;
 import kr.merutilm.rff.settings.ReferenceCompressionSettings;
 
 public class CalculationExtremeStable implements Calculation {
@@ -11,8 +11,8 @@ public class CalculationExtremeStable implements Calculation {
         return "Extreme Stable";
     }
     @Override
-    public R3ASettings r3aSettings() {
-        return new R3ASettings(16, 4, -4, R3ASelectionMethod.HIGHEST, R3ACompressionMethod.STRONGEST);
+    public MPASettings r3aSettings() {
+        return new MPASettings(16, 4, -4, MPASelectionMethod.HIGHEST, MPACompressionMethod.STRONGEST);
     }
 
     @Override

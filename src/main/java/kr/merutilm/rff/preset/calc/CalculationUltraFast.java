@@ -1,8 +1,8 @@
 package kr.merutilm.rff.preset.calc;
 
-import kr.merutilm.rff.settings.R3ACompressionMethod;
-import kr.merutilm.rff.settings.R3ASelectionMethod;
-import kr.merutilm.rff.settings.R3ASettings;
+import kr.merutilm.rff.settings.MPACompressionMethod;
+import kr.merutilm.rff.settings.MPASelectionMethod;
+import kr.merutilm.rff.settings.MPASettings;
 import kr.merutilm.rff.settings.ReferenceCompressionSettings;
 
 public class CalculationUltraFast implements Calculation{
@@ -11,8 +11,8 @@ public class CalculationUltraFast implements Calculation{
         return "Ultra Fast";
     }
     @Override
-    public R3ASettings r3aSettings() {
-        return new R3ASettings(4, 2, -3, R3ASelectionMethod.HIGHEST, R3ACompressionMethod.NO_COMPRESSION);
+    public MPASettings r3aSettings() {
+        return new MPASettings(4, 2, -3, MPASelectionMethod.HIGHEST, MPACompressionMethod.NO_COMPRESSION);
     }
 
     @Override

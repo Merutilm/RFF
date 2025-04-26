@@ -1,8 +1,8 @@
 package kr.merutilm.rff.preset.calc;
 
-import kr.merutilm.rff.settings.R3ACompressionMethod;
-import kr.merutilm.rff.settings.R3ASelectionMethod;
-import kr.merutilm.rff.settings.R3ASettings;
+import kr.merutilm.rff.settings.MPACompressionMethod;
+import kr.merutilm.rff.settings.MPASelectionMethod;
+import kr.merutilm.rff.settings.MPASettings;
 import kr.merutilm.rff.settings.ReferenceCompressionSettings;
 
 public class CalculationAccurate implements Calculation {
@@ -11,8 +11,8 @@ public class CalculationAccurate implements Calculation {
         return "Accurate";
     }
     @Override
-    public R3ASettings r3aSettings() {
-        return new R3ASettings(8, 2, -6, R3ASelectionMethod.HIGHEST, R3ACompressionMethod.LITTLE_COMPRESSION);
+    public MPASettings r3aSettings() {
+        return new MPASettings(8, 2, -6, MPASelectionMethod.HIGHEST, MPACompressionMethod.LITTLE_COMPRESSION);
     }
 
     @Override

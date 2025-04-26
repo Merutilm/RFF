@@ -13,11 +13,11 @@ import kr.merutilm.rff.precision.LWBigComplex;
 import kr.merutilm.rff.precision.LWBigDecimal;
 import kr.merutilm.rff.ui.HTMLStringBuilder.Tag;
 import kr.merutilm.rff.settings.CalculationSettings;
-import kr.merutilm.rff.settings.R3ASettings;
+import kr.merutilm.rff.settings.MPASettings;
 import kr.merutilm.rff.settings.DecimalizeIterationMethod;
-import kr.merutilm.rff.settings.R3ASelectionMethod;
+import kr.merutilm.rff.settings.MPASelectionMethod;
 import kr.merutilm.rff.settings.ReuseReferenceMethod;
-import kr.merutilm.rff.settings.R3ACompressionMethod;
+import kr.merutilm.rff.settings.MPACompressionMethod;
 
 enum ActionsFractal implements ItemActions {
     REFERENCE("Reference", "Open the reference settings. You can set the Location, Zoom, and etc. here.", null, 
@@ -79,27 +79,27 @@ enum ActionsFractal implements ItemActions {
                 applier.accept(f -> f.setDecimalizeIterationMethod(e)), true
         );
     }))),
-    R3A("R3A", new HTMLStringBuilder().wrapln(Tag.BOLD, "Recursive Reference Rebasing Approximation.").appendln("Determine all of the period based on reference orbit, skips the period of iteration at once.").append("The render speed will be significantly faster when using it recursively.").toString(), null, 
+    MPA("MPA", new HTMLStringBuilder().wrapln(Tag.BOLD, "Multi-Level Periodic Approximation.").appendln("Determine all of the period based on reference orbit, skips the period of iteration at once.").append("The render speed will be significantly faster when using it repeatedly.").toString(), null,
     (master, name, description, accelerator) ->
     ItemActions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
-        R3ASettings r3a = getCalculationSettings(master).r3aSettings();
+        MPASettings mpa = getCalculationSettings(master).MPASettings();
 
-        Consumer<UnaryOperator<R3ASettings.Builder>> applier = e ->
+        Consumer<UnaryOperator<MPASettings.Builder>> applier = e ->
                 master.setSettings(e1 -> e1.setCalculationSettings(e2 -> e2.setR3ASettings(e::apply)));
 
-        panel.createTextInput("Min Skip Reference", "Set minimum skipping reference iteration when creating a table.", r3a.minSkipReference(), Integer::parseInt, e ->
+        panel.createTextInput("Min Skip Reference", "Set minimum skipping reference iteration when creating a table.", mpa.minSkipReference(), Integer::parseInt, e ->
                 applier.accept(f -> f.setMinSkipReference(e))
         );
-        panel.createTextInput("Max Multiplier Between Level", new HTMLStringBuilder().wrapln(Tag.BOLD, "Set maximum multiplier between adjacent skipping levels.").appendln("This means the maximum multiplier of two adjacent periods for the new period that inserts between them,").append("So the multiplier between the two periods may in the worst case be the square of this.").toString(), r3a.maxMultiplierBetweenLevel(), Integer::parseInt, e ->
+        panel.createTextInput("Max Multiplier Between Level", new HTMLStringBuilder().wrapln(Tag.BOLD, "Set maximum multiplier between adjacent skipping levels.").appendln("This means the maximum multiplier of two adjacent periods for the new period that inserts between them,").append("So the multiplier between the two periods may in the worst case be the square of this.").toString(), mpa.maxMultiplierBetweenLevel(), Integer::parseInt, e ->
                 applier.accept(f -> f.setMaxMultiplierBetweenLevel(e))
         );
-        panel.createTextInput("Epsilon Power", new HTMLStringBuilder().wrapln(Tag.BOLD, "Set Epsilon power of ten.").appendln("Useful for glitch reduction. if this value is small,").appendln("The fractal will be rendered glitch-less but slow,").append("and is large, It will be fast, but maybe shown visible glitches.").toString(), r3a.epsilonPower(), Double::parseDouble, e ->
+        panel.createTextInput("Epsilon Power", new HTMLStringBuilder().wrapln(Tag.BOLD, "Set Epsilon power of ten.").appendln("Useful for glitch reduction. if this value is small,").appendln("The fractal will be rendered glitch-less but slow,").append("and is large, It will be fast, but maybe shown visible glitches.").toString(), mpa.epsilonPower(), Double::parseDouble, e ->
                 applier.accept(f -> f.setEpsilonPower(e))
         );
-        panel.createSelectInput("Selection Method", "Set the selection method of R3A.", r3a.r3aSelectionMethod(), R3ASelectionMethod.values(), e ->
+        panel.createSelectInput("Selection Method", "Set the selection method of R3A.", mpa.mpaSelectionMethod(), MPASelectionMethod.values(), e ->
                 applier.accept(f -> f.setR3ASelectionMethod(e)), false
         );
-        panel.createSelectInput("Compression Method", "Set the compession method of R3A.", r3a.r3aCompressionMethod(), R3ACompressionMethod.values(), e ->
+        panel.createSelectInput("Compression Method", "Set the compession method of R3A.", mpa.mpaCompressionMethod(), MPACompressionMethod.values(), e ->
                 applier.accept(f -> f.setR3ACompressionMethod(e)), false
         );
     }))),

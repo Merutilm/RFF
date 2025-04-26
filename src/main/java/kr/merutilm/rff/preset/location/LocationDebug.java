@@ -22,6 +22,6 @@ public class LocationDebug implements Location{
 
     @Override
     public double logZoom() {
-        return 66.02548525065176;
+        return 68.02548525065176;
     }
 }

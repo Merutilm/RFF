@@ -31,6 +31,7 @@ public class ArrayCompressor {
         return containedIndex(index) == -1;
     }
 
+
     /**
      * Rebases the given index. <p>
      * The rebased index is not the compressed index because it is a middle step that has not proceeded the pulling process. <p>

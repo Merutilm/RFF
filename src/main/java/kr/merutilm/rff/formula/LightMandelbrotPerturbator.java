@@ -4,8 +4,8 @@ package kr.merutilm.rff.formula;
 import java.util.function.BiConsumer;
 import java.util.function.IntConsumer;
 
-import kr.merutilm.rff.approx.LightR3A;
-import kr.merutilm.rff.approx.LightR3ATable;
+import kr.merutilm.rff.approx.LightPA;
+import kr.merutilm.rff.approx.LightMPATable;
 import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.parallel.ParallelRenderState;
 import kr.merutilm.rff.settings.CalculationSettings;
@@ -14,7 +14,7 @@ import kr.merutilm.rff.precision.LWBigComplex;
 
 public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
     private final LightMandelbrotReference reference;
-    private final LightR3ATable table;
+    private final LightMPATable table;
     private final double dcMax;
     private final double offR;
     private final double offI;
@@ -27,13 +27,13 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
     }
 
     public LightMandelbrotPerturbator(ParallelRenderState state, int currentID, CalculationSettings calc, double dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, BiConsumer<Integer, Double> actionPerCreatingTableIteration, boolean arbitraryPrecisionFPGBn,
-                                      LightMandelbrotReference reusedReference, LightR3ATable reusedTable, double offR, double offI) throws IllegalParallelRenderStateException{
+                                      LightMandelbrotReference reusedReference, LightMPATable reusedTable, double offR, double offI) throws IllegalParallelRenderStateException{
         super(state, currentID, calc, arbitraryPrecisionFPGBn);
         this.dcMax = dcMax;
         this.offR = offR;
         this.offI = offI;
         this.reference = reusedTable == null ? LightMandelbrotReference.generate(state, currentID, calc, precision, period, dcMax, strictFPGBn, actionPerRefCalcIteration) : reusedReference;
-        this.table = reusedTable == null ? reference.generateR3A(state, currentID, calc.r3aSettings(), dcMax, actionPerCreatingTableIteration) : reusedTable;
+        this.table = reusedTable == null ? reference.generateMPA(state, currentID, calc.MPASettings(), dcMax, actionPerCreatingTableIteration) : reusedTable;
     }
     // AtomicInteger a = new AtomicInteger();
 
@@ -75,7 +75,7 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
         while (iteration < maxIteration) {
             
             if(table != null){
-                LightR3A r3a = table.lookup(refIteration, dzr, dzi);
+                LightPA r3a = table.lookup(refIteration, dzr, dzi);
                 
                 if (r3a != null){
                     double dzr1 = r3a.anr() * dzr - r3a.ani() * dzi + r3a.bnr() * dcr1 - r3a.bni() * dci1;
@@ -181,7 +181,7 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
     }
 
     @Override
-    public LightR3ATable getR3ATable() {
+    public LightMPATable getMPATable() {
         return table;
     }
 

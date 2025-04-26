@@ -1,7 +1,5 @@
 package kr.merutilm.rff.functions;
 
-import kr.merutilm.rff.approx.R3A;
-
 
 import java.util.List;
 

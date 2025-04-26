@@ -13,7 +13,7 @@ public record CalculationSettings(
         long maxIteration,
         double bailout,
         DecimalizeIterationMethod decimalizeIterationMethod,
-        R3ASettings r3aSettings,
+        MPASettings MPASettings,
         ReferenceCompressionSettings referenceCompressionSettings,
         ReuseReferenceMethod reuseReference,
         boolean autoIteration,
@@ -32,7 +32,7 @@ public record CalculationSettings(
                 .setMaxIteration(maxIteration)
                 .setBailout(bailout)
                 .setDecimalizeIterationMethod(decimalizeIterationMethod)
-                .setR3ASettings(r3aSettings)
+                .setR3ASettings(MPASettings)
                 .setReferenceCompressionSettings(referenceCompressionSettings)
                 .setReuseReference(reuseReference)
                 .setAutoIteration(autoIteration)
@@ -46,7 +46,7 @@ public record CalculationSettings(
         private long maxIteration;
         private double bailout;
         private DecimalizeIterationMethod decimalizeIterationMethod;
-        private R3ASettings r3aSettings;
+        private MPASettings MPASettings;
         private ReferenceCompressionSettings referenceCompressionSettings;
         private ReuseReferenceMethod reuseReference;
         private boolean autoIteration;
@@ -77,13 +77,13 @@ public record CalculationSettings(
             return this;
         }
 
-        public Builder setR3ASettings(R3ASettings r3aSettings){
-            this.r3aSettings = r3aSettings;
+        public Builder setR3ASettings(MPASettings MPASettings){
+            this.MPASettings = MPASettings;
             return this;
         }
 
-        public Builder setR3ASettings(UnaryOperator<R3ASettings.Builder> changes) {
-            this.r3aSettings = changes.apply(r3aSettings == null ? null : r3aSettings.edit()).build();
+        public Builder setR3ASettings(UnaryOperator<MPASettings.Builder> changes) {
+            this.MPASettings = changes.apply(MPASettings == null ? null : MPASettings.edit()).build();
             return this;
         }
 
@@ -144,7 +144,7 @@ public record CalculationSettings(
 
         @Override
         public CalculationSettings build() {
-            return new CalculationSettings(center, logZoom, maxIteration, bailout, decimalizeIterationMethod, r3aSettings, referenceCompressionSettings, reuseReference, autoIteration, absoluteIterationMode);
+            return new CalculationSettings(center, logZoom, maxIteration, bailout, decimalizeIterationMethod, MPASettings, referenceCompressionSettings, reuseReference, autoIteration, absoluteIterationMode);
         }
     }
 

@@ -10,12 +10,12 @@ import java.util.function.IntConsumer;
 import kr.merutilm.rff.settings.CalculationSettings;
 import kr.merutilm.rff.util.AdvancedMath;
 import kr.merutilm.rff.util.ArrayFunction;
-import kr.merutilm.rff.approx.LightR3ATable;
+import kr.merutilm.rff.approx.LightMPATable;
 import kr.merutilm.rff.functions.ArrayCompressionTool;
 import kr.merutilm.rff.functions.ArrayCompressor;
 import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.parallel.ParallelRenderState;
-import kr.merutilm.rff.settings.R3ASettings;
+import kr.merutilm.rff.settings.MPASettings;
 import kr.merutilm.rff.settings.ReferenceCompressionSettings;
 import kr.merutilm.rff.precision.LWBigComplex;
 
@@ -236,8 +236,8 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
         return hasCompressor ? refImag[referenceCompressor.compress(iteration)] : refImag[iteration];
     }
 
-    public LightR3ATable generateR3A(ParallelRenderState state, int renderID, R3ASettings r3aSettings, double dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
-        return new LightR3ATable(state, renderID, this, r3aSettings, dcMax, actionPerCreatingTableIteration);
+    public LightMPATable generateMPA(ParallelRenderState state, int renderID, MPASettings MPASettings, double dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
+        return new LightMPATable(state, renderID, this, MPASettings, dcMax, actionPerCreatingTableIteration);
     }
 
     @Override

@@ -15,7 +15,9 @@ package kr.merutilm.rff.functions;
  */
 
 public record ArrayCompressionTool(int rebase, int start, int end) {
-    
+
+
+
     public ArrayCompressionTool {
         if(rebase >= start){
             throw new IllegalArgumentException("rebase index must be smaller than start index");
