@@ -4,13 +4,14 @@ import kr.merutilm.rff.formula.DeepMandelbrotReference;
 import kr.merutilm.rff.struct.DoubleExponent;
 import kr.merutilm.rff.util.DoubleExponentMath;
 
-public record DeepPA(DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr, DoubleExponent bni, int skip, DoubleExponent radius) implements PA {
-    public static final class Builder{
-        private DoubleExponent anr; 
-        private DoubleExponent ani; 
+public record DeepPA(DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr, DoubleExponent bni, int skip,
+                     DoubleExponent radius) implements PA {
+    public static final class Builder {
+        private DoubleExponent anr;
+        private DoubleExponent ani;
         private DoubleExponent bnr;
         private DoubleExponent bni;
-        private int skip; 
+        private int skip;
         private DoubleExponent radius;
 
         private final int start;
@@ -18,7 +19,7 @@ public record DeepPA(DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr,
         private final double epsilon;
         private final DoubleExponent dcMax;
 
-        private Builder(DeepMandelbrotReference reference, double epsilon, DoubleExponent dcMax, DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr, DoubleExponent bni, int start, int skip, DoubleExponent radius){
+        private Builder(DeepMandelbrotReference reference, double epsilon, DoubleExponent dcMax, DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr, DoubleExponent bni, int start, int skip, DoubleExponent radius) {
             this.anr = anr;
             this.ani = ani;
             this.bnr = bnr;
@@ -36,23 +37,28 @@ public record DeepPA(DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr,
             return new Builder(reference, epsilon, dcMax, DoubleExponent.ONE, DoubleExponent.ZERO, DoubleExponent.ZERO, DoubleExponent.ZERO, start, 0, DoubleExponent.POSITIVE_INFINITY);
         }
 
-        public int start(){
+        public int start() {
             return start;
         }
 
-        // public Builder merge(LightR3A r3a){
-        //     double anrMerge = r3a.anr * anr - r3a.ani * ani;
-        //     double aniMerge = r3a.anr * ani + r3a.ani * anr;
-        //     double bnrMerge = r3a.anr * bnr - r3a.ani * bni + r3a.bnr;
-        //     double bniMerge = r3a.anr * bni + r3a.ani * bnr + r3a.bni;
+        public int skip() {
+            return skip;
+        }
 
-        //     radius = Math.min(radius, r3a.radius);
-        //     anr = anrMerge;
-        //     ani = aniMerge;
-        //     bnr = bnrMerge;
-        //     bni = bniMerge;
-        //     return this;
-        // }
+        public Builder merge(DeepPA pa) {
+            DoubleExponent anrMerge = pa.anr.multiply(anr).subtract(pa.ani.multiply(ani));
+            DoubleExponent aniMerge = pa.anr.multiply(ani).add(pa.ani.multiply(anr));
+            DoubleExponent bnrMerge = pa.anr.multiply(bnr).subtract(pa.ani.multiply(bni)).add(pa.bnr);
+            DoubleExponent bniMerge = pa.anr.multiply(bni).add(pa.ani.multiply(bnr)).add(pa.bni);
+
+            radius = DoubleExponentMath.min(radius, pa.radius);
+            anr = anrMerge;
+            ani = aniMerge;
+            bnr = bnrMerge;
+            bni = bniMerge;
+            skip += pa.skip;
+            return this;
+        }
 
         public Builder step() {
 
@@ -77,11 +83,12 @@ public record DeepPA(DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr,
             return this;
         }
 
-        public DeepPA build(){
+        public DeepPA build() {
             return new DeepPA(anr, ani, bnr, bni, skip, radius);
         }
     }
-    public boolean isValid(DoubleExponent dzRadius){
+
+    public boolean isValid(DoubleExponent dzRadius) {
         return dzRadius.isSmallerThan(radius);
     }
 }

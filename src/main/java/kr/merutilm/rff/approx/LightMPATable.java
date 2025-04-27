@@ -38,45 +38,11 @@ public class LightMPATable extends MPATable {
 
         List<List<LightPA>> table = new ArrayList<>();
         double epsilon = Math.pow(10, settings.epsilonPower());
-
-
         int iteration = 1;
 
-        // Period sample
-        // Period :      16 | 64 | 652 | 2608 | 10432 |  55432
-        // IsArtificial : T |  F |   F |    T |     T |      F
-        //
-        // Uncompressed Array Construction
-        //
-        // MPA period : [16, 64, 652, 2608, 10432, 55432]
-        // period count array init : [0, 0, 0, 0, 0, 0]
-        // iteration count start value : 1
-        //
-        // isArtificial = true,
-        // iteration 16, period count Array [16, 16, 16, 16, 16, 16]
-        // 16 is matched, reset to 0 for all lower level
-        // [0, 16, 16, 16, 16, 16]
-        // wait until iteration is reached to 16
-        //
-        // same operation
-        // [0, 32, 32, 32, 32, 32]
-        // wait until iteration is reached to 16 * 2 = 32
-        //
-        // iteration 64, period count Array [16, 64, 64, 64, 64, 64]
-        // [0, 0, 64, 64, 64, 64]
-        //
-        // iteration 128, period count Array [16, 64, 128, 128, 128, 128]
-        // [0, 0, 128, 128, 128, 128]
-        //
-        // repeat this
-        // [A, B, C, D, E, 55430] = END
-        //
-
-
         int[] periodCount = new int[tablePeriod.length];
-        LightPA.Builder[] currentStep = new LightPA.Builder[tablePeriod.length];
+        LightPA.Builder[] currentPA = new LightPA.Builder[tablePeriod.length];
         List<LightPA> mainReferenceMPA = Collections.emptyList();
-
         while (iteration <= longestPeriod) {
 
             state.tryBreak(currentID);
@@ -97,7 +63,7 @@ public class LightMPATable extends MPATable {
                 LightPA mainReferencePA = mainReferenceMPA.get(level);
                 int skip = mainReferencePA.skip();
 
-                for (int i = 0; i < currentStep.length; i++) {
+                for (int i = 0; i < currentPA.length; i++) {
                     if(i <= level){
                         pa.add(mainReferenceMPA.get(i));
                         int count = skip;
@@ -107,11 +73,11 @@ public class LightMPATable extends MPATable {
 
                         periodCount[i] = count;
                     } else {
-                        if(currentStep[i] == null) {
+                        if(currentPA[i] == null) {
                             //its count is zero but has no element? -> Artificial PA
-                            currentStep[i] = LightPA.Builder.create(reference, epsilon, dcMax, iteration).merge(mainReferencePA);
+                            currentPA[i] = LightPA.Builder.create(reference, epsilon, dcMax, iteration).merge(mainReferencePA);
                         }else{
-                            currentStep[i].merge(mainReferencePA);
+                            currentPA[i].merge(mainReferencePA);
                         }
                         periodCount[i] += skip;
                     }
@@ -119,18 +85,19 @@ public class LightMPATable extends MPATable {
 
                 iteration += skip;
             }
+            boolean resetLowerLevel = false;
 
             for (int i = tablePeriod.length - 1; i >= 0; i--) {
 
                 if (periodCount[i] == 0 && independent) {
-                    currentStep[i] = LightPA.Builder.create(reference, epsilon, dcMax, iteration);
+                    currentPA[i] = LightPA.Builder.create(reference, epsilon, dcMax, iteration);
                 }
 
-                if (currentStep[i] != null && periodCount[i] + REQUIRED_PERTURBATION < tablePeriod[i]) {
+                if (currentPA[i] != null && periodCount[i] + REQUIRED_PERTURBATION < tablePeriod[i]) {
                     if (i + 1 < tablePeriod.length && periodCount[i] == periodCount[i + 1]) {
-                        currentStep[i] = currentStep[i + 1];
+                        currentPA[i] = currentPA[i + 1];
                     } else {
-                        currentStep[i] = currentStep[i].step();
+                        currentPA[i] = currentPA[i].step();
                     }
                 }
 
@@ -138,34 +105,35 @@ public class LightMPATable extends MPATable {
                 periodCount[i]++;
 
                 if (periodCount[i] == tablePeriod[i]) {
-                    for (int j = i; j >= 0; j--) {
 
-                        //Stop all lower level iteration for efficiency
-                        //because it is too hard to skipping to next part of the periodic point
-                        LightPA.Builder currentLevel = currentStep[j];
 
-                        if (currentLevel != null && periodCount[j] == tablePeriod[j]) {
-                            //If the skip count is lower than its current period,
-                            //it can be replaced to several lower-period RRA.
+                    //Stop all lower level iteration for efficiency
+                    //because it is too hard to skipping to next part of the periodic point
+                    LightPA.Builder currentLevel = currentPA[i];
 
-                            int compTableIndex = iterationToCompTableIndex(currentLevel.start());
-                            safetyMatchTableSize(table, compTableIndex);
+                    if (currentLevel != null && currentLevel.skip() == tablePeriod[i] - REQUIRED_PERTURBATION) {
+                        //If the skip count is lower than its current period,
+                        //it can be replaced to several lower-period RRA.
 
-                            List<LightPA> pa = table.get(compTableIndex);
-                            pa.add(currentLevel.build());
+                        int compTableIndex = iterationToCompTableIndex(currentLevel.start());
+                        safetyMatchTableSize(table, compTableIndex);
 
-                            if (compTableIndex == 0) {
-                                mainReferenceMPA = pa;
-                            }
+                        List<LightPA> pa = table.get(compTableIndex);
+                        pa.add(currentLevel.build());
+
+                        if (compTableIndex == 0) {
+                            mainReferenceMPA = pa;
                         }
-
-                        currentStep[j] = null;
-                        periodCount[j] = 0;
                     }
-                    break;
+
+                    currentPA[i] = null;
+                    resetLowerLevel = true;
+                }
+
+                if(resetLowerLevel){
+                    periodCount[i] = 0;
                 }
             }
-
             iteration++;
 
         }
@@ -188,10 +156,8 @@ public class LightMPATable extends MPATable {
         int longestPeriod = tablePeriod[tablePeriod.length - 1];
         int maxSkip = longestPeriod - iteration;
 
-
         List<LightPA> table = this.table.get(index);
-
-        if (table == null || table.isEmpty()) {
+        if(table == null){
             return null;
         }
 
@@ -211,6 +177,8 @@ public class LightMPATable extends MPATable {
             case HIGHEST -> {
 
                 LightPA r3a = table.getFirst();
+                //This table cannot be empty because the pre-processing is done.
+
                 if (!r3a.isValid(r)) {
                     yield null;
                 }

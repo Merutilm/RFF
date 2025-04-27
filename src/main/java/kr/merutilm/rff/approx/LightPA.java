@@ -40,6 +40,10 @@ public record LightPA(double anr, double ani, double bnr, double bni, int skip, 
             return start;
         }
 
+        public int skip(){
+            return skip;
+        }
+
         public Builder merge(LightPA pa){
             double anrMerge = pa.anr * anr - pa.ani * ani;
             double aniMerge = pa.anr * ani + pa.ani * anr;

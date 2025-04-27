@@ -56,9 +56,12 @@ public abstract class MPATable {
             int start = tool.start();
             int length = tool.range();
             int index = Arrays.binarySearch(tablePeriod, length + 1);
-            //if the reference compressor is same as period
-            if (index >= 0 && !isArtificial[index]) {
-                int tableIndex = iterationToPulledTableIndex(mpaPeriod, start);
+            int tableIndex = iterationToPulledTableIndex(mpaPeriod, start);
+
+            // Check if the reference compressor is same as period.
+            // However, The Computer doesn't know whether the compressor's length came from skipping to the periodic point, or being cut off in the middle.
+            // So, Do check tableIndex too.
+            if (index >= 0 && tableIndex >= 0 && !isArtificial[index]) {
                 int periodElements = tablePeriodElements[index];
                 mpaTools.add(new ArrayCompressionTool(1, tableIndex + 1, tableIndex + periodElements - 1));
             }
@@ -92,7 +95,8 @@ public abstract class MPATable {
         // 29 % 26 = 3, 29/26 = 1.xxx(7*1 elements)
         // 3 % 3 = 0, 3/3 = 1.xxx(1 element)
         // result = -1 (last remainder is not one)
-        // 
+        //
+        //
         // 
 
         if (iteration <= 0) {
@@ -109,8 +113,8 @@ public abstract class MPATable {
             if (remainder < tablePeriod[i]) {
                 continue;
             }
-            if (i < tablePeriod.length - 1 && remainder + tablePeriod[0] > tablePeriod[i + 1]) {
-                return -1;
+            if (i < tablePeriod.length - 1 && remainder + tablePeriod[0] - REQUIRED_PERTURBATION + 1 > tablePeriod[i + 1]) {
+                return -1; //Insufficient length, ("Pulled Table Index" must be skipped for at least "shortest period")
             }
 
 
