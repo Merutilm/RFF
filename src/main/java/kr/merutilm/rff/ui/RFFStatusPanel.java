@@ -21,6 +21,7 @@ final class RFFStatusPanel extends RFFPanel {
     private final MUILabelPanel progress;
     private static final String SPACE = "  ";
     private long t = 0;
+    public static final NumberFormat THOUSAND_FORMATTER = NumberFormat.getNumberInstance(Locale.US);
 
     public RFFStatusPanel() {
         
@@ -56,11 +57,11 @@ final class RFFStatusPanel extends RFFPanel {
     }
 
     public void setPeriodText(int period, int length, int r3aLength) {
-        String tPeriod = NumberFormat.getNumberInstance(Locale.US).format(period);
-        String tLength = NumberFormat.getNumberInstance(Locale.US).format(length);
-        String tR3ALength = NumberFormat.getNumberInstance(Locale.US).format(r3aLength);
+        String tPeriod = THOUSAND_FORMATTER.format(period);
+        String tLength = THOUSAND_FORMATTER.format(length);
+        String tR3ALength = THOUSAND_FORMATTER.format(r3aLength);
         this.period.getNameLabel().setText(SPACE + "Period : " + tPeriod);
-        this.period.setToolTipText(new HTMLStringBuilder().wrap(Tag.BOLD,"Reference Length : ").appendln(tLength).wrap(Tag.BOLD, "R3A Table Length : ").append(tR3ALength).toString());
+        this.period.setToolTipText(new HTMLStringBuilder().wrap(Tag.BOLD,"Reference Length : ").appendln(tLength).wrap(Tag.BOLD, "MPA Table Length : ").append(tR3ALength).toString());
     }
 
     public void initTime() {

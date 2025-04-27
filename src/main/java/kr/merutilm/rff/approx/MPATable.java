@@ -28,13 +28,13 @@ public abstract class MPATable {
         if (longestPeriod < minSkip) {
             this.settings = mpaSettings;
             this.mpaPeriod = null;
-            this.pulledMPACompressor = new ArrayCompressor(Collections.emptyList());
+            this.pulledMPACompressor = ArrayCompressor.EMPTY_COMPRESSOR;
             return;
         }
 
         MPACompressionMethod compressionMethod = mpaSettings.mpaCompressionMethod();
         Period mpaPeriod = MPATable.Period.create(referencePeriod, mpaSettings);
-        ArrayCompressor pulledR3ACompressor = compressionMethod == MPACompressionMethod.STRONGEST ? createPulledR3ACompressor(mpaPeriod, reference.referenceCompressor()) : null;
+        ArrayCompressor pulledR3ACompressor = compressionMethod == MPACompressionMethod.STRONGEST ? createPulledR3ACompressor(mpaPeriod, reference.referenceCompressor()) : ArrayCompressor.EMPTY_COMPRESSOR;
 
         this.settings = mpaSettings;
         this.mpaPeriod = mpaPeriod;

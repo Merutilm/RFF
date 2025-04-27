@@ -1,6 +1,7 @@
 # Project exclude paths
 exe archive
 target
+.vscode
 *.iml
 *.log
 *.jfr

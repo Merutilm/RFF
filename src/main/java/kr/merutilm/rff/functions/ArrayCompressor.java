@@ -1,5 +1,6 @@
 package kr.merutilm.rff.functions;
 
+import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.List;
 
@@ -12,7 +13,12 @@ import java.util.List;
  * <li> 2. pulls the subsequent elements to fill the empty space. <p>
  */
 public class ArrayCompressor {
-    
+
+
+    public static final ArrayCompressor EMPTY_COMPRESSOR = new ArrayCompressor(Collections.emptyList());
+
+
+
     private final List<ArrayCompressionTool> tools;
 
     public ArrayCompressor(List<ArrayCompressionTool> tools){

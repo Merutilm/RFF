@@ -226,11 +226,9 @@ public class GLShaderLoader {
         return textureUnit - GL_TEXTURE0;
     }
 
-    public synchronized void uploadLong(String varName, long value){
+    public synchronized void uploadDouble(String varName, double value){
         int varLocation = getLocation(varName);
-        int high = (int)(value >>> 32);
-        int low = (int)(value & 0xffffffffL);
-        glUniform1iv(varLocation, new int[]{high, low});
+        glUniform1d(varLocation, value);
     }
 
     private int getLocation(String varName){

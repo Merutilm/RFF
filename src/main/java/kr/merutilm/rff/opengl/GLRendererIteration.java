@@ -13,7 +13,7 @@ public class GLRendererIteration extends GLRenderer implements GLIterationTextur
     private ColorSettings colorSettings;
     private int iterWidth;
     private int iterHeight;
-    private long maxIteration;
+    private double maxIteration;
     
     private int paletteTextureID;
     private int paletteWidth;
@@ -91,7 +91,7 @@ public class GLRendererIteration extends GLRenderer implements GLIterationTextur
             shader.uploadTexture2D("iterations", GL_TEXTURE0, previousFBOTextureID);
         }
 
-        shader.uploadLong("maxIteration", maxIteration);
+        shader.uploadDouble("maxIteration", maxIteration);
 
         shader.uploadTexture2D("palette",  GL_TEXTURE1, paletteTextureID, paletteBuffer, paletteWidth, paletteHeight, GLShaderLoader.TextureFormat.FLOAT4);
         shader.uploadInt("paletteWidth", paletteWidth);

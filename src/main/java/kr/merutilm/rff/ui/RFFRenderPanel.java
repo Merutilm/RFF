@@ -426,7 +426,7 @@ final class RFFRenderPanel extends RFFGLPanel {
         int refreshInterval = ActionsExplore.periodPanelRefreshInterval(settings.calculationSettings().logZoom());
         IntConsumer actionPerRefCalcIteration = p -> {
             if (p % refreshInterval == 0) {
-                panel.setProcess("Period " + p);
+                panel.setProcess("Period " + RFFStatusPanel.THOUSAND_FORMATTER.format(p));
             }
         };
         BiConsumer<Integer, Double> actionPerCreatingTableIteration = (p, i) -> {

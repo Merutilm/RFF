@@ -11,8 +11,8 @@ import kr.merutilm.rff.settings.*;
 public final class Presets implements Selectable{
 
 
-    public static final Calculation INIT_CALCULATION = Calculations.STABLE.preset();
-    public static final Location INIT_LOCATION = Locations.BILLION_PERIODS.preset();
+    public static final Calculation INIT_CALCULATION = Calculations.ULTRA_FAST.preset();
+    public static final Location INIT_LOCATION = Locations.DEFAULT.preset();
 
     public static final Render INIT_RENDER = Renders.MEDIUM.preset();
     public static final Shader INIT_SHADER = Shaders.LONG_RAINBOW_FILTERED.preset();

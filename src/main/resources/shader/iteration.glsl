@@ -8,7 +8,7 @@
 uniform ivec2 resolution;
 
 uniform sampler2D iterations;
-uniform int[2] maxIteration;
+uniform double maxIteration;
 
 uniform sampler2D palette;
 uniform int paletteWidth;
@@ -22,20 +22,15 @@ uniform int smoothing;
 out vec4 color;
 
 
-int64_t getMaxIteration(){
-    return (int64_t(maxIteration[0]) << 32) + int64_t(maxIteration[1]);
-}
-
-
 double getIteration(ivec2 coord){
     vec4 iteration = texelFetch(iterations, coord, 0);
     uvec2 it = uvec2(floatBitsToUint(iteration.y), floatBitsToUint(iteration.x));
     return packDouble2x32(it);
 }
 
+vec4 getColor(double iteration){
 
-vec4 getColor(double iteration, int64_t max){
-    if (iteration == 0 || iteration >= max){
+    if (iteration == 0 || iteration >= maxIteration){
         return vec4(0, 0, 0, 1);
     }
     switch (smoothing){
@@ -70,7 +65,6 @@ void main(){
     int y = coord.y;
 
     double iteration = getIteration(coord);
-    int64_t max = getMaxIteration();
 
     if (iteration == 0){
 
@@ -82,9 +76,9 @@ void main(){
                 break;
             }
         }
-        color = getColor(it2, max);
+        color = getColor(it2);
         return;
     }
 
-    color = getColor(iteration, max);
+    color = getColor(iteration);
 }

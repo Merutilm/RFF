@@ -108,6 +108,7 @@ public class LightMPATable extends MPATable {
                         periodCount[i] = count;
                     } else {
                         if(currentStep[i] == null) {
+                            //its count is zero but has no element? -> Artificial PA
                             currentStep[i] = LightPA.Builder.create(reference, epsilon, dcMax, iteration).merge(mainReferencePA);
                         }else{
                             currentStep[i].merge(mainReferencePA);
