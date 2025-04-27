@@ -5,10 +5,10 @@
 #define REVERSED 2
 
 
-uniform ivec2 resolution;
 
 uniform sampler2D iterations;
 uniform double maxIteration;
+uniform float resolutionMultiplier;
 
 uniform sampler2D palette;
 uniform int paletteWidth;
@@ -22,10 +22,36 @@ uniform int smoothing;
 out vec4 color;
 
 
-double getIteration(ivec2 coord){
-    vec4 iteration = texelFetch(iterations, coord, 0);
+double getIteration0(ivec2 iterCoord){
+    vec4 iteration = texelFetch(iterations, iterCoord, 0);
     uvec2 it = uvec2(floatBitsToUint(iteration.y), floatBitsToUint(iteration.x));
-    return packDouble2x32(it);
+    double result = packDouble2x32(it);
+    if(result >= maxIteration){
+        return maxIteration * 2; // smooth mandelbrot plane
+    }
+    return result;
+}
+
+double getIteration(vec2 coord){
+    vec2 iterCoord = coord * resolutionMultiplier;
+    vec2 dec = mod(iterCoord, 1);
+
+    double i1 = getIteration0(ivec2(iterCoord));
+    double i2 = getIteration0(ivec2(iterCoord) + ivec2(1, 0));
+    double i3 = getIteration0(ivec2(iterCoord) + ivec2(0, 1));
+    double i4 = getIteration0(ivec2(iterCoord) + ivec2(1, 1));
+
+    double i5 = i1 - (i1 - i2) * dec.x;
+    double i6 = i3 - (i3 - i4) * dec.x;
+
+    if(i5 == 0){
+        i5 = i6;
+    }
+    if(i6 == 0){
+        i6 = i5;
+    }
+
+    return i5 - (i5 - i6) * dec.y;
 }
 
 vec4 getColor(double iteration){
@@ -59,10 +85,10 @@ vec4 getColor(double iteration){
 
 void main(){
 
-    ivec2 coord = ivec2(gl_FragCoord.xy);
+    vec2 coord = gl_FragCoord.xy;
 
-    int x = coord.x;
-    int y = coord.y;
+    float x = coord.x;
+    float y = coord.y;
 
     double iteration = getIteration(coord);
 
@@ -70,7 +96,7 @@ void main(){
 
         double it2 = 0;
         while (coord.y > 0){
-            coord.y -= 1;
+            coord.y -= 1.0;
             it2 = getIteration(coord);
             if (it2 > 0){
                 break;

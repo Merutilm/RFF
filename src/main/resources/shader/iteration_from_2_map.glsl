@@ -3,6 +3,8 @@
 
 
 uniform ivec2 resolution;
+uniform float resolutionMultiplier;
+uniform double maxIteration;
 
 uniform sampler2D normalAndZoomed;
 uniform float defaultZoomIncrement;
@@ -18,17 +20,23 @@ vec2 toFloatIteration(double iteration){
 }
 
 double getIterationNormal(ivec2 coord){
-    vec4 iteration = texelFetch(normalAndZoomed, coord, 0);
+    vec4 iteration = texelFetch(normalAndZoomed, ivec2(coord * resolutionMultiplier), 0);
     uvec2 ith = uvec2(floatBitsToUint(iteration.y), floatBitsToUint(iteration.x));
-    double normal = packDouble2x32(ith);
-    return normal;
+    double result = packDouble2x32(ith);
+    if(result >= maxIteration){
+        return maxIteration * 2; // smooth mandelbrot plane
+    }
+    return result;
 }
 
 double getIterationZoomed(ivec2 coord){
-    vec4 iteration = texelFetch(normalAndZoomed, coord, 0);
+    vec4 iteration = texelFetch(normalAndZoomed, ivec2(coord * resolutionMultiplier), 0);
     uvec2 ith = uvec2(floatBitsToUint(iteration.w), floatBitsToUint(iteration.z));
-    double zoomed = packDouble2x32(ith);
-    return zoomed;
+    double result = packDouble2x32(ith);
+    if(result >= maxIteration){
+        return maxIteration * 2; // smooth mandelbrot plane
+    }
+    return result;
 }
 
 void main(){

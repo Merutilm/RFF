@@ -4,4 +4,6 @@ public interface GLIterationTextureRenderer {
 
     void setIterationTextureID(int iterationTextureID);
 
+    void setResolutionMultiplier(float resolutionMultiplier);
+
 }

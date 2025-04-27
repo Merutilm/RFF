@@ -8,6 +8,7 @@ public class GLRendererStripe extends GLRenderer implements GLIterationTextureRe
 
 
     private int iterationTextureID;
+    private float resolutionMultiplier;
     private StripeSettings stripeSettings;
     private float time;
 
@@ -18,6 +19,11 @@ public class GLRendererStripe extends GLRenderer implements GLIterationTextureRe
     @Override
     public void setIterationTextureID(int iterationTextureID) {
         this.iterationTextureID = iterationTextureID;
+    }
+
+    @Override
+    public void setResolutionMultiplier(float resolutionMultiplier) {
+        this.resolutionMultiplier = resolutionMultiplier;
     }
 
     public void setStripeSettings(StripeSettings stripeSettings) {
@@ -34,6 +40,7 @@ public class GLRendererStripe extends GLRenderer implements GLIterationTextureRe
 
         shader.uploadTexture2D("inputTex", GL_TEXTURE0, previousFBOTextureID);
         shader.uploadTexture2D("iterations", GL_TEXTURE1, iterationTextureID);
+        shader.uploadFloat("resolutionMultiplier", resolutionMultiplier);
 
         shader.uploadBool("use", stripeSettings.use());
         shader.uploadFloat("firstInterval", (float) stripeSettings.firstInterval());

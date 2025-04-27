@@ -8,6 +8,7 @@ import static org.lwjgl.opengl.GL13.GL_TEXTURE1;
 public class GLRendererSlope extends GLRenderer implements GLIterationTextureRenderer{
 
     private int iterationTextureID;
+    private float resolutionMultiplier;
     private SlopeSettings slopeSettings;
 
     public GLRendererSlope(){
@@ -19,6 +20,11 @@ public class GLRendererSlope extends GLRenderer implements GLIterationTextureRen
         this.iterationTextureID = iterationTextureID;
     }
 
+    @Override
+    public void setResolutionMultiplier(float resolutionMultiplier) {
+        this.resolutionMultiplier = resolutionMultiplier;
+    }
+
     public void setSlopeSettings(SlopeSettings slopeSettings) {
         this.slopeSettings = slopeSettings;
     }
@@ -27,6 +33,7 @@ public class GLRendererSlope extends GLRenderer implements GLIterationTextureRen
     protected void update() {
         shader.uploadTexture2D("inputTex", GL_TEXTURE0, previousFBOTextureID);
         shader.uploadTexture2D("iterations", GL_TEXTURE1, iterationTextureID);
+        shader.uploadFloat("resolutionMultiplier", resolutionMultiplier);
         shader.uploadFloat("depth", (float) slopeSettings.depth());
         shader.uploadFloat("reflectionRatio", (float) slopeSettings.reflectionRatio());
         shader.uploadFloat("opacity", (float) slopeSettings.opacity());

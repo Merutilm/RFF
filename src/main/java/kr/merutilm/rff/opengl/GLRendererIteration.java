@@ -14,7 +14,7 @@ public class GLRendererIteration extends GLRenderer implements GLIterationTextur
     private int iterWidth;
     private int iterHeight;
     private double maxIteration;
-    
+
     private int paletteTextureID;
     private int paletteWidth;
     private int paletteHeight;
@@ -71,6 +71,10 @@ public class GLRendererIteration extends GLRenderer implements GLIterationTextur
         return iterationTextureID;
     }
 
+    @Override
+    public float getResolutionMultiplier() {
+        return (float) iterWidth / w;
+    }
 
     @Override
     protected void update() {
@@ -87,8 +91,10 @@ public class GLRendererIteration extends GLRenderer implements GLIterationTextur
             }
             iterationBuffer.flip();
             shader.uploadTexture2D("iterations", GL_TEXTURE0, iterationTextureID, iterationBuffer, iterWidth, iterHeight, GLShaderLoader.TextureFormat.FLOAT2);
+            shader.uploadFloat("resolutionMultiplier", getResolutionMultiplier());
         }else{
             shader.uploadTexture2D("iterations", GL_TEXTURE0, previousFBOTextureID);
+            shader.uploadFloat("resolutionMultiplier", 1);
         }
 
         shader.uploadDouble("maxIteration", maxIteration);

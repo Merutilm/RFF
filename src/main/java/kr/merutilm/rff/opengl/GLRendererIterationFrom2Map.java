@@ -11,6 +11,7 @@ public class GLRendererIterationFrom2Map extends GLRenderer implements GLIterati
 
     private int iterWidth;
     private int iterHeight;
+    private double maxIteration;
     private DataSettings dataSettings;
     private float currentFrame;
     private int iterationTextureID;
@@ -26,6 +27,7 @@ public class GLRendererIterationFrom2Map extends GLRenderer implements GLIterati
         this.iterationTextureID = shader.recreateTexture2D(iterationTextureID, iterWidth, iterHeight, GLShaderLoader.TextureFormat.FLOAT4, false);
         this.iterWidth = iterWidth;
         this.iterHeight = iterHeight;
+        this.maxIteration = maxIteration;
     }
 
     public void setCurrentFrame(float currentFrame) {
@@ -37,6 +39,11 @@ public class GLRendererIterationFrom2Map extends GLRenderer implements GLIterati
         return shader.getFboTextureID();
     }
 
+    @Override
+    public float getResolutionMultiplier() {
+        return (float) iterWidth / w;
+    }
+
     public void setDataSettings(DataSettings dataSettings) {
         this.dataSettings = dataSettings;
     }
@@ -46,6 +53,8 @@ public class GLRendererIterationFrom2Map extends GLRenderer implements GLIterati
 
         iterationBuffer.flip();
         shader.upload2i("resolution", w, h);
+        shader.uploadDouble("maxIteration", maxIteration);
+        shader.uploadFloat("resolutionMultiplier", getResolutionMultiplier());
         shader.uploadTexture2D("normalAndZoomed", GL_TEXTURE0, iterationTextureID, iterationBuffer, iterWidth, iterHeight, GLShaderLoader.TextureFormat.FLOAT4);
         shader.uploadFloat("defaultZoomIncrement", (float) dataSettings.defaultZoomIncrement());
         shader.uploadFloat("currentFrame", currentFrame);

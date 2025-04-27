@@ -26,15 +26,18 @@ public class GLMultiPassRenderer {
 
     public void update(){
         int iterationTextureID = 0;
+        float resolutionMultiplier = 1;
 
         for (int i = 0; i < renderers.size(); i++) {
             GLRenderer renderer = renderers.get(i);
 
             if(renderer instanceof GLIterationTextureProvider p && iterationTextureID == 0){
                 iterationTextureID = p.getIterationTextureID();
+                resolutionMultiplier = p.getResolutionMultiplier();
             }
             if(renderer instanceof GLIterationTextureRenderer r){
                 r.setIterationTextureID(iterationTextureID);
+                r.setResolutionMultiplier(resolutionMultiplier);
             }
             if(renderer instanceof GLTimeRenderer t){
                 t.setTime(time);
