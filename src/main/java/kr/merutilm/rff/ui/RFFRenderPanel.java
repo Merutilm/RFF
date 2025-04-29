@@ -31,7 +31,7 @@ import java.util.*;
 import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
-import java.util.function.IntConsumer;
+import java.util.function.LongConsumer;
 
 import static org.lwjgl.opengl.GL.createCapabilities;
 import static org.lwjgl.opengl.GL11.*;
@@ -52,7 +52,7 @@ final class RFFRenderPanel extends RFFGLPanel {
 
     private static final int FPS = 30;
 
-    private transient Perturbator currentPerturbator;
+    private transient MandelbrotPerturbator currentPerturbator;
 
     private volatile boolean recomputeRequested = false;
     private volatile boolean resizeRequested = false;
@@ -64,7 +64,7 @@ final class RFFRenderPanel extends RFFGLPanel {
     private volatile boolean isRendering = false;
     private volatile boolean isImageCreating = false;
 
-    private int period = 1;
+    private long period = 1;
 
 
     public RFFRenderPanel(RFF master) {
@@ -426,12 +426,12 @@ final class RFFRenderPanel extends RFFGLPanel {
         DoubleExponent dcMax = DoubleExponentMath.hypot(offset[0], offset[1]);
 
         int refreshInterval = ActionsExplore.periodPanelRefreshInterval(settings.calculationSettings().logZoom());
-        IntConsumer actionPerRefCalcIteration = p -> {
+        LongConsumer actionPerRefCalcIteration = p -> {
             if (p % refreshInterval == 0) {
                 panel.setProcess("Period " + RFFStatusPanel.THOUSAND_FORMATTER.format(p));
             }
         };
-        BiConsumer<Integer, Double> actionPerCreatingTableIteration = (p, i) -> {
+        BiConsumer<Long, Double> actionPerCreatingTableIteration = (p, i) -> {
             if (p % refreshInterval == 0) {
                 panel.setProcess("Creating Table... " + TextFormatter.processText(i));
             }
@@ -441,12 +441,12 @@ final class RFFRenderPanel extends RFFGLPanel {
         state.tryBreak(currentID);
 
         switch (calc.reuseReference()) {
-            case CURRENT_REFERENCE -> {
+            case CURRENT_REFERENCE ->
                 currentPerturbator = currentPerturbator.reuse(state, currentID, calc, currentPerturbator.getDcMaxByDoubleExponent(), precision);
-            }
+
             case CENTERED_REFERENCE -> {
-                int period = currentPerturbator.getReference().longestPeriod();
-                MandelbrotLocator center = MandelbrotLocator.locateMinibrot(state, currentID, (MandelbrotPerturbator) currentPerturbator,
+                long period = currentPerturbator.getReference().longestPeriod();
+                MandelbrotLocator center = MandelbrotLocator.locateMinibrot(state, currentID, currentPerturbator,
                         ActionsExplore.getActionWhileFindingMinibrotCenter(panel, logZoom, period),
                         ActionsExplore.getActionWhileCreatingTable(panel, logZoom),
                         ActionsExplore.getActionWhileFindingMinibrotZoom(panel)
@@ -479,7 +479,7 @@ final class RFFRenderPanel extends RFFGLPanel {
         int length = currentPerturbator.getReference().length();
         currentMap = new RFFMap(calc.logZoom(), period, calc.maxIteration(), iterations);
 
-        panel.setPeriodText(period, length - 1, currentPerturbator.getReference().longestPeriod());
+        panel.setPeriodText(period, length - 1, currentPerturbator.getMPATable().length());
         panel.setProcess("Preparing...");
 
         state.tryBreak(currentID);

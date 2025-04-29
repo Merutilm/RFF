@@ -82,7 +82,7 @@ enum ActionsExplore implements ItemActions {
             render.getState().createThread(id -> {
                 try{
                     
-                    int period = render.getCurrentPerturbator().getReference().longestPeriod();
+                    long period = render.getCurrentPerturbator().getReference().longestPeriod();
                     MandelbrotLocator locator = MandelbrotLocator.locateMinibrot(render.getState(),
                                     id, (MandelbrotPerturbator) render.getCurrentPerturbator(),
                             getActionWhileFindingMinibrotCenter(panel, logZoom, period),
@@ -143,7 +143,7 @@ enum ActionsExplore implements ItemActions {
         SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Cannot find center. Zoom in a little and try again.", "Error", JOptionPane.ERROR_MESSAGE));
     }
 
-    public static BiConsumer<Integer, Double> getActionWhileCreatingTable(RFFStatusPanel panel, double logZoom){
+    public static BiConsumer<Long, Double> getActionWhileCreatingTable(RFFStatusPanel panel, double logZoom){
         int interval = periodPanelRefreshInterval(logZoom);
         return (p, i) -> {
 
@@ -154,7 +154,7 @@ enum ActionsExplore implements ItemActions {
         };
     }
 
-    public static BiConsumer<Integer, Integer> getActionWhileFindingMinibrotCenter(RFFStatusPanel panel, double logZoom, int period){
+    public static BiConsumer<Long, Integer> getActionWhileFindingMinibrotCenter(RFFStatusPanel panel, double logZoom, long period){
         int interval = periodPanelRefreshInterval(logZoom);
         return (p, i) -> {
                             

@@ -17,20 +17,20 @@ public class LightMPATable extends MPATable {
 
     private final List<List<LightPA>> table;
 
-    public LightMPATable(ParallelRenderState state, int currentID, LightMandelbrotReference reference, MPASettings MPASettings, double dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
+    public LightMPATable(ParallelRenderState state, int currentID, LightMandelbrotReference reference, MPASettings MPASettings, double dcMax, BiConsumer<Long, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
         super(reference, MPASettings);
         this.table = createTable(state, currentID, reference, dcMax, actionPerCreatingTableIteration);
     }
 
-    private List<List<LightPA>> createTable(ParallelRenderState state, int currentID, LightMandelbrotReference reference, double dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
+    private List<List<LightPA>> createTable(ParallelRenderState state, int currentID, LightMandelbrotReference reference, double dcMax, BiConsumer<Long, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
 
         if (mpaPeriod == null) {
             return Collections.emptyList();
         }
 
-        int[] tablePeriod = mpaPeriod.tablePeriod();
-        int longestPeriod = tablePeriod[tablePeriod.length - 1];
-        int[] tableElements = mpaPeriod.tableElements();
+        long[] tablePeriod = mpaPeriod.tablePeriod();
+        long longestPeriod = tablePeriod[tablePeriod.length - 1];
+        long[] tableElements = mpaPeriod.tableElements();
 
         if (longestPeriod < settings.minSkipReference()) {
             return Collections.emptyList();
@@ -38,16 +38,16 @@ public class LightMPATable extends MPATable {
 
         List<List<LightPA>> table = new ArrayList<>();
         double epsilon = Math.pow(10, settings.epsilonPower());
-        int iteration = 1;
+        long iteration = 1;
 
-        int[] periodCount = new int[tablePeriod.length];
+        long[] periodCount = new long[tablePeriod.length];
         LightPA.Builder[] currentPA = new LightPA.Builder[tablePeriod.length];
         List<LightPA> mainReferenceMPA = Collections.emptyList();
         while (iteration <= longestPeriod) {
 
             state.tryBreak(currentID);
             actionPerCreatingTableIteration.accept(iteration, (double) iteration / longestPeriod);
-            int pulledTableIndex = iterationToPulledTableIndex(mpaPeriod, iteration);
+            long pulledTableIndex = iterationToPulledTableIndex(mpaPeriod, iteration);
             boolean independent = pulledMPACompressor.isIndependent(pulledTableIndex);
             int containedIndex = pulledMPACompressor.containedIndex(pulledTableIndex + 1);
             ArrayCompressionTool containedTool = containedIndex == -1 ? null : pulledMPACompressor.tools().get(containedIndex);
@@ -61,12 +61,12 @@ public class LightMPATable extends MPATable {
 
                 List<LightPA> pa = table.get(compTableIndex);
                 LightPA mainReferencePA = mainReferenceMPA.get(level);
-                int skip = mainReferencePA.skip();
+                long skip = mainReferencePA.skip();
 
                 for (int i = 0; i < currentPA.length; i++) {
                     if(i <= level){
                         pa.add(mainReferenceMPA.get(i));
-                        int count = skip;
+                        long count = skip;
                         for (int j = level - 1; j >= i; j--) {
                             count %= tablePeriod[j];
                         }
@@ -141,19 +141,19 @@ public class LightMPATable extends MPATable {
     }
 
 
-    public LightPA lookup(int iteration, double dzr, double dzi) {
+    public LightPA lookup(long refIteration, double dzr, double dzi) {
 
-        if (iteration == 0 || mpaPeriod == null) {
+        if (refIteration == 0 || mpaPeriod == null) {
             return null;
         }
-        int index = iterationToCompTableIndex(iteration);
+        int index = iterationToCompTableIndex(refIteration);
 
         if (index == -1 || index >= table.size()) {
             return null;
         }
-        int[] tablePeriod = mpaPeriod.tablePeriod();
-        int longestPeriod = tablePeriod[tablePeriod.length - 1];
-        int maxSkip = longestPeriod - iteration;
+        long[] tablePeriod = mpaPeriod.tablePeriod();
+        long longestPeriod = tablePeriod[tablePeriod.length - 1];
+        long maxSkip = longestPeriod - refIteration;
 
         List<LightPA> table = this.table.get(index);
         if(table == null){

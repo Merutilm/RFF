@@ -18,22 +18,22 @@ public class DeepMPATable extends MPATable {
 
     private final List<List<DeepPA>> table;
 
-    public DeepMPATable(ParallelRenderState state, int currentID, DeepMandelbrotReference reference, MPASettings MPASettings, DoubleExponent dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
+    public DeepMPATable(ParallelRenderState state, int currentID, DeepMandelbrotReference reference, MPASettings MPASettings, DoubleExponent dcMax, BiConsumer<Long, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
         super(reference, MPASettings);
         this.table = createTable(state, currentID, reference, dcMax, actionPerCreatingTableIteration);
     }
 
-    private List<List<DeepPA>> createTable(ParallelRenderState state, int currentID, DeepMandelbrotReference reference, DoubleExponent dcMax, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
+    private List<List<DeepPA>> createTable(ParallelRenderState state, int currentID, DeepMandelbrotReference reference, DoubleExponent dcMax, BiConsumer<Long, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException {
 
         if (mpaPeriod == null) {
             return Collections.emptyList();
         }
 
-        int[] tablePeriod = mpaPeriod.tablePeriod();
-        int longestPeriod = tablePeriod[tablePeriod.length - 1];
-        int[] tableElements = mpaPeriod.tableElements();
+        long[] tablePeriod = mpaPeriod.tablePeriod();
+        long longestPeriod = tablePeriod[tablePeriod.length - 1];
+        long[] tableElements = mpaPeriod.tableElements();
 
-        int[] periodCount = new int[tablePeriod.length];
+        long[] periodCount = new long[tablePeriod.length];
 
         if (longestPeriod < settings.minSkipReference()) {
             return Collections.emptyList();
@@ -41,7 +41,7 @@ public class DeepMPATable extends MPATable {
 
         List<List<DeepPA>> table = new ArrayList<>();
         double epsilon = Math.pow(10, settings.epsilonPower());
-        int iteration = 1;
+        long iteration = 1;
 
         DeepPA.Builder[] currentPA = new DeepPA.Builder[tablePeriod.length];
         List<DeepPA> mainReferenceMPA = Collections.emptyList();
@@ -52,7 +52,7 @@ public class DeepMPATable extends MPATable {
 
             state.tryBreak(currentID);
             actionPerCreatingTableIteration.accept(iteration, (double) iteration / longestPeriod);
-            int pulledTableIndex = iterationToPulledTableIndex(mpaPeriod, iteration);
+            long pulledTableIndex = iterationToPulledTableIndex(mpaPeriod, iteration);
             boolean independent = pulledMPACompressor.isIndependent(pulledTableIndex);
             int containedIndex = pulledMPACompressor.containedIndex(pulledTableIndex + 1);
             ArrayCompressionTool containedTool = containedIndex == -1 ? null : pulledMPACompressor.tools().get(containedIndex);
@@ -66,12 +66,12 @@ public class DeepMPATable extends MPATable {
 
                 List<DeepPA> pa = table.get(compTableIndex);
                 DeepPA mainReferencePA = mainReferenceMPA.get(level);
-                int skip = mainReferencePA.skip();
+                long skip = mainReferencePA.skip();
 
                 for (int i = 0; i < currentPA.length; i++) {
                     if (i <= level) {
                         pa.add(mainReferenceMPA.get(i));
-                        int count = skip;
+                        long count = skip;
                         for (int j = level - 1; j >= i; j--) {
                             count %= tablePeriod[j];
                         }
@@ -139,20 +139,20 @@ public class DeepMPATable extends MPATable {
     }
 
 
-    public DeepPA lookup(int iteration, DoubleExponent dzr, DoubleExponent dzi) {
+    public DeepPA lookup(long refIteration, DoubleExponent dzr, DoubleExponent dzi) {
 
-        if (iteration == 0 || mpaPeriod == null) {
+        if (refIteration == 0 || mpaPeriod == null) {
             return null;
         }
 
-        int index = iterationToCompTableIndex(iteration);
+        int index = iterationToCompTableIndex(refIteration);
 
         if (index == -1 || index >= table.size()) {
             return null;
         }
-        int[] tablePeriod = mpaPeriod.tablePeriod();
-        int longestPeriod = tablePeriod[tablePeriod.length - 1];
-        int maxSkip = longestPeriod - iteration;
+        long[] tablePeriod = mpaPeriod.tablePeriod();
+        long longestPeriod = tablePeriod[tablePeriod.length - 1];
+        long maxSkip = longestPeriod - refIteration;
 
         List<DeepPA> table = this.table.get(index);
         if(table == null){

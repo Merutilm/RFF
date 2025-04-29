@@ -56,10 +56,10 @@ final class RFFStatusPanel extends RFFPanel {
         zoom.getNameLabel().setText(SPACE + "Zoom : " + text);
     }
 
-    public void setPeriodText(int period, int length, int r3aLength) {
+    public void setPeriodText(long period, int length, int mpaLength) {
         String tPeriod = THOUSAND_FORMATTER.format(period);
         String tLength = THOUSAND_FORMATTER.format(length);
-        String tR3ALength = THOUSAND_FORMATTER.format(r3aLength);
+        String tR3ALength = THOUSAND_FORMATTER.format(mpaLength);
         this.period.getNameLabel().setText(SPACE + "Period : " + tPeriod);
         this.period.setToolTipText(new HTMLStringBuilder().wrap(Tag.BOLD,"Reference Length : ").appendln(tLength).wrap(Tag.BOLD, "MPA Table Length : ").append(tR3ALength).toString());
     }

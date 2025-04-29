@@ -4,22 +4,22 @@ import kr.merutilm.rff.formula.DeepMandelbrotReference;
 import kr.merutilm.rff.struct.DoubleExponent;
 import kr.merutilm.rff.util.DoubleExponentMath;
 
-public record DeepPA(DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr, DoubleExponent bni, int skip,
+public record DeepPA(DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr, DoubleExponent bni, long skip,
                      DoubleExponent radius) implements PA {
     public static final class Builder implements PABuilder<DeepPA> {
         private DoubleExponent anr;
         private DoubleExponent ani;
         private DoubleExponent bnr;
         private DoubleExponent bni;
-        private int skip;
+        private long skip;
         private DoubleExponent radius;
 
-        private final int start;
+        private final long start;
         private final DeepMandelbrotReference reference;
         private final double epsilon;
         private final DoubleExponent dcMax;
 
-        private Builder(DeepMandelbrotReference reference, double epsilon, DoubleExponent dcMax, DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr, DoubleExponent bni, int start, int skip, DoubleExponent radius) {
+        private Builder(DeepMandelbrotReference reference, double epsilon, DoubleExponent dcMax, DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr, DoubleExponent bni, long start, long skip, DoubleExponent radius) {
             this.anr = anr;
             this.ani = ani;
             this.bnr = bnr;
@@ -33,17 +33,17 @@ public record DeepPA(DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr,
             this.dcMax = dcMax;
         }
 
-        public static Builder create(DeepMandelbrotReference reference, double epsilon, DoubleExponent dcMax, int start) {
+        public static Builder create(DeepMandelbrotReference reference, double epsilon, DoubleExponent dcMax, long start) {
             return new Builder(reference, epsilon, dcMax, DoubleExponent.ONE, DoubleExponent.ZERO, DoubleExponent.ZERO, DoubleExponent.ZERO, start, 0, DoubleExponent.POSITIVE_INFINITY);
         }
 
         @Override
-        public int start() {
+        public long start() {
             return start;
         }
 
         @Override
-        public int skip() {
+        public long skip() {
             return skip;
         }
 
@@ -66,7 +66,7 @@ public record DeepPA(DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr,
         @Override
         public Builder step() {
 
-            int iter = start + skip++;
+            long iter = start + skip++;
             int index = reference.referenceCompressor().compress(iter);
             DoubleExponent z2r = reference.refReal()[index].doubled();
             DoubleExponent z2i = reference.refImag()[index].doubled();

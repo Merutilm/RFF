@@ -49,6 +49,7 @@ abstract class RFFGLPanel extends AWTGLCanvas {
     }
 
 
+
     public abstract void applyCurrentMap();
 
     public abstract void applyColor(Settings settings);

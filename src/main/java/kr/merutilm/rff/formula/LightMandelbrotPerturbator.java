@@ -2,7 +2,7 @@ package kr.merutilm.rff.formula;
 
 // import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
-import java.util.function.IntConsumer;
+import java.util.function.LongConsumer;
 
 import kr.merutilm.rff.approx.LightPA;
 import kr.merutilm.rff.approx.LightMPATable;
@@ -19,14 +19,14 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
     private final double offR;
     private final double offI;
 
-    public LightMandelbrotPerturbator(ParallelRenderState state, int currentID, CalculationSettings calc, double dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, BiConsumer<Integer, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException{
+    public LightMandelbrotPerturbator(ParallelRenderState state, int currentID, CalculationSettings calc, double dcMax, int precision, long period, LongConsumer actionPerRefCalcIteration, BiConsumer<Long, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException{
         this(state, currentID, calc, dcMax, precision, period, actionPerRefCalcIteration, actionPerCreatingTableIteration,false);
     }
-    public LightMandelbrotPerturbator(ParallelRenderState state, int currentID, CalculationSettings calc, double dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, BiConsumer<Integer, Double> actionPerCreatingTableIteration, boolean arbitraryPrecisionFPGBn) throws IllegalParallelRenderStateException{
+    public LightMandelbrotPerturbator(ParallelRenderState state, int currentID, CalculationSettings calc, double dcMax, int precision, long period, LongConsumer actionPerRefCalcIteration, BiConsumer<Long, Double> actionPerCreatingTableIteration, boolean arbitraryPrecisionFPGBn) throws IllegalParallelRenderStateException{
         this(state, currentID, calc, dcMax, precision, period, actionPerRefCalcIteration, actionPerCreatingTableIteration, arbitraryPrecisionFPGBn, null, null, 0, 0);
     }
 
-    public LightMandelbrotPerturbator(ParallelRenderState state, int currentID, CalculationSettings calc, double dcMax, int precision, int period, IntConsumer actionPerRefCalcIteration, BiConsumer<Integer, Double> actionPerCreatingTableIteration, boolean arbitraryPrecisionFPGBn,
+    public LightMandelbrotPerturbator(ParallelRenderState state, int currentID, CalculationSettings calc, double dcMax, int precision, long period, LongConsumer actionPerRefCalcIteration, BiConsumer<Long, Double> actionPerCreatingTableIteration, boolean arbitraryPrecisionFPGBn,
                                       LightMandelbrotReference reusedReference, LightMPATable reusedTable, double offR, double offI) throws IllegalParallelRenderStateException{
         super(state, currentID, calc, arbitraryPrecisionFPGBn);
         this.dcMax = dcMax;
@@ -46,9 +46,9 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
         // int i = a.incrementAndGet();
 
         long iteration = 0;
-        int refIteration = 0;
+        long refIteration = 0;
         int absIteration = 0;
-        int maxRefIteration = reference.longestPeriod();
+        long maxRefIteration = reference.longestPeriod();
 
 //        double minRad = Double.MAX_VALUE;
         double dzr = 0; // delta z

@@ -10,7 +10,7 @@ import kr.merutilm.rff.struct.DoubleMatrix;
 import kr.merutilm.rff.util.IOUtilities;
 import kr.merutilm.rff.settings.Settings;
 
-public record RFFMap(double zoom, int period, long maxIteration, DoubleMatrix iterations) {
+public record RFFMap(double zoom, long period, long maxIteration, DoubleMatrix iterations) {
 
     public static RFFMap read(File file){
         if(file == null || !file.exists()){
@@ -30,7 +30,7 @@ public record RFFMap(double zoom, int period, long maxIteration, DoubleMatrix it
             double zoom = IOBinaryParser.byteArrayToDouble(data);
             
             data = stream.readNBytes(Integer.BYTES);
-            int period = IOBinaryParser.byteArrayToInt(data);
+            long period = IOBinaryParser.byteArrayToLong(data);
 
             data = stream.readNBytes(Long.BYTES);
             long maxIteration = IOBinaryParser.byteArrayToLong(data);
@@ -74,7 +74,7 @@ public record RFFMap(double zoom, int period, long maxIteration, DoubleMatrix it
             
             stream.write(IOBinaryParser.intToByteArray(width));
             stream.write(IOBinaryParser.doubleToByteArray(zoom));
-            stream.write(IOBinaryParser.intToByteArray(period));
+            stream.write(IOBinaryParser.longToByteArray(period));
             stream.write(IOBinaryParser.longToByteArray(maxIteration));
             byte[] arr = new byte[canvas.length * 8];
             for (int i = 0; i < canvas.length; i++) {
@@ -86,12 +86,6 @@ public record RFFMap(double zoom, int period, long maxIteration, DoubleMatrix it
         } catch (IOException e) {
             throw new IllegalStateException();
         }
-    }
-    public Settings modifyToMapSettings(Settings target){
-        return target.edit().setCalculationSettings(e -> 
-            e.setMaxIteration(maxIteration)
-            .setLogZoom(zoom)
-        ).build();
     }
     
 }

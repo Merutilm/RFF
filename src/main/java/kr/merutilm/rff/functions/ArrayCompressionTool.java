@@ -14,7 +14,7 @@ package kr.merutilm.rff.functions;
  * @param end the end index of uncompressed array
  */
 
-public record ArrayCompressionTool(int rebase, int start, int end) {
+public record ArrayCompressionTool(long rebase, long start, long end) {
 
 
 
@@ -28,7 +28,7 @@ public record ArrayCompressionTool(int rebase, int start, int end) {
      * Gets the range of current tool : {@code end - start + 1}
      * @return The range of current tool.
      */
-    public int range(){
+    public long range(){
         return end - start + 1;
     }
     

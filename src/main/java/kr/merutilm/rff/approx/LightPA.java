@@ -3,22 +3,22 @@ package kr.merutilm.rff.approx;
 import kr.merutilm.rff.formula.LightMandelbrotReference;
 import kr.merutilm.rff.util.AdvancedMath;
 
-public record LightPA(double anr, double ani, double bnr, double bni, int skip, double radius) implements PA {
+public record LightPA(double anr, double ani, double bnr, double bni, long skip, double radius) implements PA {
 
     public static final class Builder implements PABuilder<LightPA>{
         private double anr; 
         private double ani; 
         private double bnr;
         private double bni;
-        private int skip; 
+        private long skip;
         private double radius;
 
-        private final int start;
+        private final long start;
         private final LightMandelbrotReference reference;
         private final double epsilon;
         private final double dcMax;
 
-        private Builder(LightMandelbrotReference reference, double epsilon, double dcMax, double anr, double ani, double bnr, double bni, int start, int skip, double radius){
+        private Builder(LightMandelbrotReference reference, double epsilon, double dcMax, double anr, double ani, double bnr, double bni, long start, long skip, double radius){
             this.anr = anr;
             this.ani = ani;
             this.bnr = bnr;
@@ -32,17 +32,17 @@ public record LightPA(double anr, double ani, double bnr, double bni, int skip, 
             this.dcMax = dcMax;
         }
 
-        public static Builder create(LightMandelbrotReference reference, double epsilon, double dcMax, int start) {
+        public static Builder create(LightMandelbrotReference reference, double epsilon, double dcMax, long start) {
             return new Builder(reference, epsilon, dcMax, 1, 0, 0, 0, start, 0, Double.MAX_VALUE);
         }
 
         @Override
-        public int start(){
+        public long start(){
             return start;
         }
 
         @Override
-        public int skip(){
+        public long skip(){
             return skip;
         }
 
@@ -65,7 +65,7 @@ public record LightPA(double anr, double ani, double bnr, double bni, int skip, 
         @Override
         public Builder step() {
 
-            int iter = start + skip++; //n+k
+            long iter = start + skip++; //n+k
             int index = reference.referenceCompressor().compress(iter);
 
             double z2r = 2 * reference.refReal()[index];

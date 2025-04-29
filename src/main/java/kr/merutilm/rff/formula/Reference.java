@@ -20,14 +20,14 @@ public interface Reference {
     /**
      * The Period of reference orbit.
      */
-    int[] period();
+    long[] period();
 
     /**
      * The Length of reference orbit.
      */
     int length();
 
-    default int longestPeriod(){
+    default long longestPeriod(){
         return period()[period().length - 1];
     }
 

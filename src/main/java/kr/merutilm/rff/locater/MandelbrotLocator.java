@@ -38,12 +38,12 @@ public record MandelbrotLocator(LWBigComplex center, DoubleExponent dcMax, doubl
     }
     
 
-    private static MandelbrotPerturbator findAccurateCenterPerturbator(ParallelRenderState state, int currentID, MandelbrotPerturbator scene, BiConsumer<Integer, Integer> actionWhileFindingMinibrotCenter, BiConsumer<Integer, Double> actionWhileCreatingTable) throws IllegalParallelRenderStateException{
+    private static MandelbrotPerturbator findAccurateCenterPerturbator(ParallelRenderState state, int currentID, MandelbrotPerturbator scene, BiConsumer<Long, Integer> actionWhileFindingMinibrotCenter, BiConsumer<Long, Double> actionWhileCreatingTable) throws IllegalParallelRenderStateException{
         
         // multiply zoom by 2 and find center offset.
         // set the center to center + centerOffset.
         
-        int period = scene.getReference().period()[scene.getReference().period().length - 1];
+        long longestPeriod = scene.getReference().longestPeriod();
         double zoom = scene.getLogZoom();
         CalculationSettings calc = scene.getCalc();
         long maxIteration = calc.maxIteration();
@@ -65,9 +65,9 @@ public record MandelbrotLocator(LWBigComplex center, DoubleExponent dcMax, doubl
             }
             centerFixCount.getAndIncrement();
             if(scene.getLogZoom() < DoubleExponent.EXP_DEADLINE / 2){
-                doubledZoomScene = new LightMandelbrotPerturbator(state, currentID, doubledZoomCalc, doubledZoomDcMax.doubleValue(), doubledZoomPrecision, period, p -> actionWhileFindingMinibrotCenter.accept(p, centerFixCount.get()), actionWhileCreatingTable, true);
+                doubledZoomScene = new LightMandelbrotPerturbator(state, currentID, doubledZoomCalc, doubledZoomDcMax.doubleValue(), doubledZoomPrecision, longestPeriod, p -> actionWhileFindingMinibrotCenter.accept(p, centerFixCount.get()), actionWhileCreatingTable, true);
             }else{
-                doubledZoomScene = new DeepMandelbrotPerturbator(state, currentID, doubledZoomCalc, doubledZoomDcMax, doubledZoomPrecision, period, p -> actionWhileFindingMinibrotCenter.accept(p, centerFixCount.get()), actionWhileCreatingTable, true);
+                doubledZoomScene = new DeepMandelbrotPerturbator(state, currentID, doubledZoomCalc, doubledZoomDcMax, doubledZoomPrecision, longestPeriod, p -> actionWhileFindingMinibrotCenter.accept(p, centerFixCount.get()), actionWhileCreatingTable, true);
             }
         }
 
@@ -75,7 +75,7 @@ public record MandelbrotLocator(LWBigComplex center, DoubleExponent dcMax, doubl
         return doubledZoomScene;
     }
     
-    public static MandelbrotLocator locateMinibrot(ParallelRenderState state, int currentID, MandelbrotPerturbator scene, BiConsumer<Integer, Integer> actionWhileFindingMinibrotCenter, BiConsumer<Integer, Double> actionWhileCreatingTable, DoubleConsumer actionWhileFindingMinibrotZoom) throws IllegalParallelRenderStateException {
+    public static MandelbrotLocator locateMinibrot(ParallelRenderState state, int currentID, MandelbrotPerturbator scene, BiConsumer<Long, Integer> actionWhileFindingMinibrotCenter, BiConsumer<Long, Double> actionWhileCreatingTable, DoubleConsumer actionWhileFindingMinibrotZoom) throws IllegalParallelRenderStateException {
 
         // code flowing
         // e.g. zoom * 2 -> zoom * 1.5 -> zoom * 1.75.....
