@@ -10,7 +10,7 @@ public interface FunctionEase {
     double apply(double t);
 
     static FunctionEase merge(Ease... ease) {
-        return merge(Arrays.stream(ease).map(Ease::fun).toArray(FunctionEase[]::new));
+        return merge(Arrays.stream(ease).map(Ease::func).toArray(FunctionEase[]::new));
     }
 
     /**
@@ -25,7 +25,7 @@ public interface FunctionEase {
     }
 
     default FunctionEase andThen(Ease ease) {
-        return andThen(ease.fun());
+        return andThen(ease.func());
     }
 
     default FunctionEase andThen(FunctionEase ease) {

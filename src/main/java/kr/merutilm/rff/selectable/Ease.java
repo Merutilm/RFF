@@ -1,7 +1,5 @@
 package kr.merutilm.rff.selectable;
 
-import java.util.Arrays;
-
 import kr.merutilm.rff.functions.FunctionEase;
 
 import static java.lang.Math.PI;
@@ -125,7 +123,7 @@ public enum Ease implements Selectable {
         return name;
     }
 
-    public FunctionEase fun() {
+    public FunctionEase func() {
         return functionEase;
     }
 
@@ -134,10 +132,4 @@ public enum Ease implements Selectable {
         this.functionEase = functionEase;
     }
 
-    public static Ease typeOf(String name) {
-        return name == null ? null : Arrays.stream(values())
-                .filter(value -> value.name.equals(name))
-                .findAny()
-                .orElseThrow(() -> new NullPointerException(name));
-    }
 }

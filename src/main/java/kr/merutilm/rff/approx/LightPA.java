@@ -5,7 +5,7 @@ import kr.merutilm.rff.util.AdvancedMath;
 
 public record LightPA(double anr, double ani, double bnr, double bni, int skip, double radius) implements PA {
 
-    public static final class Builder{
+    public static final class Builder implements PABuilder<LightPA>{
         private double anr; 
         private double ani; 
         private double bnr;
@@ -36,14 +36,17 @@ public record LightPA(double anr, double ani, double bnr, double bni, int skip, 
             return new Builder(reference, epsilon, dcMax, 1, 0, 0, 0, start, 0, Double.MAX_VALUE);
         }
 
+        @Override
         public int start(){
             return start;
         }
 
+        @Override
         public int skip(){
             return skip;
         }
 
+        @Override
         public Builder merge(LightPA pa){
             double anrMerge = pa.anr * anr - pa.ani * ani;
             double aniMerge = pa.anr * ani + pa.ani * anr;
@@ -59,6 +62,7 @@ public record LightPA(double anr, double ani, double bnr, double bni, int skip, 
             return this;
         }
 
+        @Override
         public Builder step() {
 
             int iter = start + skip++; //n+k
@@ -84,6 +88,7 @@ public record LightPA(double anr, double ani, double bnr, double bni, int skip, 
             return this;
         }
 
+        @Override
         public LightPA build(){
             return new LightPA(anr, ani, bnr, bni, skip, radius);
         }

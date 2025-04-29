@@ -13,7 +13,7 @@ import kr.merutilm.rff.parallel.IllegalParallelRenderStateException;
 import kr.merutilm.rff.parallel.ParallelDoubleArrayDispatcher;
 import kr.merutilm.rff.parallel.ParallelRenderState;
 import kr.merutilm.rff.settings.CalculationSettings;
-import kr.merutilm.rff.settings.ImageSettings;
+import kr.merutilm.rff.settings.RenderSettings;
 import kr.merutilm.rff.settings.Settings;
 import kr.merutilm.rff.struct.DoubleExponent;
 import kr.merutilm.rff.struct.DoubleMatrix;
@@ -42,12 +42,13 @@ final class RFFRenderPanel extends RFFGLPanel {
     private transient RFFMap currentMap;
     private final transient ParallelRenderState state = new ParallelRenderState();
     private transient GLMultiPassRenderer renderer;
-    private transient GLRendererIteration rendererIteration;
+    private transient GLRendererIterationPalette rendererIteration;
     private transient GLRendererStripe rendererStripe;
     private transient GLRendererSlope rendererSlope;
-    private transient GLRendererColorFilter rendererColorFilter;
+    private transient GLRendererColor rendererColorFilter;
     private transient GLRendererFog rendererFog;
     private transient GLRendererBloom rendererBloom;
+    private transient GLRendererAntialiasing rendererAntialiasing;
 
     private static final int FPS = 30;
 
@@ -91,13 +92,13 @@ final class RFFRenderPanel extends RFFGLPanel {
 
         renderer = new GLMultiPassRenderer();
 
-        rendererIteration = new GLRendererIteration();
+        rendererIteration = new GLRendererIterationPalette();
         rendererStripe = new GLRendererStripe();
         rendererSlope = new GLRendererSlope();
-        rendererColorFilter = new GLRendererColorFilter();
+        rendererColorFilter = new GLRendererColor();
         rendererFog = new GLRendererFog();
         rendererBloom = new GLRendererBloom();
-        GLRendererInterpolation interpolation = new GLRendererInterpolation();
+        rendererAntialiasing = new GLRendererAntialiasing();
 
 
         renderer.addRenderer(rendererIteration);
@@ -106,7 +107,7 @@ final class RFFRenderPanel extends RFFGLPanel {
         renderer.addRenderer(rendererColorFilter);
         renderer.addRenderer(rendererFog);
         renderer.addRenderer(rendererBloom);
-        renderer.addRenderer(interpolation);
+        renderer.addRenderer(rendererAntialiasing);
         requestResize();
         requestColor();
         requestRecompute();
@@ -115,12 +116,13 @@ final class RFFRenderPanel extends RFFGLPanel {
 
     @Override
     public void applyColor(Settings settings){
-        rendererIteration.setColorSettings(settings.shaderSettings().colorSettings());
+        rendererIteration.setPaletteSettings(settings.shaderSettings().paletteSettings());
         rendererStripe.setStripeSettings(settings.shaderSettings().stripeSettings());
         rendererSlope.setSlopeSettings(settings.shaderSettings().slopeSettings());
-        rendererColorFilter.setColorFilterSettings(settings.shaderSettings().colorFilterSettings());
+        rendererColorFilter.setColorFilterSettings(settings.shaderSettings().colorSettings());
         rendererFog.setFogSettings(settings.shaderSettings().fogSettings());
         rendererBloom.setBloomSettings(settings.shaderSettings().bloomSettings());
+        rendererAntialiasing.setUse(settings.renderSettings().antialiasing());
     }
 
 
@@ -288,7 +290,7 @@ final class RFFRenderPanel extends RFFGLPanel {
                 if (SwingUtilities.isLeftMouseButton(e)) {
                     int dx = pmx.get() - getMouseX(settings, e);
                     int dy = pmy.get() - getMouseY(settings, e);
-                    double m = master.getSettings().imageSettings().resolutionMultiplier();
+                    double m = master.getSettings().renderSettings().resolutionMultiplier();
                     double logZoom = master.getSettings().calculationSettings().logZoom();
                     master.setSettings(e1 -> e1.setCalculationSettings(
                                     e2 -> e2.addCenter(
@@ -309,22 +311,22 @@ final class RFFRenderPanel extends RFFGLPanel {
     }
 
     private int getImgWidth(Settings settings) {
-        ImageSettings img = settings.imageSettings();
+        RenderSettings img = settings.renderSettings();
         return (int) (getFramebufferWidth() * img.resolutionMultiplier());
     }
 
     private int getImgHeight(Settings settings) {
-        ImageSettings img = settings.imageSettings();
+        RenderSettings img = settings.renderSettings();
         return (int) (getFramebufferHeight() * img.resolutionMultiplier());
     }
 
     private int getMouseX(Settings settings, MouseEvent e) {
-        ImageSettings img = settings.imageSettings();
+        RenderSettings img = settings.renderSettings();
         return RFFPanel.toRealLength((int) (e.getX() * img.resolutionMultiplier()));
     }
 
     private int getMouseY(Settings settings, MouseEvent e) {
-        ImageSettings img = settings.imageSettings();
+        RenderSettings img = settings.renderSettings();
         return getImgHeight(settings) - RFFPanel.toRealLength((int) (e.getY() * img.resolutionMultiplier()));
     }
 
@@ -335,7 +337,7 @@ final class RFFRenderPanel extends RFFGLPanel {
     }
 
     private DoubleExponent[] offsetConversion(Settings settings, double px, double py) {
-        ImageSettings img = settings.imageSettings();
+        RenderSettings img = settings.renderSettings();
         double resolutionMultiplier = img.resolutionMultiplier();
         return new DoubleExponent[]{
                 DoubleExponent.valueOf(px - getImgWidth(settings) / 2.0).divide(getDivisor(settings)).divide(resolutionMultiplier),

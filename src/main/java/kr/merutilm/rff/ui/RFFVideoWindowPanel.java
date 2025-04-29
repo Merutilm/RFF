@@ -4,13 +4,11 @@ package kr.merutilm.rff.ui;
 import kr.merutilm.rff.io.BitMap;
 import kr.merutilm.rff.io.RFFMap;
 import kr.merutilm.rff.opengl.*;
-import kr.merutilm.rff.parallel.ParallelDoubleArrayDispatcher;
 import kr.merutilm.rff.settings.Settings;
 import kr.merutilm.rff.struct.DoubleMatrix;
 import kr.merutilm.rff.util.AdvancedMath;
 import org.lwjgl.BufferUtils;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 
@@ -24,13 +22,15 @@ class RFFVideoWindowPanel extends RFFGLPanel {
     private transient RFFMap zoomed;
     private transient float currentFrame;
     private transient GLMultiPassRenderer renderer;
-    private transient GLRendererIterationFrom2Map rendererIterationFrom2Map;
-    private transient GLRendererIteration rendererIteration;
+    private transient GLRendererIterationPaletteFrom2Map rendererIterationFrom2Map;
+    private transient GLRendererIterationPalette rendererIteration;
     private transient GLRendererStripe rendererStripe;
     private transient GLRendererSlope rendererSlope;
-    private transient GLRendererColorFilter rendererColorFilter;
+    private transient GLRendererColor rendererColorFilter;
     private transient GLRendererFog rendererFog;
     private transient GLRendererBloom rendererBloom;
+    private transient GLRendererAntialiasing rendererAntialiasing;
+
     public RFFVideoWindowPanel() {
         super();
     }
@@ -63,12 +63,13 @@ class RFFVideoWindowPanel extends RFFGLPanel {
     @Override
     public void applyColor(Settings settings){
         rendererIterationFrom2Map.setDataSettings(settings.videoSettings().dataSettings());
-        rendererIteration.setColorSettings(settings.shaderSettings().colorSettings());
+        rendererIteration.setPaletteSettings(settings.shaderSettings().paletteSettings());
         rendererStripe.setStripeSettings(settings.shaderSettings().stripeSettings());
         rendererSlope.setSlopeSettings(settings.shaderSettings().slopeSettings());
-        rendererColorFilter.setColorFilterSettings(settings.shaderSettings().colorFilterSettings());
+        rendererColorFilter.setColorFilterSettings(settings.shaderSettings().colorSettings());
         rendererFog.setFogSettings(settings.shaderSettings().fogSettings());
         rendererBloom.setBloomSettings(settings.shaderSettings().bloomSettings());
+        rendererAntialiasing.setUse(settings.renderSettings().antialiasing());
     }
 
     @Override
@@ -77,14 +78,14 @@ class RFFVideoWindowPanel extends RFFGLPanel {
 
         renderer = new GLMultiPassRenderer();
 
-        rendererIterationFrom2Map = new GLRendererIterationFrom2Map();
-        rendererIteration = new GLRendererIteration();
+        rendererIterationFrom2Map = new GLRendererIterationPaletteFrom2Map();
+        rendererIteration = new GLRendererIterationPalette();
         rendererStripe = new GLRendererStripe();
         rendererSlope = new GLRendererSlope();
-        rendererColorFilter = new GLRendererColorFilter();
+        rendererColorFilter = new GLRendererColor();
         rendererFog = new GLRendererFog();
         rendererBloom = new GLRendererBloom();
-        GLRendererInterpolation interpolation = new GLRendererInterpolation();
+        rendererAntialiasing = new GLRendererAntialiasing();
 
         renderer.addRenderer(rendererIterationFrom2Map);
         renderer.addRenderer(rendererIteration);
@@ -93,7 +94,7 @@ class RFFVideoWindowPanel extends RFFGLPanel {
         renderer.addRenderer(rendererColorFilter);
         renderer.addRenderer(rendererFog);
         renderer.addRenderer(rendererBloom);
-        renderer.addRenderer(interpolation);
+        renderer.addRenderer(rendererAntialiasing);
 
     }
 

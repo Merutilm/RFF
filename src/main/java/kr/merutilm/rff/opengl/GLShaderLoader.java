@@ -28,6 +28,7 @@ public class GLShaderLoader {
             2, 1, 0,
             0, 1, 3
     };
+
     private final int vaoID;
 
     public GLShaderLoader(String vertexName, String fragName) {
@@ -68,11 +69,12 @@ public class GLShaderLoader {
 
         float[] vertexArray = {
                 //location     //color
-                1, -1, 0,      0, 0, 0, 1,
-                -1, 1, 0,      0, 0, 0, 1,
-                1, 1, 0,      0, 0, 0, 1,
-                -1, -1, 0,      0, 0, 0, 1
+                1, -1, 1,      0, 0, 0, 1,
+                -1, 1, 1,      0, 0, 0, 1,
+                1, 1, 1,      0, 0, 0, 1,
+                -1, -1, 1,      0, 0, 0, 1
         };
+
         FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(vertexArray.length);
         vertexBuffer.put(vertexArray).flip();
         IntBuffer elementBuffer = BufferUtils.createIntBuffer(elementArray.length);

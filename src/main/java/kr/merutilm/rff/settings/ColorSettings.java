@@ -1,147 +1,66 @@
 package kr.merutilm.rff.settings;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-
-import kr.merutilm.rff.struct.HexColor;
 import kr.merutilm.rff.struct.Struct;
 import kr.merutilm.rff.struct.StructBuilder;
 
+public record ColorSettings(double gamma, double exposure, double hue, double saturation, double brightness,
+                            double contrast) implements Struct<ColorSettings> {
 
-public record ColorSettings(
-        HexColor[] colors,
-        ColorSmoothingSettings colorSmoothing,
-        double iterationInterval,
-        double offsetRatio,
-        double animationSpeed
-) implements Struct<ColorSettings> {
 
     @Override
     public Builder edit() {
         return new Builder()
-                .setColors(List.of(colors))
-                .setColorSmoothing(colorSmoothing)
-                .setIterationInterval(iterationInterval)
-                .setOffsetRatio(offsetRatio)
-                .setAnimationSpeed(animationSpeed);
+                .setGamma(gamma)
+                .setExposure(exposure)
+                .setHue(hue)
+                .setSaturation(saturation)
+                .setBrightness(brightness)
+                .setContrast(contrast);
     }
 
     public static final class Builder implements StructBuilder<ColorSettings> {
+        private double gamma;
+        private double exposure;
+        private double hue;
+        private double saturation;
+        private double brightness;
+        private double contrast;
 
-        private final List<HexColor> colors = new ArrayList<>();
-        private ColorSmoothingSettings colorSmoothing = ColorSmoothingSettings.NORMAL;
-        private double iterationInterval = 150;
-        private double offsetRatio = 0;
-        private double animationSpeed;
 
-        public Builder add(int index, HexColor c) {
-            colors.add(index, c);
+        public Builder setGamma(double gamma) {
+            this.gamma = gamma;
             return this;
         }
 
-        public Builder add(HexColor c) {
-            colors.add(c);
+        public Builder setExposure(double exposure) {
+            this.exposure = exposure;
             return this;
         }
 
-        public Builder addRainbow() {
-            add(HexColor.R_RED);
-            add(HexColor.R_ORANGE);
-            add(HexColor.R_YELLOW);
-            add(HexColor.R_GREEN);
-            add(HexColor.R_BLUE);
-            add(HexColor.R_INDIGO);
-            add(HexColor.R_VIOLET);
+        public Builder setHue(double hue) {
+            this.hue = hue;
             return this;
         }
 
-        public Builder addReversedRainbow() {
-            add(HexColor.R_VIOLET);
-            add(HexColor.R_INDIGO);
-            add(HexColor.R_BLUE);
-            add(HexColor.R_GREEN);
-            add(HexColor.R_YELLOW);
-            add(HexColor.R_ORANGE);
-            add(HexColor.R_RED);
+        public Builder setSaturation(double saturation) {
+            this.saturation = saturation;
             return this;
         }
 
-        public Builder remove(int i) {
-            colors.remove(i);
+        public Builder setBrightness(double brightness) {
+            this.brightness = brightness;
             return this;
         }
 
-        public Builder setColor(int i, HexColor c) {
-            colors.set(i, c);
-            return this;
-        }
-
-        public Builder setColors(List<HexColor> palette) {
-            this.colors.clear();
-            this.colors.addAll(palette);
-            return this;
-        }
-
-
-        public Builder setColorSmoothing(ColorSmoothingSettings colorSmoothing) {
-            this.colorSmoothing = colorSmoothing;
-            return this;
-        }
-
-        public Builder setIterationInterval(double iterationInterval) {
-            this.iterationInterval = iterationInterval;
-            return this;
-        }
-
-        public Builder setOffsetRatio(double offsetRatio) {
-            this.offsetRatio = offsetRatio;
-            return this;
-        }
-
-        public Builder setAnimationSpeed(double animationSpeed) {
-            this.animationSpeed = animationSpeed;
+        public Builder setContrast(double contrast) {
+            this.contrast = contrast;
             return this;
         }
 
         @Override
         public ColorSettings build() {
-            return new ColorSettings(colors.toArray(HexColor[]::new), colorSmoothing, iterationInterval, offsetRatio, animationSpeed);
+            return new ColorSettings(gamma, exposure, hue, saturation, brightness, contrast);
         }
-    }
-
-    public HexColor getColor(double value) {
-        double ratio = ((value / iterationInterval + offsetRatio) % 1 + 1) % 1;
-        double i = ratio * colors.length;
-        int i0 = (int) i;
-        int i1 = i0 + 1;
-
-        HexColor c1 = colors[i0 % colors.length];
-        HexColor c2 = colors[i1 % colors.length];
-        return HexColor.ratioDivide(c1, c2, i % 1);
 
     }
-
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(Arrays.hashCode(colors), colorSmoothing, iterationInterval, offsetRatio);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return o instanceof ColorSettings c
-               && Arrays.equals(c.colors, colors)
-               && c.colorSmoothing == colorSmoothing
-               && c.iterationInterval == iterationInterval
-               && c.offsetRatio == offsetRatio
-               && c.animationSpeed == animationSpeed;
-    }
-
-    @Override
-    public String toString() {
-        return Arrays.toString(colors) + ", " + colorSmoothing + ", " + iterationInterval + ", " + offsetRatio + ", " + animationSpeed;
-    }
-
 }

@@ -42,7 +42,7 @@ public class GLRendererStripe extends GLRenderer implements GLIterationTextureRe
         shader.uploadTexture2D("iterations", GL_TEXTURE1, iterationTextureID);
         shader.uploadFloat("resolutionMultiplier", resolutionMultiplier);
 
-        shader.uploadBool("use", stripeSettings.use());
+        shader.uploadInt("type", stripeSettings.stripeType().ordinal());
         shader.uploadFloat("firstInterval", (float) stripeSettings.firstInterval());
         shader.uploadFloat("secondInterval", (float) stripeSettings.secondInterval());
         shader.uploadFloat("opacity", (float) stripeSettings.opacity());

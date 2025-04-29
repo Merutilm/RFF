@@ -191,10 +191,10 @@ public record HexColor(int r, int g, int b, int a) implements Struct<HexColor> {
     }
 
     public static HexColor ratioDivide(HexColor start, HexColor end, double ratio) {
-        return ratioDivide(start, end, ratio, Ease.LINEAR.fun());
+        return ratioDivide(start, end, ratio, Ease.LINEAR.func());
     }
     public static int ratioDivide(int start, int end, double ratio){
-        return ratioDivide(start, end, ratio, Ease.LINEAR.fun());
+        return ratioDivide(start, end, ratio, Ease.LINEAR.func());
     }
     public static int ratioDivide(int start, int end, double ratio, FunctionEase ease){
         int sr = intR(start);

@@ -6,7 +6,7 @@ import kr.merutilm.rff.util.DoubleExponentMath;
 
 public record DeepPA(DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr, DoubleExponent bni, int skip,
                      DoubleExponent radius) implements PA {
-    public static final class Builder {
+    public static final class Builder implements PABuilder<DeepPA> {
         private DoubleExponent anr;
         private DoubleExponent ani;
         private DoubleExponent bnr;
@@ -37,14 +37,17 @@ public record DeepPA(DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr,
             return new Builder(reference, epsilon, dcMax, DoubleExponent.ONE, DoubleExponent.ZERO, DoubleExponent.ZERO, DoubleExponent.ZERO, start, 0, DoubleExponent.POSITIVE_INFINITY);
         }
 
+        @Override
         public int start() {
             return start;
         }
 
+        @Override
         public int skip() {
             return skip;
         }
 
+        @Override
         public Builder merge(DeepPA pa) {
             DoubleExponent anrMerge = pa.anr.multiply(anr).subtract(pa.ani.multiply(ani));
             DoubleExponent aniMerge = pa.anr.multiply(ani).add(pa.ani.multiply(anr));
@@ -60,6 +63,7 @@ public record DeepPA(DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr,
             return this;
         }
 
+        @Override
         public Builder step() {
 
             int iter = start + skip++;
@@ -82,7 +86,7 @@ public record DeepPA(DoubleExponent anr, DoubleExponent ani, DoubleExponent bnr,
             bni = bniStep;
             return this;
         }
-
+        @Override
         public DeepPA build() {
             return new DeepPA(anr, ani, bnr, bni, skip, radius);
         }

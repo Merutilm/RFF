@@ -1,15 +1,14 @@
 package kr.merutilm.rff.preset.render;
 
-import kr.merutilm.rff.settings.ImageSettings;
+import kr.merutilm.rff.settings.RenderSettings;
 
-public class RenderMedium implements Render{
+public class RenderMedium implements Render {
     @Override
     public String getName() {
         return "Medium";
     }
     @Override
-    public ImageSettings createImageSettings() {
-        return new ImageSettings(1);
+    public RenderSettings createImageSettings() {
+        return new RenderSettings(0.5, true);
     }
-    
 }

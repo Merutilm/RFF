@@ -1,5 +1,6 @@
 package kr.merutilm.rff.ui;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.swing.JMenu;
@@ -25,7 +26,7 @@ enum RFFSettingsMenu {
     }),
     IMAGE(master -> {
         RFFMenuTree.Builder menuBuilder = RFFMenuTree.Builder.init("Image");
-        for(ActionsImage a : ActionsImage.values()){
+        for(ActionsRender a : ActionsRender.values()){
             menuBuilder.createItem(a.initializer().init(master, a.toString(), a.description(), a.keyStroke()));
         }
         
@@ -62,18 +63,47 @@ enum RFFSettingsMenu {
                 }));
             }
         });
-        menuBuilder.createMenu("Shader", e -> {
-            for(Presets.Shaders a : Presets.Shaders.values()){
-                e.createItem(ItemActions.createItem(a.toString(), "", null, () -> {
-                    master.setPreset(a.preset());
-                    master.getWindow().getRenderer().requestColor();
-                }));
-            }
+        menuBuilder.createMenu("Shaders", e -> {
+            Consumer<Presets.PresetElement<?>> shaderChangedAction = a -> {
+                master.setPreset(a.preset());
+                master.getWindow().getRenderer().requestColor();
+            };
+            e.createMenu("Palettes", e1 -> {
+                for(Presets.Shaders.Palettes a : Presets.Shaders.Palettes.values()){
+                    e1.createItem(ItemActions.createItem(a.toString(), "", null, () -> shaderChangedAction.accept(a)));
+                }
+            });
+            e.createMenu("Stripes", e1 -> {
+                for(Presets.Shaders.Stripes a : Presets.Shaders.Stripes.values()){
+                    e1.createItem(ItemActions.createItem(a.toString(), "", null, () -> shaderChangedAction.accept(a)));
+                }
+            });
+            e.createMenu("Slopes", e1 -> {
+                for(Presets.Shaders.Slopes a : Presets.Shaders.Slopes.values()){
+                    e1.createItem(ItemActions.createItem(a.toString(), "", null, () -> shaderChangedAction.accept(a)));
+                }
+            });
+            e.createMenu("Colors", e1 -> {
+                for(Presets.Shaders.Colors a : Presets.Shaders.Colors.values()){
+                    e1.createItem(ItemActions.createItem(a.toString(), "", null, () -> shaderChangedAction.accept(a)));
+                }
+            });
+            e.createMenu("Fogs", e1 -> {
+                for(Presets.Shaders.Fogs a : Presets.Shaders.Fogs.values()){
+                    e1.createItem(ItemActions.createItem(a.toString(), "", null, () -> shaderChangedAction.accept(a)));
+                }
+            });
+            e.createMenu("Blooms", e1 -> {
+                for(Presets.Shaders.Blooms a : Presets.Shaders.Blooms.values()){
+                    e1.createItem(ItemActions.createItem(a.toString(), "", null, () -> shaderChangedAction.accept(a)));
+                }
+            });
         });
         menuBuilder.createMenu("Resolution", e -> {
             for(Presets.Resolutions a : Presets.Resolutions.values()){
                 e.createItem(ItemActions.createItem(a.toString(), "", null, () -> {
                     master.setPreset(a.preset());
+                    master.getWindow().getRenderer().requestRecompute();
                 }));
             }
         });

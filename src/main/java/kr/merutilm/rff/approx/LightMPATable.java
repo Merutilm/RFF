@@ -106,14 +106,12 @@ public class LightMPATable extends MPATable {
 
                 if (periodCount[i] == tablePeriod[i]) {
 
-
-                    //Stop all lower level iteration for efficiency
-                    //because it is too hard to skipping to next part of the periodic point
                     LightPA.Builder currentLevel = currentPA[i];
 
                     if (currentLevel != null && currentLevel.skip() == tablePeriod[i] - REQUIRED_PERTURBATION) {
-                        //If the skip count is lower than its current period,
-                        //it can be replaced to several lower-period RRA.
+
+                        //If the skip count is lower than its current period - perturbation,
+                        //it can be replaced to several lower-level PA.
 
                         int compTableIndex = iterationToCompTableIndex(currentLevel.start());
                         safetyMatchTableSize(table, compTableIndex);
@@ -125,7 +123,8 @@ public class LightMPATable extends MPATable {
                             mainReferenceMPA = pa;
                         }
                     }
-
+                    //Stop all lower level iteration for efficiency
+                    //because it is too hard to skipping to next part of the periodic point
                     currentPA[i] = null;
                     resetLowerLevel = true;
                 }

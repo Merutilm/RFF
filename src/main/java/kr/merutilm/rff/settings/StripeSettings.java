@@ -1,10 +1,11 @@
 package kr.merutilm.rff.settings;
 
+import kr.merutilm.rff.selectable.StripeType;
 import kr.merutilm.rff.struct.Struct;
 import kr.merutilm.rff.struct.StructBuilder;
 
 public record StripeSettings(
-        boolean use,
+        StripeType stripeType,
         double firstInterval,
         double secondInterval,
         double opacity,
@@ -15,7 +16,7 @@ public record StripeSettings(
     @Override
     public Builder edit() {
         return new Builder()
-                .setUse(use)
+                .setStripeType(stripeType)
                 .setFirstInterval(firstInterval)
                 .setSecondInterval(secondInterval)
                 .setOpacity(opacity)
@@ -24,15 +25,16 @@ public record StripeSettings(
     }
 
     public static final class Builder implements StructBuilder<StripeSettings> {
-        private boolean use;
+        private StripeType stripeType;
         private double firstInterval;
         private double secondInterval;
         private double opacity;
         private double offset;
         private double animationSpeed;
 
-        public Builder setUse(boolean use) {
-            this.use = use;
+
+        public Builder setStripeType(StripeType stripeType) {
+            this.stripeType = stripeType;
             return this;
         }
 
@@ -63,7 +65,7 @@ public record StripeSettings(
 
         @Override
         public StripeSettings build() {
-            return new StripeSettings(use, firstInterval, secondInterval, opacity, offset, animationSpeed);
+            return new StripeSettings(stripeType, firstInterval, secondInterval, opacity, offset, animationSpeed);
         }
     }
 }

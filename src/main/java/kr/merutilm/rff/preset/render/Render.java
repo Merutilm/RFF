@@ -1,8 +1,8 @@
 package kr.merutilm.rff.preset.render;
 
 import kr.merutilm.rff.preset.Preset;
-import kr.merutilm.rff.settings.ImageSettings;
+import kr.merutilm.rff.settings.RenderSettings;
 
 public interface Render extends Preset{
-    ImageSettings createImageSettings();
+    RenderSettings createImageSettings();
 }

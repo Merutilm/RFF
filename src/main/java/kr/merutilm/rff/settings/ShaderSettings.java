@@ -6,10 +6,10 @@ import kr.merutilm.rff.struct.Struct;
 import kr.merutilm.rff.struct.StructBuilder;
 
 public record ShaderSettings(
-    ColorSettings colorSettings,
+    PaletteSettings paletteSettings,
     StripeSettings stripeSettings,
     SlopeSettings slopeSettings,
-    ColorFilterSettings colorFilterSettings,
+    ColorSettings colorSettings,
     FogSettings fogSettings,
     BloomSettings bloomSettings
 ) implements Struct<ShaderSettings>{
@@ -17,30 +17,30 @@ public record ShaderSettings(
     @Override
     public Builder edit() {
         return new Builder()
-        .setColorSettings(colorSettings)
+        .setPaletteSettings(paletteSettings)
         .setStripeSettings(stripeSettings)
         .setSlopeSettings(slopeSettings)
-        .setColorFilterSettings(colorFilterSettings)
+        .setColorSettings(colorSettings)
         .setFogSettings(fogSettings)
         .setBloomSettings(bloomSettings);
     }
 
     public static final class Builder implements StructBuilder<ShaderSettings>{
         
-        private ColorSettings colorSettings;
+        private PaletteSettings paletteSettings;
         private StripeSettings stripeSettings;
         private SlopeSettings slopeSettings;
-        private ColorFilterSettings colorFilterSettings;
+        private ColorSettings colorSettings;
         private BloomSettings bloomSettings;
         private FogSettings fogSettings;
 
-        public Builder setColorSettings(ColorSettings colorSettings){
-            this.colorSettings = colorSettings;
+        public Builder setPaletteSettings(PaletteSettings paletteSettings){
+            this.paletteSettings = paletteSettings;
             return this;
         }
 
-        public Builder setColorSettings(UnaryOperator<ColorSettings.Builder> changes) {
-            this.colorSettings = changes.apply(colorSettings == null ? null : colorSettings.edit()).build();
+        public Builder setPaletteSettings(UnaryOperator<PaletteSettings.Builder> changes) {
+            this.paletteSettings = changes.apply(paletteSettings == null ? null : paletteSettings.edit()).build();
             return this;
         }
         
@@ -64,13 +64,13 @@ public record ShaderSettings(
             return this;
         }
 
-        public Builder setColorFilterSettings(ColorFilterSettings colorFilterSettings){
-            this.colorFilterSettings = colorFilterSettings;
+        public Builder setColorSettings(ColorSettings colorSettings){
+            this.colorSettings = colorSettings;
             return this;
         }
     
-        public Builder setColorFilterSettings(UnaryOperator<ColorFilterSettings.Builder> changes) {
-            this.colorFilterSettings = changes.apply(colorFilterSettings == null ? null : colorFilterSettings.edit()).build();
+        public Builder setColorSettings(UnaryOperator<ColorSettings.Builder> changes) {
+            this.colorSettings = changes.apply(colorSettings == null ? null : colorSettings.edit()).build();
             return this;
         }
 
@@ -97,7 +97,7 @@ public record ShaderSettings(
 
         @Override
         public ShaderSettings build() {
-            return new ShaderSettings(colorSettings, stripeSettings, slopeSettings, colorFilterSettings, fogSettings, bloomSettings);
+            return new ShaderSettings(paletteSettings, stripeSettings, slopeSettings, colorSettings, fogSettings, bloomSettings);
         }
     }
 }    

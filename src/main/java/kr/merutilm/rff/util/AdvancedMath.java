@@ -79,7 +79,7 @@ public final class AdvancedMath {
 
 
     public static double ratioDivide(double p1, double p2, double ratio) {
-        return ratioDivide(p1, p2, ratio, Ease.LINEAR.fun());
+        return ratioDivide(p1, p2, ratio, Ease.LINEAR.func());
     }
 
     public static double ratioDivide(double p1, double p2, double ratio, FunctionEase ease) {

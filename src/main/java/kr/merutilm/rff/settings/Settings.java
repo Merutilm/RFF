@@ -7,18 +7,18 @@ import kr.merutilm.rff.struct.StructBuilder;
 
 public record Settings(
     CalculationSettings calculationSettings,
-    ImageSettings imageSettings,
+    RenderSettings renderSettings,
     ShaderSettings shaderSettings,
     VideoSettings videoSettings
 ) implements Struct<Settings>{
 
-    
+
 
     @Override
     public Builder edit() {
         return new Builder()
         .setCalculationSettings(calculationSettings)
-        .setImageSettings(imageSettings)
+        .setRenderSettings(renderSettings)
         .setShaderSettings(shaderSettings)
         .setVideoSettings(videoSettings);
     }
@@ -26,7 +26,8 @@ public record Settings(
     public static final class Builder implements StructBuilder<Settings>{
 
         private CalculationSettings calculationSettings;
-        private ImageSettings imageSettings;
+        private RenderSettings renderSettings;
+        private PaletteSettings paletteSettings;
         private ShaderSettings shaderSettings;
         private VideoSettings videoSettings;
 
@@ -35,19 +36,19 @@ public record Settings(
             this.calculationSettings = calculationSettings;
             return this;
         }
-        
+
         public Builder setCalculationSettings(UnaryOperator<CalculationSettings.Builder> changes) {
             this.calculationSettings = changes.apply(calculationSettings == null ? null : calculationSettings.edit()).build();
             return this;
         }
-        
-        public Builder setImageSettings(ImageSettings imageSettings){
-            this.imageSettings = imageSettings;
+
+        public Builder setRenderSettings(RenderSettings renderSettings){
+            this.renderSettings = renderSettings;
             return this;
         }
 
-        public Builder setImageSettings(UnaryOperator<ImageSettings.Builder> changes) {
-            this.imageSettings = changes.apply(imageSettings == null ? null : imageSettings.edit()).build();
+        public Builder setRenderSettings(UnaryOperator<RenderSettings.Builder> changes) {
+            this.renderSettings = changes.apply(renderSettings == null ? null : renderSettings.edit()).build();
             return this;
         }
 
@@ -74,7 +75,7 @@ public record Settings(
 
         @Override
         public Settings build() {
-            return new Settings(calculationSettings, imageSettings, shaderSettings, videoSettings);
+            return new Settings(calculationSettings, renderSettings, shaderSettings, videoSettings);
         }
     }
 

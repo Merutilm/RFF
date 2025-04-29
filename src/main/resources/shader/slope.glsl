@@ -16,7 +16,7 @@ out vec4 color;
 
 double getIteration0(ivec2 iterCoord){
     vec4 iteration = texelFetch(iterations, iterCoord, 0);
-    uvec2 it = uvec2(floatBitsToUint(iteration.y), floatBitsToUint(iteration.x));
+    uvec2 it = floatBitsToUint(iteration.yx);
     return packDouble2x32(it);
 }
 
@@ -49,7 +49,7 @@ void main() {
 
     vec2 coord = gl_FragCoord.xy;
 
-    if(reflectionRatio >= 1){
+    if(reflectionRatio >= 1 || depth == 0){
         color = texelFetch(inputTex, ivec2(coord), 0);
         return;
     }

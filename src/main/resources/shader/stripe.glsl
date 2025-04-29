@@ -1,10 +1,16 @@
 #version 450
 
+#define DOUBLE_PI 6.2831853071795864
+#define NONE 0
+#define SINGLE_DIRECTION 1
+#define SMOOTH 2
+#define SMOOTH_SQUARED 3
+
 uniform sampler2D inputTex;
 uniform sampler2D iterations;
 uniform float resolutionMultiplier;
 
-uniform bool use;
+uniform int type;
 uniform float firstInterval;
 uniform float secondInterval;
 uniform float opacity;
@@ -14,13 +20,13 @@ in vec4 fColor;
 out vec4 color;
 
 
-double getIteration0(ivec2 iterCoord){
+double getIteration0(ivec2 iterCoord) {
     vec4 iteration = texelFetch(iterations, iterCoord, 0);
-    uvec2 it = uvec2(floatBitsToUint(iteration.y), floatBitsToUint(iteration.x));
+    uvec2 it = floatBitsToUint(iteration.yx);
     return packDouble2x32(it);
 }
 
-double getIteration(vec2 coord){
+double getIteration(vec2 coord) {
     vec2 iterCoord = coord * resolutionMultiplier;
     vec2 dec = mod(iterCoord, 1);
 
@@ -32,10 +38,10 @@ double getIteration(vec2 coord){
     double i5 = i1 - (i1 - i2) * dec.x;
     double i6 = i3 - (i3 - i4) * dec.x;
 
-    if(i5 == 0){
+    if (i5 == 0) {
         i5 = i6;
     }
-    if(i6 == 0){
+    if (i6 == 0) {
         i6 = i5;
     }
 
@@ -49,11 +55,29 @@ void main() {
     double iteration = getIteration(coord);
     color = texelFetch(inputTex, ivec2(coord), 0);
 
-    if(!use || iteration == 0){
+    if (type == NONE || iteration == 0) {
         return;
     }
+    double iterCurr = iteration - offset;
+    float black;
+    float rat1 = float(mod(iterCurr, firstInterval)) / firstInterval;
+    float rat2 = float(mod(iterCurr, secondInterval)) / secondInterval;
 
-    float m = float(mod(iteration - offset, firstInterval)) * float(mod(iteration - offset, secondInterval)) / (firstInterval * secondInterval);
+    switch (type) {
+        case SINGLE_DIRECTION: {
+                                   black = rat1 * rat2;
+                                   break;
+                               }
+        case SMOOTH: {
+                                   black = pow((sin(rat1 * DOUBLE_PI) + 1) * (sin(rat2 * DOUBLE_PI) + 1) / 4, 2);
+                                   break;
+                               }
+        case SMOOTH_SQUARED: {
+                                   black = pow((sin(rat1 * DOUBLE_PI) + 1) * (sin(rat2 * DOUBLE_PI) + 1) / 4, 4);
+                                   break;
+                               }
+    }
 
-    color = vec4((color * (1 - m * opacity)).rgb, 1);
+
+    color = vec4((color * (1 - black * opacity)).rgb, 1);
 }

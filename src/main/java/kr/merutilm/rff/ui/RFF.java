@@ -1,12 +1,12 @@
 package kr.merutilm.rff.ui;
 
 import kr.merutilm.rff.preset.resolution.Resolution;
-import kr.merutilm.rff.preset.shader.Shader;
 import kr.merutilm.rff.preset.Preset;
 import kr.merutilm.rff.preset.Presets;
 import kr.merutilm.rff.preset.calc.Calculation;
 import kr.merutilm.rff.preset.location.Location;
 import kr.merutilm.rff.preset.render.Render;
+import kr.merutilm.rff.preset.shader.ShaderPreset;
 import kr.merutilm.rff.settings.Settings;
 
 import java.awt.*;
@@ -47,9 +47,13 @@ final class RFF {
                     setSettings(e -> e.setCalculationSettings(e2 -> e2.setR3ASettings(p.r3aSettings()).setReferenceCompressionSettings(p.referenceCompressionSettings())));
             case Location p ->
                     setSettings(e -> e.setCalculationSettings(e2 -> e2.setCenter(p.createCenter()).setLogZoom(p.logZoom()).setMaxIteration(p.maxIteration())));
-            case Render p -> setSettings(e -> e.setImageSettings(p.createImageSettings()));
-
-            case Shader p -> setSettings(e -> e.setShaderSettings(p.createShaderSettings()));
+            case Render p -> setSettings(e -> e.setRenderSettings(p.createImageSettings()));
+            case ShaderPreset.Palette p -> setSettings(e -> e.setShaderSettings(e2 -> e2.setPaletteSettings(p.paletteSettings())));
+            case ShaderPreset.Stripe p -> setSettings(e -> e.setShaderSettings(e2 -> e2.setStripeSettings(p.stripeSettings())));
+            case ShaderPreset.Slope p -> setSettings(e -> e.setShaderSettings(e2 -> e2.setSlopeSettings(p.slopeSettings())));
+            case ShaderPreset.Color p -> setSettings(e -> e.setShaderSettings(e2 -> e2.setColorSettings(p.colorSettings())));
+            case ShaderPreset.Fog p -> setSettings(e -> e.setShaderSettings(e2 -> e2.setFogSettings(p.fogSettings())));
+            case ShaderPreset.Bloom p -> setSettings(e -> e.setShaderSettings(e2 -> e2.setBloomSettings(p.bloomSettings())));
             case Resolution p ->
                     setWindowPanelSize(window, window.getRenderer(), p.getResolution().width, p.getResolution().height);
             default -> {

@@ -6,6 +6,7 @@ import java.util.function.UnaryOperator;
 
 import javax.swing.KeyStroke;
 
+import kr.merutilm.rff.selectable.StripeType;
 import kr.merutilm.rff.settings.*;
 import kr.merutilm.rff.util.IOUtilities;
 
@@ -15,10 +16,10 @@ enum ActionsShader implements ItemActions {
     PALETTE("Palette", "Shader:Palette", null, 
     (master, name, description, accelerator) -> 
     ItemActions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
-        ColorSettings color = getShaderSettings(master).colorSettings();
+        PaletteSettings color = getShaderSettings(master).paletteSettings();
         
-        Consumer<UnaryOperator<ColorSettings.Builder>> applier = e -> {
-            master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setColorSettings(e)));
+        Consumer<UnaryOperator<PaletteSettings.Builder>> applier = e -> {
+            master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setPaletteSettings(e)));
             master.getWindow().getRenderer().requestColor();
         };
 
@@ -48,9 +49,9 @@ enum ActionsShader implements ItemActions {
         };
 
 
-        panel.createBoolInput("Use", "Use Stripe", color.use(), e ->
-            applier.accept(f -> f.setUse(e))
-        );
+        panel.createSelectInput("Stripe Type", "Stripe Type", color.stripeType(), StripeType.values(), e ->
+            applier.accept(f -> f.setStripeType(e))
+        , true);
         panel.createTextInput("First Interval", "Stripe interval 1", color.firstInterval(), Double::parseDouble, e ->
             applier.accept(f -> f.setFirstInterval(e))
         );
@@ -95,13 +96,13 @@ enum ActionsShader implements ItemActions {
 
         
     }))),
-    COLOR_FILTER("Color Filter","Shader:ColorFilter", null, 
+    COLOR_FILTER("Color","Shader:Color", null,
         (master, name, description, accelerator) -> 
         ItemActions.createItem(name, description, accelerator, () -> new RFFSettingsWindow(master.getWindow(), name, (_, panel) -> {
-            ColorFilterSettings colorFilter = getShaderSettings(master).colorFilterSettings();
+            ColorSettings colorFilter = getShaderSettings(master).colorSettings();
         
-            Consumer<UnaryOperator<ColorFilterSettings.Builder>> applier = e -> {
-                master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setColorFilterSettings(e)));
+            Consumer<UnaryOperator<ColorSettings.Builder>> applier = e -> {
+                master.setSettings(e1 -> e1.setShaderSettings(e2 -> e2.setColorSettings(e)));
                 master.getWindow().getRenderer().requestColor();
             };
     
@@ -110,6 +111,9 @@ enum ActionsShader implements ItemActions {
             );
             panel.createTextInput("Exposure", "Exposure value", colorFilter.exposure(), Double::parseDouble, e ->
                 applier.accept(f -> f.setExposure(e))        
+            );
+            panel.createTextInput("Hue", "Hue value", colorFilter.hue(), Double::parseDouble, e ->
+                    applier.accept(f -> f.setHue(e))
             );
             panel.createTextInput("Saturation", "Saturation value", colorFilter.saturation(), Double::parseDouble, e ->
                    applier.accept(f -> f.setSaturation(e))

@@ -1,6 +1,6 @@
 package kr.merutilm.rff.preset.render;
 
-import kr.merutilm.rff.settings.ImageSettings;
+import kr.merutilm.rff.settings.RenderSettings;
 
 public class RenderLow implements Render{
     @Override
@@ -8,7 +8,8 @@ public class RenderLow implements Render{
         return "Low";
     }
     @Override
-    public ImageSettings createImageSettings() {
-        return new ImageSettings(0.5);
+    public RenderSettings createImageSettings() {
+        return new RenderSettings(0.25, true);
     }
+    
 }
