@@ -1,6 +1,6 @@
 package kr.merutilm.rff.ui;
 
-import java.awt.GridLayout;
+import java.awt.*;
 import java.util.function.Consumer;
 
 import javax.swing.ButtonGroup;
@@ -21,10 +21,13 @@ final class MUISelectionFieldPanel<S extends Enum<S> & Selectable> extends RFFPa
         label.setHorizontalAlignment(SwingConstants.CENTER);
 
         RFFPanel buttonPanel = new RFFPanel(new GridLayout(1, options.length));
+        Cursor cursor = new Cursor(Cursor.HAND_CURSOR);
+        buttonPanel.setCursor(cursor);
         buttonPanel.setBorder(MUIConstants.INPUT_BORDER);
         buttonPanel.setBackground(MUIConstants.INPUT_BACKGROUND);
 
         ButtonGroup group = new ButtonGroup();
+
 
         for (S option : options) {
             JToggleButton button = new JToggleButton(option.toString());
@@ -41,6 +44,7 @@ final class MUISelectionFieldPanel<S extends Enum<S> & Selectable> extends RFFPa
             });
 
             button.setToolTipText("<html>"+description+"</html>");
+
             button.setUI(new BasicToggleButtonUI());
             button.setFont(MUIConstants.DEFAULT_FONT);
             button.setForeground(MUIConstants.TEXT_COLOR);

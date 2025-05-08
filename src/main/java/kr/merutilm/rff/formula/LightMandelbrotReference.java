@@ -130,7 +130,7 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
 
                 }
             }
-            
+
             period = ++iteration;
 
             if(compressCriteria < 0 || reuseIndex <= compressCriteria){
@@ -140,59 +140,12 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
                     rr = ArrayFunction.exp2xArr(rr);
                     ri = ArrayFunction.exp2xArr(ri);
                 }
-    
+
                 rr[index] = zr;
                 ri[index] = zi;
             }
-            
+
         }
-
-//        boolean useSwirlGuessing = false; 
-//        if(useSwirlGuessing){
-//            int swirlPeriod = 1;
-//            double swirlDzrTemp = 0;
-//            double swirlDziTemp = 0;
-//            double swirlDzr = 0;
-//            double swirlDzi = 0;
-//            double squaredSwirlDzThreshold = dcMax * 100;
-//            double swirlDetectionThreshold = 2;
-//
-//            z = LWBigComplex.zero(precision);
-//            long swirlIteration = 0;
-//            double prevSwirlDz2 = 0;
-//
-//            while (zr * zr + zi * zi < bailout * bailout && swirlIteration < maxIteration) {
-//
-//                state.tryBreak(renderID);
-//
-//                pzr = zr;
-//                pzi = zi;
-//                z = formula.apply(z, center, precision);
-//
-//                zr = z.re().doubleValue();
-//                zi = z.im().doubleValue();
-//
-//
-//                if(swirlIteration % swirlPeriod == 0){
-//                    swirlDzr = pzr - swirlDzrTemp;
-//                    swirlDzi = pzi - swirlDziTemp;
-//                    swirlDzrTemp = pzr;
-//                    swirlDziTemp = pzi;
-//                    double swirlDz2 = swirlDzr * swirlDzr + swirlDzi * swirlDzi;
-//
-//                    if(0 < prevSwirlDz2 && prevSwirlDz2 <= swirlDz2 && swirlDz2 / prevSwirlDz2 < swirlDetectionThreshold && swirlDz2 < squaredSwirlDzThreshold){
-//                        break;
-//                    }
-//                    prevSwirlDz2 = swirlDz2;
-//                }
-//
-//                actionPerRefCalcIteration.accept(iteration);
-//                swirlIteration++;
-//            }
-//
-//            System.out.println(swirlIteration - 1);
-//        }
-
 
         if (!strictFPGBn) {
             fpgBn = LWBigComplex.valueOf(fpgBnr, fpgBni, precision);

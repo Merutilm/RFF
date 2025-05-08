@@ -1,5 +1,6 @@
 package kr.merutilm.rff.ui;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,10 +61,14 @@ record RFFMenuTree(List<RFFMenuTree> elements, String name, JMenuItem matcher) {
     
     private JMenuItem createUI(boolean head){
         if(elements.isEmpty()){
+            Cursor cursor = new Cursor(Cursor.HAND_CURSOR);
+            matcher.setCursor(cursor);
             return matcher;
         }else{
             JMenu menu = head ? new RFFMenuBarMenu(name) : new RFFMenu(name);
             elements.forEach(e -> menu.add(e.createUI(false)));
+            Cursor cursor = new Cursor(Cursor.HAND_CURSOR);
+            menu.setCursor(cursor);
             return menu;
         }
     }

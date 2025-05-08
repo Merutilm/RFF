@@ -4,11 +4,11 @@ import kr.merutilm.rff.selectable.Selectable;
 
 public enum MPASelectionMethod implements Selectable{
     /**
-     * Check the lowest-level bla first, increases the level until not valid bla.
+     * Check the lowest-level MPA first, increases the level until not valid.
      */
     LOWEST("Lowest"),
     /**
-     * Check the highest-level bla first. decreases the level if not valid.
+     * Check the highest-level MPA first. decreases the level if not valid.
      */
     HIGHEST("Highest");
     

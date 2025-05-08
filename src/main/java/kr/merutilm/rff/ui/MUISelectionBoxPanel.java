@@ -12,9 +12,7 @@ import javax.swing.plaf.basic.ComboPopup;
 
 import kr.merutilm.rff.selectable.Selectable;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.util.function.Consumer;
 
 
@@ -28,6 +26,8 @@ final class MUISelectionBoxPanel<S extends Enum<S> & Selectable> extends RFFPane
         label.setFont(MUIConstants.DEFAULT_FONT);
 
         JComboBox<S> comboBox = new JComboBox<>(options);
+        Cursor cursor = new Cursor(Cursor.HAND_CURSOR);
+        comboBox.setCursor(cursor);
         comboBox.setToolTipText("<html>"+description+"</html>");
         comboBox.setSelectedIndex(defaultValue.ordinal());
         comboBox.addActionListener(_ -> enterFunction.accept(options[comboBox.getSelectedIndex()]));
@@ -66,6 +66,7 @@ final class MUISelectionBoxPanel<S extends Enum<S> & Selectable> extends RFFPane
                         list.setOpaque(false);
                         list.setBorder(MUIConstants.BUTTON_BORDER);
                         list.setFixedCellHeight(MUIConstants.UI_SELECTION_HEIGHT);
+                        list.setCursor(cursor);
                     }
                     @Override
                     protected void configureScroller() {

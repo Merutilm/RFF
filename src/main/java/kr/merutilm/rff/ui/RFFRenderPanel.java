@@ -22,6 +22,7 @@ import kr.merutilm.rff.util.TextFormatter;
 import org.lwjgl.BufferUtils;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -261,6 +262,8 @@ final class RFFRenderPanel extends RFFGLPanel {
             @Override
             public void mousePressed(MouseEvent e) {
                 super.mousePressed(e);
+                Cursor cursor = new Cursor(Cursor.MOVE_CURSOR);
+                setCursor(cursor);
                 Settings settings = master.getSettings();
                 if (SwingUtilities.isLeftMouseButton(e)) {
                     pmx.set(getMouseX(settings, e));
@@ -274,9 +277,13 @@ final class RFFRenderPanel extends RFFGLPanel {
             @Override
             public void mouseMoved(MouseEvent e) {
                 super.mouseMoved(e);
+                Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+                setCursor(cursor);
+
                 if (currentMap == null) {
                     return;
                 }
+
                 Settings settings = master.getSettings();
                 long it = (long) currentMap.iterations().pipette(getMouseX(settings, e), getMouseY(settings, e));
                 RFFStatusPanel panel = master.getWindow().getStatusPanel();

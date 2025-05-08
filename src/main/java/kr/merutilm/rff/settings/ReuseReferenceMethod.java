@@ -2,7 +2,7 @@ package kr.merutilm.rff.settings;
 
 import kr.merutilm.rff.selectable.Selectable;
 
-public enum ReuseReferenceMethod implements Selectable{
+public enum     ReuseReferenceMethod implements Selectable{
     /**
      * Reuse current reference
      */

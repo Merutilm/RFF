@@ -9,6 +9,7 @@ import kr.merutilm.rff.struct.DoubleExponent;
 
 public class LWBigDecimal extends Number{
 
+
     private final int exp2;
     private final BigInteger value;
     private static final BigDecimal BD_TWO = BigDecimal.valueOf(2);
@@ -82,7 +83,7 @@ public class LWBigDecimal extends Number{
             b = ta;
             dExp = -dExp;
         }
-        
+
         int e = a.exp2 - newExp2;
         BigInteger v = a.value.add(b.value.shiftRight(dExp)).shiftLeft(e);
 
@@ -182,7 +183,7 @@ public class LWBigDecimal extends Number{
         for (byte b : ba) {
             mantissa = (mantissa << 8) | (b & 0xff);
         }
-       
+
         int fExp2 = exp2 + shift + DoubleExponent.DOUBLE_PRECISION;
         //0100 0000 0000 : 2^1
         //0000 0000 0000 : 2^-1023

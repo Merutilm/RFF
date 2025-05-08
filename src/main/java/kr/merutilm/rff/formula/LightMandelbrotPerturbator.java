@@ -19,6 +19,21 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
     private final double offR;
     private final double offI;
 
+
+    public static void main(String[] args) {
+        int precision = -100;
+        LWBigComplex complex = LWBigComplex.valueOf("-0.23", "0.64", precision);
+        LWBigComplex temp = complex;
+        long t = System.currentTimeMillis();
+
+        for (int i = 0; i < 10000000; i++) {
+            temp = temp.square(precision);
+            temp = temp.add(complex, precision);
+        }
+
+        System.out.println(System.currentTimeMillis() - t);
+        System.out.println(temp);
+    }
     public LightMandelbrotPerturbator(ParallelRenderState state, int currentID, CalculationSettings calc, double dcMax, int precision, long period, LongConsumer actionPerRefCalcIteration, BiConsumer<Long, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException{
         this(state, currentID, calc, dcMax, precision, period, actionPerRefCalcIteration, actionPerCreatingTableIteration,false);
     }
