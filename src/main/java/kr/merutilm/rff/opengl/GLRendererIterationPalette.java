@@ -31,10 +31,10 @@ public class GLRendererIterationPalette extends GLRenderer implements GLIteratio
     }
 
 
-    public void setIteration(int x, int y, int w, double iteration) {
+    public void setIteration(int x, int y, double iteration) {
         synchronized (shader) {
             iterationBuffer.clear();
-            iterationBuffer.put((y * w + x) * 2, doubleToTwoIntBits(iteration));
+            iterationBuffer.put((y * iterWidth + x) * 2, doubleToTwoIntBits(iteration));
             iterationBuffer.flip();
         }
     }

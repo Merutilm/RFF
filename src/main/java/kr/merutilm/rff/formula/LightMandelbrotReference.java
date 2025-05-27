@@ -63,7 +63,7 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
 
             state.tryBreak(renderID);
 
-            // use Fast-Period-Guessing, and create R3A Table
+            // use Fast-Period-Guessing, and create MPA Table
             double radius2 = zr * zr + zi * zi;
             double fpgLimit = radius2 / dcMax;
 
@@ -107,34 +107,30 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
             zr = z.re().doubleValue();
             zi = z.im().doubleValue();
 
-            if(compressCriteria >= 0 && iteration >= 1) {
+            if (compressCriteria >= 0 && iteration >= 1) {
                 int refIndex = new ArrayCompressor(tools).compress(reuseIndex + 1);
 
-                if (AdvancedMath.abs(zr / rr[refIndex] - 1) <= compressionThreshold  &&
+                if (AdvancedMath.abs(zr / rr[refIndex] - 1) <= compressionThreshold &&
                     AdvancedMath.abs(zi / ri[refIndex] - 1) <= compressionThreshold
                 ) {
-
                     reuseIndex++;
-                } else {
-                    if (reuseIndex != 0) {
-                        if (reuseIndex > compressCriteria) { // reference compression criteria
+                } else if (reuseIndex != 0) {
+                    if (reuseIndex > compressCriteria) { // reference compression criteria
 
-                            ArrayCompressionTool compressor = new ArrayCompressionTool(1, iteration - reuseIndex + 1, iteration);
-                            compressed += compressor.range(); //get the increment of iteration
-                            tools.add(compressor);
-                        }
-                        //If it is enough to large, set all reference in the range to 0 and save the index
-
-                        reuseIndex = 0;
+                        ArrayCompressionTool compressor = new ArrayCompressionTool(1, iteration - reuseIndex + 1, iteration);
+                        compressed += compressor.range(); //get the increment of iteration
+                        tools.add(compressor);
                     }
+                    //If it is enough to large, set all reference in the range to 0 and save the index
 
+                    reuseIndex = 0;
                 }
             }
 
             period = ++iteration;
 
-            if(compressCriteria < 0 || reuseIndex <= compressCriteria){
-                int index = (int)(iteration - compressed);
+            if (compressCriteria < 0 || reuseIndex <= compressCriteria) {
+                int index = (int) (iteration - compressed);
 
                 if (index == rr.length) {
                     rr = ArrayFunction.exp2xArr(rr);
@@ -151,8 +147,8 @@ public record LightMandelbrotReference(Formula formula, LWBigComplex refCenter, 
             fpgBn = LWBigComplex.valueOf(fpgBnr, fpgBni, precision);
         }
 
-        rr = Arrays.copyOfRange(rr, 0, (int)(period - compressed + 1));
-        ri = Arrays.copyOfRange(ri, 0, (int)(period - compressed + 1));
+        rr = Arrays.copyOfRange(rr, 0, (int) (period - compressed + 1));
+        ri = Arrays.copyOfRange(ri, 0, (int) (period - compressed + 1));
         periodArray = periodArrayLength == 0 ? new long[]{period} : Arrays.copyOfRange(periodArray, 0, periodArrayLength);
 
         return new LightMandelbrotReference(formula, center, rr, ri, new ArrayCompressor(tools), periodArray, z, fpgBn);

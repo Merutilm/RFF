@@ -494,7 +494,7 @@ final class RFFRenderPanel extends RFFGLPanel {
         generator.createRenderer((x, y, xr, _, _, _, _, _, _) -> {
             DoubleExponent[] dc = offsetConversion(settings, x, y);
             double iteration = currentPerturbator.iterate(dc[0], dc[1]);
-            rendererIteration.setIteration(x, y, xr, iteration);
+            rendererIteration.setIteration(x, y, iteration);
 
             if(x == xr - 1){
                 canBeDisplayed = true;

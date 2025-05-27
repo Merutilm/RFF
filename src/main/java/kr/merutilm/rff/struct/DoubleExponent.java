@@ -148,7 +148,7 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
             return NAN;
         }
         if(isInfinite() && v.isInfinite()){
-            return signum() == v.signum() ? NAN : this;
+            return signum() != v.signum() ? NAN : this;
         }
         if(isInfinite() || v.isZero()){
             return this;
@@ -186,7 +186,7 @@ public class DoubleExponent extends Number implements Comparable<DoubleExponent>
             return NAN;
         }
         if(isInfinite() && v.isInfinite()){
-            return signum() == v.signum() ? this : NAN;
+            return signum() != v.signum() ? this : NAN;
         }
 
         if(isInfinite() || v.isZero()){

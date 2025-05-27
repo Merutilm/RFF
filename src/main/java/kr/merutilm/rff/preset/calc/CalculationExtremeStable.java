@@ -11,7 +11,7 @@ public class CalculationExtremeStable implements Calculation {
         return "Extreme Stable";
     }
     @Override
-    public MPASettings r3aSettings() {
+    public MPASettings mpaSettings() {
         return new MPASettings(16, 4, -4, MPASelectionMethod.HIGHEST, MPACompressionMethod.STRONGEST);
     }
 

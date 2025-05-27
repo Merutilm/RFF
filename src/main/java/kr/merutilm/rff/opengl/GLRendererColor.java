@@ -20,7 +20,6 @@ public class GLRendererColor extends GLRenderer{
     @Override
     protected void update() {
         shader.uploadTexture2D("inputTex", GL_TEXTURE0, previousFBOTextureID);
-        shader.upload2i("resolution", w, h);
         shader.uploadFloat("gamma", (float) colorSettings.gamma());
         shader.uploadFloat("exposure", (float) colorSettings.exposure());
         shader.uploadFloat("hue", (float) colorSettings.hue());

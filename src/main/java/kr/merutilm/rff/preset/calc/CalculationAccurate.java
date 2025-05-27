@@ -11,7 +11,7 @@ public class CalculationAccurate implements Calculation {
         return "Accurate";
     }
     @Override
-    public MPASettings r3aSettings() {
+    public MPASettings mpaSettings() {
         return new MPASettings(8, 2, -6, MPASelectionMethod.HIGHEST, MPACompressionMethod.LITTLE_COMPRESSION);
     }
 

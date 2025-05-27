@@ -11,7 +11,7 @@ public class CalculationFast implements Calculation{
         return "Fast";
     }
     @Override
-    public MPASettings r3aSettings() {
+    public MPASettings mpaSettings() {
         return new MPASettings(8, 2, -4, MPASelectionMethod.HIGHEST, MPACompressionMethod.LITTLE_COMPRESSION);
     }
 

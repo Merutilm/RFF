@@ -146,7 +146,8 @@ public class ParallelDoubleArrayDispatcher extends ParallelArrayDispatcher<Doubl
 
         int cpyIndex = 0;
         while (index < result.length) {
-            if(cpy.length <= cpyIndex || cpy[cpyIndex] != cpyIndex + count){
+            int value = cpyIndex + count;
+            if(cpy.length <= cpyIndex || cpy[cpyIndex] != value){
                 result[index] = cpyIndex + count;
                 index++;
                 count++;

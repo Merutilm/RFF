@@ -17,8 +17,8 @@ import kr.merutilm.rff.settings.*;
 public final class Presets implements Selectable{
 
 
-    public static final Calculation INIT_CALCULATION = Calculations.STABLE.preset();
-    public static final Location INIT_LOCATION = new LocationDebug();
+    public static final Calculation INIT_CALCULATION = Calculations.ULTRA_FAST.preset();
+    public static final Location INIT_LOCATION = Locations.DEFAULT.preset();
 
     public static final Render INIT_RENDER = Renders.HIGH.preset();
     public static final ShaderPreset INIT_SHADER_PRESET = new ShaderPreset(
@@ -36,7 +36,7 @@ public final class Presets implements Selectable{
             INIT_LOCATION.maxIteration(), 
             2, 
             DecimalizeIterationMethod.LOG_LOG, 
-            INIT_CALCULATION.r3aSettings(), 
+            INIT_CALCULATION.mpaSettings(),
             INIT_CALCULATION.referenceCompressionSettings(), 
             ReuseReferenceMethod.DISABLED, 
             true, 

@@ -11,7 +11,7 @@ public class CalculationUltraFast implements Calculation{
         return "Ultra Fast";
     }
     @Override
-    public MPASettings r3aSettings() {
+    public MPASettings mpaSettings() {
         return new MPASettings(4, 2, -3, MPASelectionMethod.HIGHEST, MPACompressionMethod.NO_COMPRESSION);
     }
 

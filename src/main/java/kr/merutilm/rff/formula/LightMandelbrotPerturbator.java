@@ -19,21 +19,6 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
     private final double offR;
     private final double offI;
 
-
-    public static void main(String[] args) {
-        int precision = -100;
-        LWBigComplex complex = LWBigComplex.valueOf("-0.23", "0.64", precision);
-        LWBigComplex temp = complex;
-        long t = System.currentTimeMillis();
-
-        for (int i = 0; i < 10000000; i++) {
-            temp = temp.square(precision);
-            temp = temp.add(complex, precision);
-        }
-
-        System.out.println(System.currentTimeMillis() - t);
-        System.out.println(temp);
-    }
     public LightMandelbrotPerturbator(ParallelRenderState state, int currentID, CalculationSettings calc, double dcMax, int precision, long period, LongConsumer actionPerRefCalcIteration, BiConsumer<Long, Double> actionPerCreatingTableIteration) throws IllegalParallelRenderStateException{
         this(state, currentID, calc, dcMax, precision, period, actionPerRefCalcIteration, actionPerCreatingTableIteration,false);
     }
@@ -90,26 +75,26 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
         while (iteration < maxIteration) {
             
             if(table != null){
-                LightPA r3a = table.lookup(refIteration, dzr, dzi);
-                
-                if (r3a != null){
-                    double dzr1 = r3a.anr() * dzr - r3a.ani() * dzi + r3a.bnr() * dcr1 - r3a.bni() * dci1;
-                    double dzi1 = r3a.anr() * dzi + r3a.ani() * dzr + r3a.bnr() * dci1 + r3a.bni() * dcr1;
-    
+                LightPA pa = table.lookup(refIteration, dzr, dzi);
+
+                if (pa != null){
+                    double dzr1 = pa.anr() * dzr - pa.ani() * dzi + pa.bnr() * dcr1 - pa.bni() * dci1;
+                    double dzi1 = pa.anr() * dzi + pa.ani() * dzr + pa.bnr() * dci1 + pa.bni() * dcr1;
+
                     dzr = dzr1;
                     dzi = dzi1;
-    
-                    iteration += r3a.skip();
-                    refIteration += r3a.skip();
+
+                    iteration += pa.skip();
+                    refIteration += pa.skip();
                     if (iteration >= maxIteration) {
                         return isAbs ? absIteration : maxIteration;
                     }
-                     
+
                     // if (dcr1 * dcr1 + dci1 * dci1 < 4e-181) { //Tracking refIteration Skips
                     //     if (isFirst) {
                     //         startRef = refIteration;
                     //     }
-     
+
                     //     if (!isFirst && startRef + skipCount != refIteration) {
                     //         System.out.println("S " + startRef + ", K " + skipCount + ", E " + (startRef + skipCount));
                     //         skipCount = 0;
@@ -118,9 +103,9 @@ public class LightMandelbrotPerturbator extends MandelbrotPerturbator {
                     //         skipCount += r3a.skip();
                     //         isFirst = false;
                     //     }
-     
+
                     // }
-     
+
                     continue;
                 }
             }

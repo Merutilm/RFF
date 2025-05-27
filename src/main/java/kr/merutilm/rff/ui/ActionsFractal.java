@@ -26,7 +26,7 @@ enum ActionsFractal implements ItemActions {
         CalculationSettings calc = getCalculationSettings(master);
 
         Consumer<UnaryOperator<CalculationSettings.Builder>> applier = e ->
-                master.setSettings(e1 -> e1.setCalculationSettings(e::apply));
+                master.setSettings(e1 -> e1.setCalculationSettings(e));
         AtomicReference<String> realStr = new AtomicReference<>(calc.center().re().toString());
         AtomicReference<String> imagStr = new AtomicReference<>(calc.center().im().toString());
         AtomicReference<Double> zoomStr = new AtomicReference<>(calc.logZoom());
@@ -67,7 +67,7 @@ enum ActionsFractal implements ItemActions {
         CalculationSettings calc = getCalculationSettings(master);
 
         Consumer<UnaryOperator<CalculationSettings.Builder>> applier = e ->
-                master.setSettings(e1 -> e1.setCalculationSettings(e::apply));
+                master.setSettings(e1 -> e1.setCalculationSettings(e));
 
         panel.createTextInput("Max Iteration", "Set maximum iteration. It is disabled when Auto iteration is enabled.", calc.maxIteration(), Long::parseLong, e ->
                 applier.accept(f -> f.setMaxIteration(e)));
@@ -96,10 +96,10 @@ enum ActionsFractal implements ItemActions {
         panel.createTextInput("Epsilon Power", new HTMLStringBuilder().wrapln(Tag.BOLD, "Set Epsilon power of ten.").appendln("Useful for glitch reduction. if this value is small,").appendln("The fractal will be rendered glitch-less but slow,").append("and is large, It will be fast, but maybe shown visible glitches.").toString(), mpa.epsilonPower(), Double::parseDouble, e ->
                 applier.accept(f -> f.setEpsilonPower(e))
         );
-        panel.createSelectInput("Selection Method", "Set the selection method of R3A.", mpa.mpaSelectionMethod(), MPASelectionMethod.values(), e ->
+        panel.createSelectInput("Selection Method", "Set the selection method of MPA.", mpa.mpaSelectionMethod(), MPASelectionMethod.values(), e ->
                 applier.accept(f -> f.setR3ASelectionMethod(e)), false
         );
-        panel.createSelectInput("Compression Method", "Set the compession method of R3A.", mpa.mpaCompressionMethod(), MPACompressionMethod.values(), e ->
+        panel.createSelectInput("Compression Method", "Set the compession method of MPA.", mpa.mpaCompressionMethod(), MPACompressionMethod.values(), e ->
                 applier.accept(f -> f.setR3ACompressionMethod(e)), false
         );
     }))),

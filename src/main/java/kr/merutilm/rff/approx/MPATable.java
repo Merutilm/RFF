@@ -33,17 +33,17 @@ public abstract class MPATable {
 
         MPACompressionMethod compressionMethod = mpaSettings.mpaCompressionMethod();
         Period mpaPeriod = MPATable.Period.create(referencePeriod, mpaSettings);
-        ArrayCompressor pulledR3ACompressor = compressionMethod == MPACompressionMethod.STRONGEST ? createPulledR3ACompressor(mpaPeriod, reference.referenceCompressor()) : ArrayCompressor.EMPTY_COMPRESSOR;
+        ArrayCompressor pulledMPACompressor = compressionMethod == MPACompressionMethod.STRONGEST ? createPulledMPACompressor(mpaPeriod, reference.referenceCompressor()) : ArrayCompressor.EMPTY_COMPRESSOR;
 
         this.settings = mpaSettings;
         this.mpaPeriod = mpaPeriod;
-        this.pulledMPACompressor = pulledR3ACompressor;
+        this.pulledMPACompressor = pulledMPACompressor;
 
     }
 
     public abstract int length();
 
-    private static ArrayCompressor createPulledR3ACompressor(Period mpaPeriod, ArrayCompressor refCompressor) {
+    private static ArrayCompressor createPulledMPACompressor(Period mpaPeriod, ArrayCompressor refCompressor) {
 
         List<ArrayCompressionTool> refCompTools = refCompressor.tools();
         List<ArrayCompressionTool> mpaTools = new ArrayList<>();
@@ -294,9 +294,9 @@ public abstract class MPATable {
             return new Temp(tablePeriod, isArtificial);
         }
 
-        private static Period create(long[] referencePeriod, MPASettings MPASettings) {
+        private static Period create(long[] referencePeriod, MPASettings mpaSettings) {
 
-            Temp temp = generateTablePeriod(referencePeriod, MPASettings);
+            Temp temp = generateTablePeriod(referencePeriod, mpaSettings);
             long[] tablePeriod = temp.tablePeriod();
             boolean[] isArtificial = temp.isArtificial();
             long[] tablePeriodElements = generatePeriodElements(tablePeriod);

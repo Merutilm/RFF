@@ -48,7 +48,6 @@ enum ActionsShader implements ItemActions {
             master.getWindow().getRenderer().requestColor();
         };
 
-
         panel.createSelectInput("Stripe Type", "Stripe Type", color.stripeType(), StripeType.values(), e ->
             applier.accept(f -> f.setStripeType(e))
         , true);

@@ -12,7 +12,7 @@ public class CalculationNormal implements Calculation{
         return "Normal";
     }
     @Override
-    public MPASettings r3aSettings() {
+    public MPASettings mpaSettings() {
         return new MPASettings(8, 2, -5, MPASelectionMethod.HIGHEST, MPACompressionMethod.LITTLE_COMPRESSION);
     }
 

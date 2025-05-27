@@ -44,7 +44,7 @@ final class RFF {
     public void setPreset(Preset preset) {
         switch (preset) {
             case Calculation p ->
-                    setSettings(e -> e.setCalculationSettings(e2 -> e2.setR3ASettings(p.r3aSettings()).setReferenceCompressionSettings(p.referenceCompressionSettings())));
+                    setSettings(e -> e.setCalculationSettings(e2 -> e2.setR3ASettings(p.mpaSettings()).setReferenceCompressionSettings(p.referenceCompressionSettings())));
             case Location p ->
                     setSettings(e -> e.setCalculationSettings(e2 -> e2.setCenter(p.createCenter()).setLogZoom(p.logZoom()).setMaxIteration(p.maxIteration())));
             case Render p -> setSettings(e -> e.setRenderSettings(p.createImageSettings()));

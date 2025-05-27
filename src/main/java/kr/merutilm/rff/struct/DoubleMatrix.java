@@ -36,25 +36,6 @@ public class DoubleMatrix implements Matrix{
         return canvas[convertLocation(x, y)];
     }
 
-    public double pipetteAdvanced(double x, double y) {
-
-        double px = x % 1;
-        double py = y % 1;
-        int x1 = (int) x;
-        int y1 = (int) y;
-        int x2 = (int) x + 1;
-        int y2 = (int) y + 1;
-
-        double c1 = pipette(x1, y1);
-        double c2 = pipette(x2, y1);
-        double c3 = pipette(x1, y2);
-        double c4 = pipette(x2, y2);
-
-        double cc1 = AdvancedMath.ratioDivide(c1, c2, px);
-        double cc2 = AdvancedMath.ratioDivide(c3, c4, px);
-
-        return AdvancedMath.ratioDivide(cc1, cc2, py);
-    }
     @Override
     public int getWidth() {
         return width;

@@ -6,6 +6,6 @@ import kr.merutilm.rff.settings.ReferenceCompressionSettings;
 
 public interface Calculation extends Preset{
     
-    MPASettings r3aSettings();
+    MPASettings mpaSettings();
     ReferenceCompressionSettings referenceCompressionSettings();
 }

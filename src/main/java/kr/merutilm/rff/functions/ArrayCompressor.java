@@ -11,28 +11,24 @@ import java.util.List;
  * <li> 1. rebases the given index based on its data. <p>
  * <li> 2. pulls the subsequent elements to fill the empty space. <p>
  */
-public class ArrayCompressor {
-
+public record ArrayCompressor(List<ArrayCompressionTool> tools) {
 
     public static final ArrayCompressor EMPTY_COMPRESSOR = new ArrayCompressor(Collections.emptyList());
 
-
-
-    private final List<ArrayCompressionTool> tools;
-
-    public ArrayCompressor(List<ArrayCompressionTool> tools){
+    public ArrayCompressor(List<ArrayCompressionTool> tools) {
         this.tools = Collections.unmodifiableList(tools);
     }
 
     /**
-     * Checks whether the given index is independant. <p>
+     * Checks whether the given index is independent. <>
      * The time complexity is {@code O(log N)} because it uses {@link ArrayCompressor#binarySearch(long, int, int, int) binary-search}.
-     * @see ArrayCompressor#containedIndex(long) containedIndex
-     * @see ArrayCompressor#binarySearch(long, int, int, int) binarySearch
+     *
      * @param index To checking index
      * @return {@code true} when given index is independent.
+     * @see ArrayCompressor#containedIndex(long) containedIndex
+     * @see ArrayCompressor#binarySearch(long, int, int, int) binarySearch
      */
-    public boolean isIndependent(long index){
+    public boolean isIndependent(long index) {
         return containedIndex(index) == -1;
     }
 
@@ -41,11 +37,12 @@ public class ArrayCompressor {
      * Rebases the given index. <p>
      * The rebased index is not the compressed index because it is a middle step that has not proceeded the pulling process. <p>
      * To get the final index, use the {@link ArrayCompressor#pull(long) pull()} method.
+     *
      * @param index To rebasing index
      * @return The rebased index.
      */
-    public long rebase(long index){
-        if(tools.isEmpty() || index < tools.getFirst().start() || index > tools.getLast().end()){
+    public long rebase(long index) {
+        if (tools.isEmpty() || index < tools.getFirst().start() || index > tools.getLast().end()) {
             return index;
         }
 
@@ -72,20 +69,22 @@ public class ArrayCompressor {
             ArrayCompressionTool tool = tools.get(i);
             if (tool.start() <= rebased && rebased <= tool.end()) {
                 rebased -= tool.start() - tool.rebase();
-            }else if (rebased > tool.end()){
+            } else if (rebased > tool.end()) {
                 break;
             }
         }
         return rebased;
     }
+
     /**
      * Completes the compressed array by pulling subsequent elements into the void in the array made by the rebasing process. <p>
      * You can get the final index of the compressed array. <p>
      * <b>This method assumes that the given index has been completed the rebase process and the given list is the same as the list used in the rebasing process.</b>
+     *
      * @param index To pulling rebased index
      * @return The final compressed index.
      */
-    public int pull(long index){
+    public int pull(long index) {
         // "Rebased" iteration is not a target of compressions.
         // The space created by compression is filled by pushing indices to front. This is the definition of this method.
         // CAUTION : given index must be not rebase-able.
@@ -105,10 +104,10 @@ public class ArrayCompressor {
         long compressed = index;
 
         for (ArrayCompressionTool tool : tools) {
-        
+
             // Since it already processed the cases within the range : startIteration < compressedIteration < endIteration,
             // there is no reason to consider that condition.
-        
+
             if (index > tool.end()) {
                 compressed -= tool.range();
             } else {
@@ -122,26 +121,27 @@ public class ArrayCompressor {
     /**
      * Gets the contained index of the given list. <p>
      * The time complexity is {@code O(log N)} because it uses {@link ArrayCompressor#binarySearch binary-search}.
-     * @see ArrayCompressor#binarySearch(long, int, int, int) binarySearch
+     *
      * @param index To checking index
      * @return the index of the given list.
+     * @see ArrayCompressor#binarySearch(long, int, int, int) binarySearch
      */
-    public int containedIndex(long index){
+    public int containedIndex(long index) {
         return binarySearch(index, 0, (tools.size() + 1) / 2, tools.size());
     }
 
-    
+
     /**
      * A single step of recursive binary-search to get the contained index of the list. <p>
-     * 
-     * @param index To checking index
-     * @param compIndex The index of given list
-     * @param indexGap The index gap
+     *
+     * @param index        To checking index
+     * @param compIndex    The index of given list
+     * @param indexGap     The index gap
      * @param lastIndexGap The last index Gap
      * @return The index of the given list. returns {@code -1} if the given index is unrebaseable.
      */
-    private int binarySearch(long index, int compIndex, int indexGap, int lastIndexGap){
-        if(compIndex < 0 || compIndex >= tools.size() || tools.getFirst().start() > index){
+    private int binarySearch(long index, int compIndex, int indexGap, int lastIndexGap) {
+        if (compIndex < 0 || compIndex >= tools.size() || tools.getFirst().start() > index) {
             return -1;
         }
 
@@ -149,33 +149,29 @@ public class ArrayCompressor {
         boolean requiredSmallerIndex = current.start() > index;
         boolean requiredLargerIndex = current.end() < index;
 
-        if(indexGap == lastIndexGap && (requiredLargerIndex || requiredSmallerIndex)){
+        if (indexGap == lastIndexGap && (requiredLargerIndex || requiredSmallerIndex)) {
             return -1;
         }
 
-        if(requiredSmallerIndex){
+        if (requiredSmallerIndex) {
             return binarySearch(index, compIndex - indexGap, (indexGap + 1) / 2, indexGap);
         }
-        if(requiredLargerIndex){
+        if (requiredLargerIndex) {
             return binarySearch(index, compIndex + indexGap, (indexGap + 1) / 2, indexGap);
         }
-        
+
         return compIndex;
     }
 
     /**
      * Gets the compressed index of compressed array.
+     *
      * @param index the index you want
      * @return Finally compressed index
      */
     public int compress(long index) {
         long rebased = rebase(index);
         return pull(rebased);
-    }
-
-
-    public List<ArrayCompressionTool> tools(){
-        return tools;
     }
 
 }
