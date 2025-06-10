@@ -29,7 +29,7 @@ public record RFFMap(double zoom, long period, long maxIteration, DoubleMatrix i
             data = stream.readNBytes(Double.BYTES);
             double zoom = IOBinaryParser.byteArrayToDouble(data);
             
-            data = stream.readNBytes(Integer.BYTES);
+            data = stream.readNBytes(Long.BYTES);
             long period = IOBinaryParser.byteArrayToLong(data);
 
             data = stream.readNBytes(Long.BYTES);
