@@ -90,7 +90,6 @@ final class RFFVideoWindow extends JFrame{
         ExportSettings exportSettings = settings.videoSettings().exportSettings();
         double fps = exportSettings.fps();
         float frameInterval = (float) (animationSettings.mps() / fps);
-        ParallelRenderState state = new ParallelRenderState();
         RFFMap targetMap = RFFMap.readByID(dir, 1);
         if(targetMap == null){
             JOptionPane.showMessageDialog(null, "Cannot create video. There is no samples in the directory : Videos", "Export video", JOptionPane.ERROR_MESSAGE);
